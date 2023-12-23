@@ -7,7 +7,7 @@ Please check out [values.yaml](https://github.com/Rookout/piper/tree/main/helm-c
 
 To add piper helm repo run:
 ```bash
-helm repo add piper https://piper.rookout.com
+helm repo add piper https://piper.quickube.com
 ```
 
 After configuring Piper [values.yaml](https://github.com/Rookout/piper/tree/main/helm-chart/values.yaml), run the following command for installation:

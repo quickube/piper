@@ -11,7 +11,7 @@ import (
 func Start(ctx context.Context, stop context.CancelFunc, cfg *conf.GlobalConfig, clients *clients.Clients) {
 	labelSelector := &metav1.LabelSelector{
 		MatchExpressions: []metav1.LabelSelectorRequirement{
-			{Key: "piper.rookout.com/notified",
+			{Key: "piper.quickube.com/notified",
 				Operator: metav1.LabelSelectorOpExists},
 		},
 	}

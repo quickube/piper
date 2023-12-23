@@ -23,10 +23,10 @@ func (weh *workflowEventHandler) Handle(ctx context.Context, event *watch.Event)
 		)
 	}
 
-	currentPiperNotifyLabelStatus, ok := workflow.GetLabels()["piper.rookout.com/notified"]
+	currentPiperNotifyLabelStatus, ok := workflow.GetLabels()["piper.quickube.com/notified"]
 	if !ok {
 		return fmt.Errorf(
-			"workflow %s missing piper.rookout.com/notified label\n",
+			"workflow %s missing piper.quickube.com/notified label\n",
 			workflow.GetName(),
 		)
 	}

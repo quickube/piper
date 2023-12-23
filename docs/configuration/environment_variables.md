@@ -1,7 +1,7 @@
 ## Environment Variables
 
 The environment variables used by Piper to configure its functionality.
-The helm chart populate them using [values.yaml](https://github.com/Rookout/piper/tree/main/helm-chart/values.yaml) file
+The helm chart populate them using [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/values.yaml) file
 
 ### Git
 
@@ -57,4 +57,4 @@ The helm chart populate them using [values.yaml](https://github.com/Rookout/pipe
 * ROOKOUT_LABELS 
   The labels to label instances at Rookout, default to "service:piper"
 * ROOKOUT_REMOTE_ORIGIN
-  The repo URL for source code fetching, default:"https://github.com/Rookout/piper.git".
+  The repo URL for source code fetching, default:"https://github.com/quickube/piper.git".

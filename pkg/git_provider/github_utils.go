@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/rookout/piper/pkg/utils"
+	"github.com/quickube/piper/pkg/utils"
 
 	"github.com/google/go-github/v52/github"
-	"github.com/rookout/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/conf"
 )
 
 func isOrgWebhookEnabled(ctx context.Context, c *GithubClientImpl) (*github.Hook, bool) {

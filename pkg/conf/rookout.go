@@ -9,7 +9,7 @@ import (
 type RookoutConfig struct {
 	Token        string `envconfig:"ROOKOUT_TOKEN" default:""`
 	Labels       string `envconfig:"ROOKOUT_LABELS" default:"service:piper"`
-	RemoteOrigin string `envconfig:"ROOKOUT_REMOTE_ORIGIN" default:"https://github.com/Rookout/piper.git"`
+	RemoteOrigin string `envconfig:"ROOKOUT_REMOTE_ORIGIN" default:"https://github.com/quickube/piper.git"`
 }
 
 func (cfg *RookoutConfig) RookoutConfLoad() error {

@@ -3,12 +3,12 @@ package git_provider
 import (
 	"context"
 	"fmt"
-	"github.com/rookout/piper/pkg/utils"
+	"github.com/quickube/piper/pkg/utils"
 	"log"
 	"net/http"
 	"strings"
 
-	"github.com/rookout/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/conf"
 
 	"github.com/google/go-github/v52/github"
 )

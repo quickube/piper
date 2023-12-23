@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"github.com/rookout/piper/pkg/conf"
-	"github.com/rookout/piper/pkg/webhook_creator"
+	"github.com/quickube/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/webhook_creator"
 	"golang.org/x/net/context"
 	"log"
 	"net/http"

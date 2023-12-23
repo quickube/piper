@@ -1,7 +1,7 @@
 # Introduction
 
 <p align="center">
-  <img src="https://www.rookout.com/wp-content/uploads/2022/10/ArgoPipeline_1.0_Hero.png.webp?raw=true" />
+  <img src="https://www.quickube.com/wp-content/uploads/2022/10/ArgoPipeline_1.0_Hero.png.webp?raw=true" />
 </p>
     
 Welcome to Piper! 
@@ -11,7 +11,7 @@ Piper is an open source project that aimed at providing multibranch pipeline fun
 ## General explanation
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Rookout/piper/main/docs/img/flow.svg" />
+  <img src="https://raw.githubusercontent.com/quickube/piper/main/docs/img/flow.svg" />
 </p>
 
 To achieve multibranch pipeline functionality Piper will do the hard works for us.

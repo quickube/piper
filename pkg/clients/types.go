@@ -1,8 +1,8 @@
 package clients
 
 import (
-	"github.com/rookout/piper/pkg/git_provider"
-	"github.com/rookout/piper/pkg/workflow_handler"
+	"github.com/quickube/piper/pkg/git_provider"
+	"github.com/quickube/piper/pkg/workflow_handler"
 )
 
 type Clients struct {

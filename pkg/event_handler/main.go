@@ -2,8 +2,8 @@ package event_handler
 
 import (
 	"context"
-	"github.com/rookout/piper/pkg/clients"
-	"github.com/rookout/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/clients"
+	"github.com/quickube/piper/pkg/conf"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"log"
 )

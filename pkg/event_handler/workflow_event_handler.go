@@ -3,7 +3,7 @@ package event_handler
 import (
 	"fmt"
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
-	"github.com/rookout/piper/pkg/clients"
+	"github.com/quickube/piper/pkg/clients"
 	"golang.org/x/net/context"
 	"k8s.io/apimachinery/pkg/watch"
 	"log"

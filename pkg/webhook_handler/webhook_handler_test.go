@@ -3,10 +3,10 @@ package webhook_handler
 import (
 	"context"
 	"fmt"
-	"github.com/rookout/piper/pkg/clients"
-	"github.com/rookout/piper/pkg/common"
-	"github.com/rookout/piper/pkg/git_provider"
-	"github.com/rookout/piper/pkg/utils"
+	"github.com/quickube/piper/pkg/clients"
+	"github.com/quickube/piper/pkg/common"
+	"github.com/quickube/piper/pkg/git_provider"
+	"github.com/quickube/piper/pkg/utils"
 	assertion "github.com/stretchr/testify/assert"
 	"net/http"
 	"strings"
@@ -125,7 +125,7 @@ func TestPrepareBatchForMatchingTriggers(t *testing.T) {
 				Branch:           "branch1",
 				Commit:           "commitHSA",
 				User:             "piper",
-				UserEmail:        "piper@rookout.com",
+				UserEmail:        "piper@quickube.com",
 				PullRequestURL:   "",
 				PullRequestTitle: "",
 				DestBranch:       "",
@@ -175,7 +175,7 @@ func TestPrepareBatchForMatchingTriggers(t *testing.T) {
 				Branch:           "branch1",
 				Commit:           "commitHSA",
 				User:             "piper",
-				UserEmail:        "piper@rookout.com",
+				UserEmail:        "piper@quickube.com",
 				PullRequestURL:   "",
 				PullRequestTitle: "",
 				DestBranch:       "",
@@ -225,7 +225,7 @@ func TestPrepareBatchForMatchingTriggers(t *testing.T) {
 				Branch:           "branch1",
 				Commit:           "commitHSA",
 				User:             "piper",
-				UserEmail:        "piper@rookout.com",
+				UserEmail:        "piper@quickube.com",
 				PullRequestURL:   "",
 				PullRequestTitle: "",
 				DestBranch:       "",
@@ -248,7 +248,7 @@ func TestPrepareBatchForMatchingTriggers(t *testing.T) {
 				Branch:           "branch1",
 				Commit:           "commitHSA",
 				User:             "piper",
-				UserEmail:        "piper@rookout.com",
+				UserEmail:        "piper@quickube.com",
 				PullRequestURL:   "",
 				PullRequestTitle: "",
 				DestBranch:       "",
@@ -271,7 +271,7 @@ func TestPrepareBatchForMatchingTriggers(t *testing.T) {
 				Branch:           "branch1",
 				Commit:           "commitHSA",
 				User:             "piper",
-				UserEmail:        "piper@rookout.com",
+				UserEmail:        "piper@quickube.com",
 				PullRequestURL:   "",
 				PullRequestTitle: "",
 				DestBranch:       "",
@@ -294,7 +294,7 @@ func TestPrepareBatchForMatchingTriggers(t *testing.T) {
 				Branch:           "branch1",
 				Commit:           "commitHSA",
 				User:             "piper",
-				UserEmail:        "piper@rookout.com",
+				UserEmail:        "piper@quickube.com",
 				PullRequestURL:   "",
 				PullRequestTitle: "",
 				DestBranch:       "",
@@ -344,7 +344,7 @@ func TestPrepareBatchForMatchingTriggers(t *testing.T) {
 				Branch:           "branch1",
 				Commit:           "commitHSA",
 				User:             "piper",
-				UserEmail:        "piper@rookout.com",
+				UserEmail:        "piper@quickube.com",
 				PullRequestURL:   "",
 				PullRequestTitle: "",
 				DestBranch:       "",
@@ -398,7 +398,7 @@ func TestPrepareBatchForMatchingTriggers(t *testing.T) {
 				Branch:           "branch1",
 				Commit:           "commitHSA",
 				User:             "piper",
-				UserEmail:        "piper@rookout.com",
+				UserEmail:        "piper@quickube.com",
 				PullRequestURL:   "",
 				PullRequestTitle: "",
 				DestBranch:       "",
@@ -452,7 +452,7 @@ func TestPrepareBatchForMatchingTriggers(t *testing.T) {
 				Branch:           "branch2",
 				Commit:           "commitHSA",
 				User:             "piper",
-				UserEmail:        "piper@rookout.com",
+				UserEmail:        "piper@quickube.com",
 				PullRequestURL:   "",
 				PullRequestTitle: "",
 				DestBranch:       "",

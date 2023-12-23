@@ -23,14 +23,14 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: rookout/piper
+          images: quickube/piper
       - name: Build and export
         uses: docker/build-push-action@v4
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: rookout/piper:${{ github.ref_name }},latest
+          tags: quickube/piper:${{ github.ref_name }},latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

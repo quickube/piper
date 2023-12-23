@@ -13,9 +13,9 @@ import (
 	"log"
 	"strings"
 
-	"github.com/rookout/piper/pkg/common"
-	"github.com/rookout/piper/pkg/conf"
-	"github.com/rookout/piper/pkg/utils"
+	"github.com/quickube/piper/pkg/common"
+	"github.com/quickube/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/utils"
 )
 
 const (

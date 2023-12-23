@@ -3,8 +3,8 @@ package git_provider
 import (
 	"fmt"
 	bitbucket "github.com/ktrysmt/go-bitbucket"
-	"github.com/rookout/piper/pkg/conf"
-	"github.com/rookout/piper/pkg/utils"
+	"github.com/quickube/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/utils"
 	"log"
 	"net/http"
 	"strings"

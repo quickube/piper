@@ -1,5 +1,5 @@
 # Default values for Piper.
-# For more information head to https:/github.com/rookout/piper
+# For more information head to https:/github.com/quickube/piper
 
 # Map of Piper configurations.
 piper:
@@ -97,7 +97,7 @@ image:
   # -- Piper image name
   name: piper
   # -- Piper public dockerhub repo
-  repository: rookout
+  repository: quickube
   # -- Piper image pull policy
   pullPolicy: IfNotPresent
   # -- Piper image tag

@@ -1,4 +1,4 @@
-module github.com/rookout/piper
+module github.com/quickube/piper
 
 go 1.20
 

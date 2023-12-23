@@ -1,8 +1,8 @@
 package server
 
 import (
-	"github.com/rookout/piper/pkg/clients"
-	"github.com/rookout/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/clients"
+	"github.com/quickube/piper/pkg/conf"
 	"golang.org/x/net/context"
 	"log"
 )

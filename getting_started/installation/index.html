@@ -765,7 +765,7 @@
 Piper will create a CRD that Argo Workflows will pick, so install or configure Piper to create those CRDs in the right namespace. </p>
 <p>Please check out <a href="https://github.com/Rookout/piper/tree/main/helm-chart/values.yaml">values.yaml</a> file of the helm chart configurations.</p>
 <p>To add piper helm repo run:
-</p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>piper<span class="w"> </span>https://piper.rookout.com
+</p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>piper<span class="w"> </span>https://piper.quickube.com
 </code></pre></div>
 <p>After configuring Piper <a href="https://github.com/Rookout/piper/tree/main/helm-chart/values.yaml">values.yaml</a>, run the following command for installation:
 </p><div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>piper<span class="w"> </span>piper/piper<span class="w"> </span><span class="se">\</span>

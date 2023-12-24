@@ -166,7 +166,6 @@ func IsFileExists(ctx *context.Context, wh *WebhookHandlerImpl, path string, fil
 		return false
 	}
 
-	log.Printf("[DEBUG] %s", files)
 	if utils.IsElementExists(files, file) {
 		return true
 	}

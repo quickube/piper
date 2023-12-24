@@ -2,7 +2,7 @@ package webhook_handler
 
 import (
 	"context"
-	"github.com/rookout/piper/pkg/common"
+	"github.com/quickube/piper/pkg/common"
 )
 
 type Trigger struct {

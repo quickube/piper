@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
-	"github.com/rookout/piper/pkg/utils"
+	"github.com/quickube/piper/pkg/utils"
 )
 
 type WorkflowsConfig struct {

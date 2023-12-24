@@ -3,15 +3,15 @@ package event_handler
 import (
 	"context"
 	"errors"
-	"github.com/rookout/piper/pkg/git_provider"
+	"github.com/quickube/piper/pkg/git_provider"
 	assertion "github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"testing"
 
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
-	"github.com/rookout/piper/pkg/clients"
-	"github.com/rookout/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/clients"
+	"github.com/quickube/piper/pkg/conf"
 )
 
 type mockGitProvider struct{}
@@ -183,6 +183,7 @@ func TestNotify(t *testing.T) {
 
 	// Create a mock configuration and clients
 	cfg := &conf.GlobalConfig{
+		GitProviderConfig: conf.GitProviderConfig{Provider: "github"},
 		WorkflowServerConfig: conf.WorkflowServerConfig{
 			ArgoAddress: "http://workflow-server",
 			Namespace:   "test-namespace",

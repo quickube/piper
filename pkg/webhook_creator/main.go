@@ -3,9 +3,10 @@ package webhook_creator
 import (
 	"fmt"
 	"github.com/emicklei/go-restful/v3/log"
-	"github.com/rookout/piper/pkg/clients"
-	"github.com/rookout/piper/pkg/conf"
-	"github.com/rookout/piper/pkg/git_provider"
+	"github.com/quickube/piper/pkg/clients"
+	"github.com/quickube/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/git_provider"
+	"github.com/quickube/piper/pkg/utils"
 	"golang.org/x/net/context"
 	"strconv"
 	"strings"
@@ -87,6 +88,9 @@ func (wc *WebhookCreatorImpl) initWebhooks() error {
 		return fmt.Errorf("org level webhook wanted but provided repositories list")
 	}
 	for _, repo := range strings.Split(wc.cfg.GitProviderConfig.RepoList, ",") {
+		if wc.cfg.GitProviderConfig.Provider == "bitbucket" {
+			repo = utils.SanitizeString(repo)
+		}
 		hook, err := wc.clients.GitProvider.SetWebhook(&ctx, &repo)
 		if err != nil {
 			return err

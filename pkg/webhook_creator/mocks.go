@@ -2,7 +2,7 @@ package webhook_creator
 
 import (
 	"errors"
-	"github.com/rookout/piper/pkg/git_provider"
+	"github.com/quickube/piper/pkg/git_provider"
 	"golang.org/x/net/context"
 	"net/http"
 )

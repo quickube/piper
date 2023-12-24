@@ -2,8 +2,8 @@ package event_handler
 
 import (
 	"context"
-	"github.com/rookout/piper/pkg/clients"
-	"github.com/rookout/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/clients"
+	"github.com/quickube/piper/pkg/conf"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"log"
 )
@@ -11,7 +11,7 @@ import (
 func Start(ctx context.Context, stop context.CancelFunc, cfg *conf.GlobalConfig, clients *clients.Clients) {
 	labelSelector := &metav1.LabelSelector{
 		MatchExpressions: []metav1.LabelSelectorRequirement{
-			{Key: "piper.rookout.com/notified",
+			{Key: "piper.quickube.com/notified",
 				Operator: metav1.LabelSelectorOpExists},
 		},
 	}
@@ -28,9 +28,9 @@ func Start(ctx context.Context, stop context.CancelFunc, cfg *conf.GlobalConfig,
 	}
 	go func() {
 		for event := range watcher.ResultChan() {
-			err = handler.Handle(ctx, &event)
-			if err != nil {
-				log.Printf("[event handler] failed to Handle workflow event %s", err) // ERROR
+			err2 := handler.Handle(ctx, &event)
+			if err2 != nil {
+				log.Printf("[event handler] failed to Handle workflow event %s", err2) // ERROR
 			}
 		}
 		log.Print("[event handler] stopped work, closing watcher")

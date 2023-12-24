@@ -3,14 +3,14 @@
 Piper should be deployed in the cluster with Argo Workflows. 
 Piper will create a CRD that Argo Workflows will pick, so install or configure Piper to create those CRDs in the right namespace. 
 
-Please check out [values.yaml](https://github.com/Rookout/piper/tree/main/helm-chart/values.yaml) file of the helm chart configurations.
+Please check out [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/values.yaml) file of the helm chart configurations.
 
 To add piper helm repo run:
 ```bash
-helm repo add piper https://piper.rookout.com
+helm repo add piper https://piper.quickube.com
 ```
 
-After configuring Piper [values.yaml](https://github.com/Rookout/piper/tree/main/helm-chart/values.yaml), run the following command for installation:
+After configuring Piper [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/values.yaml), run the following command for installation:
 ```bash
 helm upgrade --install piper piper/piper \
 -f YOUR_VALUES_FILE.yaml
@@ -22,20 +22,25 @@ helm upgrade --install piper piper/piper \
 
 ### Ingress
 
-Piper should listen to webhooks from your git provider. Checkout [values.yaml](https://github.com/Rookout/piper/tree/main/helm-chart/values.yaml) for `ingress`
+Piper should listen to webhooks from your git provider. 
+Expose it using ingress or service, then provide the address to `piper.webhook.url` as followed:
+`https://PIPER_EXPOESED_URL/webhook`
+
+Checkout [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/values.yaml)
 
 ### Git
 
 Piper will use git for fetching `.workflows` folder and receiving events using webhooks.
 
-To pick which git provider you are using provide `gitProvider.name` configuration in helm chart (Now only supports GitHub).
+To pick which git provider you are using provide `gitProvider.name` configuration in helm chart (Now only supports GitHub and Bitbucket).
 
-Also configure you organization name using `gitProvider.organization.name` in helm chart.
+Also configure you organization (Github) or workspace (Bitbucket) name using `gitProvider.organization.name` in helm chart.
 
 #### Git Token Permissions
 
 The token should have access for creating webhooks and read repositories content.
 For GitHub configure `admin:org` and `write:org` permissions in Classic Token.
+For Bitbucket configure `Repositories:read`, `Webhooks:read and write` and `Pull requests:read` permissions (for multiple repos use workspace token).
 
 #### Token
 
@@ -52,7 +57,7 @@ kubectl create secret generic piper-git-token --from-literal=token=YOUR_GIT_OKEN
 
 Piper will create a webhook configuration for you, for the whole organization or for each repo you configure.
 
-Configure `piper.webhook.url` the address of piper that exposed with ingress.
+Configure `piper.webhook.url` the address of piper that exposed with ingress with `/webhook` postfix.
 
 For organization level configure: `gitProvider.webhook.orgLevel` to `true`.
 
@@ -63,7 +68,7 @@ Piper implements graceful shutdown, it will delete all the webhooks when termina
 #### Status check
 
 Piper will handle status checks for you. 
-It will notify the GitProvider for the status of Workflow for specific commit that triggered the Piper.
+It will notify the GitProvider for the status of Workflow for specific commit that triggered Piper.
 For linking provide valid URL of your Argo Workflows server address at: `argoWorkflows.server.address`
 
 ---

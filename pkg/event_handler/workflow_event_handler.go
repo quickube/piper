@@ -3,7 +3,7 @@ package event_handler
 import (
 	"fmt"
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
-	"github.com/rookout/piper/pkg/clients"
+	"github.com/quickube/piper/pkg/clients"
 	"golang.org/x/net/context"
 	"k8s.io/apimachinery/pkg/watch"
 	"log"
@@ -23,10 +23,10 @@ func (weh *workflowEventHandler) Handle(ctx context.Context, event *watch.Event)
 		)
 	}
 
-	currentPiperNotifyLabelStatus, ok := workflow.GetLabels()["piper.rookout.com/notified"]
+	currentPiperNotifyLabelStatus, ok := workflow.GetLabels()["piper.quickube.com/notified"]
 	if !ok {
 		return fmt.Errorf(
-			"workflow %s missing piper.rookout.com/notified label\n",
+			"workflow %s missing piper.quickube.com/notified label\n",
 			workflow.GetName(),
 		)
 	}
@@ -42,7 +42,7 @@ func (weh *workflowEventHandler) Handle(ctx context.Context, event *watch.Event)
 
 	err := weh.Notifier.Notify(&ctx, workflow)
 	if err != nil {
-		return fmt.Errorf("failed to Notify workflow to github, error:%s\n", err)
+		return fmt.Errorf("failed to Notify workflow to git provider, error:%s\n", err)
 	}
 
 	err = weh.Clients.Workflows.UpdatePiperWorkflowLabel(&ctx, workflow.GetName(), "notified", string(workflow.Status.Phase))

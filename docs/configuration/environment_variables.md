@@ -1,7 +1,7 @@
 ## Environment Variables
 
 The environment variables used by Piper to configure its functionality.
-The helm chart populate them using [values.yaml](https://github.com/Rookout/piper/tree/main/helm-chart/values.yaml) file
+The helm chart populate them using [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/values.yaml) file
 
 ### Git
 
@@ -27,6 +27,14 @@ The helm chart populate them using [values.yaml](https://github.com/Rookout/pipe
   Will cleanup all webhook that were created with piper. 
   Notice that there will be a race conditions between pod that being terminated and the new one. 
 
+* GIT_ENFORCE_ORG_BELONGING
+  Boolean variable, whether to enforce organizational belonging of git event creator. default `false`
+
+* GIT_FULL_HEALTH_CHECK
+  Enables full health check of webhook. Full health check contains expecting and validating ping event from a webhook.
+  Doesn't work for bitbucket, because the API call don't
+
+
 ### Argo Workflows Server
 * ARGO_WORKFLOWS_TOKEN
   The token of Argo Workflows server.
@@ -49,4 +57,4 @@ The helm chart populate them using [values.yaml](https://github.com/Rookout/pipe
 * ROOKOUT_LABELS 
   The labels to label instances at Rookout, default to "service:piper"
 * ROOKOUT_REMOTE_ORIGIN
-  The repo URL for source code fetching, default:"https://github.com/Rookout/piper.git".
+  The repo URL for source code fetching, default:"https://github.com/quickube/piper.git".

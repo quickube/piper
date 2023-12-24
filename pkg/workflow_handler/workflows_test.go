@@ -2,9 +2,9 @@ package workflow_handler
 
 import (
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
-	"github.com/rookout/piper/pkg/common"
-	"github.com/rookout/piper/pkg/conf"
-	"github.com/rookout/piper/pkg/git_provider"
+	"github.com/quickube/piper/pkg/common"
+	"github.com/quickube/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/git_provider"
 	assertion "github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -150,7 +150,7 @@ func TestCreateWorkflow(t *testing.T) {
 	assert.Equal("my-repo-my-branch-", workflow.ObjectMeta.GenerateName)
 	assert.Equal(wfcImpl.cfg.Namespace, workflow.ObjectMeta.Namespace)
 	assert.Equal(map[string]string{
-		"piper.rookout.com/notified": "false",
+		"piper.quickube.com/notified": "false",
 		"repo":                       "my-repo",
 		"branch":                     "my-branch",
 		"user":                       "my-user",

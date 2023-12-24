@@ -2,7 +2,7 @@ package git_provider
 
 import (
 	"fmt"
-	"github.com/rookout/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/conf"
 )
 
 func NewGitProviderClient(cfg *conf.GlobalConfig) (Client, error) {
@@ -10,6 +10,12 @@ func NewGitProviderClient(cfg *conf.GlobalConfig) (Client, error) {
 	switch cfg.GitProviderConfig.Provider {
 	case "github":
 		gitClient, err := NewGithubClient(cfg)
+		if err != nil {
+			return nil, err
+		}
+		return gitClient, nil
+	case "bitbucket":
+		gitClient, err := NewBitbucketServerClient(cfg)
 		if err != nil {
 			return nil, err
 		}

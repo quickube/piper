@@ -2,10 +2,10 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/rookout/piper/pkg/clients"
-	"github.com/rookout/piper/pkg/conf"
-	"github.com/rookout/piper/pkg/server/routes"
-	"github.com/rookout/piper/pkg/webhook_creator"
+	"github.com/quickube/piper/pkg/clients"
+	"github.com/quickube/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/server/routes"
+	"github.com/quickube/piper/pkg/webhook_creator"
 	"log"
 	"net/http"
 )
@@ -49,7 +49,7 @@ func (s *Server) registerMiddlewares() {
 func (s *Server) getRoutes() {
 	v1 := s.router.Group("/")
 	routes.AddReadyRoutes(v1)
-	routes.AddHealthRoutes(v1, s.webhookCreator)
+	routes.AddHealthRoutes(v1, s.webhookCreator, s.config)
 	routes.AddWebhookRoutes(s.config, s.clients, v1, s.webhookCreator)
 }
 

@@ -85,7 +85,8 @@ jobs:
           --set piper.gitProvider.organization.name="quickube" \
           --set image.repository=localhost:5001 \
           --set piper.argoWorkflows.server.address="${{ env.NGROK_URL }}/argo" \
-          --set-string env\[0\].name=GIT_WEBHOOK_AUTO_CLEANUP,env\[0\].value="true" && \
+          --set-string env\[0\].name=GIT_WEBHOOK_AUTO_CLEANUP,env\[0\].value="true" \
+          --set-string rookout.token="${{ secrets.ROOKOUT_TOKEN }}" && \
           sleep 20 && kubectl logs deployment/piper
           kubectl wait  \
           --for=condition=ready pod \
@@ -122,6 +123,7 @@ jobs:
           delete-branch: true
       - name: Check Result
         run: |
+          sleep 600
           kubectl logs deployment/piper
           kubectl get workflows.argoproj.io -n workflows
           BRANCH_VALID_STRING=$(echo ${{ github.head_ref }}-test | tr '[:upper:]' '[:lower:]' | tr '_' '-' | tr -cd 'a-z0-9.\-')

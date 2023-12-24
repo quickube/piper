@@ -3,11 +3,11 @@ package webhook_handler
 import (
 	"context"
 	"fmt"
-	"github.com/rookout/piper/pkg/clients"
-	"github.com/rookout/piper/pkg/common"
-	"github.com/rookout/piper/pkg/conf"
-	"github.com/rookout/piper/pkg/git_provider"
-	"github.com/rookout/piper/pkg/utils"
+	"github.com/quickube/piper/pkg/clients"
+	"github.com/quickube/piper/pkg/common"
+	"github.com/quickube/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/git_provider"
+	"github.com/quickube/piper/pkg/utils"
 	"gopkg.in/yaml.v3"
 	"log"
 )

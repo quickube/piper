@@ -17,13 +17,13 @@ This folder should contain declarations of the templates and main DAG that will 
 Finally, it will submit the Workflow as a K8s resource in the cluster. 
 To access more detailed explanations, please navigate to the [Documentation site](https://piper.quickube.com).
 
-https://github.com/Rookout/piper/assets/106976988/09b3a5d8-3428-4bdc-9146-3034d81164bf
+https://github.com/quickube/piper/assets/106976988/09b3a5d8-3428-4bdc-9146-3034d81164bf
 
 ## Reporting Issues
 
 If you encounter any issues or bugs while using Piper, please help us improve by reporting them. Follow these steps to report an issue:
 
-1. Go to the [Piper Issues](https://github.com/Rookout/Piper/issues) page on GitHub.
+1. Go to the [Piper Issues](https://github.com/quickube/Piper/issues) page on GitHub.
 2. Click on the "New Issue" button.
 3. Provide a descriptive title and detailed description of the issue, including any relevant error messages or steps to reproduce the problem.
 4. Add appropriate labels to categorize the issue (e.g., bug, enhancement, question).

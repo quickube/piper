@@ -2,9 +2,9 @@ package webhook_creator
 
 import (
 	"errors"
-	"github.com/rookout/piper/pkg/clients"
-	"github.com/rookout/piper/pkg/conf"
-	"github.com/rookout/piper/pkg/git_provider"
+	"github.com/quickube/piper/pkg/clients"
+	"github.com/quickube/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/git_provider"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
 	"math/rand"

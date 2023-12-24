@@ -2,9 +2,9 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/rookout/piper/pkg/clients"
-	"github.com/rookout/piper/pkg/conf"
-	"github.com/rookout/piper/pkg/webhook_creator"
+	"github.com/quickube/piper/pkg/clients"
+	"github.com/quickube/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/webhook_creator"
 	"net/http"
 )
 

@@ -1,14 +1,14 @@
 package routes
 
 import (
-	"github.com/rookout/piper/pkg/webhook_creator"
+	"github.com/quickube/piper/pkg/webhook_creator"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rookout/piper/pkg/clients"
-	"github.com/rookout/piper/pkg/conf"
-	webhookHandler "github.com/rookout/piper/pkg/webhook_handler"
+	"github.com/quickube/piper/pkg/clients"
+	"github.com/quickube/piper/pkg/conf"
+	webhookHandler "github.com/quickube/piper/pkg/webhook_handler"
 )
 
 func AddWebhookRoutes(cfg *conf.GlobalConfig, clients *clients.Clients, rg *gin.RouterGroup, wc *webhook_creator.WebhookCreatorImpl) {

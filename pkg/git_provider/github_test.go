@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"github.com/google/go-github/v52/github"
-	"github.com/rookout/piper/pkg/conf"
-	"github.com/rookout/piper/pkg/utils"
+	"github.com/quickube/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/utils"
 	assertion "github.com/stretchr/testify/assert"
 )
 

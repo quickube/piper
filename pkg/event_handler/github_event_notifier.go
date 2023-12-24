@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
-	"github.com/rookout/piper/pkg/clients"
-	"github.com/rookout/piper/pkg/conf"
-	"github.com/rookout/piper/pkg/utils"
+	"github.com/quickube/piper/pkg/clients"
+	"github.com/quickube/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/utils"
 )
 
 var workflowTranslationToGithubMap = map[string]string{

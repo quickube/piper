@@ -113,6 +113,9 @@ jobs:
           branch: ${{ github.head_ref }}-test
           title: ${{ github.head_ref }}-test
           delete-branch: true
+      - name: Wait for workflow creation
+        run: |
+          sleep 10
       - name: Close Pull Request
         uses: peter-evans/close-pull@v3
         with:
@@ -123,7 +126,6 @@ jobs:
           delete-branch: true
       - name: Check Result
         run: |
-          sleep 600
           kubectl logs deployment/piper
           kubectl get workflows.argoproj.io -n workflows
           BRANCH_VALID_STRING=$(echo ${{ github.head_ref }}-test | tr '[:upper:]' '[:lower:]' | tr '_' '-' | tr -cd 'a-z0-9.\-')

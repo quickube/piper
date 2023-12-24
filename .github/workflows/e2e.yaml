@@ -116,6 +116,7 @@ jobs:
       - name: Wait for workflow creation
         run: |
           sleep 10
+
       - name: Close Pull Request
         uses: peter-evans/close-pull@v3
         with:

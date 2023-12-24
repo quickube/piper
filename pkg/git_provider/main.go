@@ -2,7 +2,7 @@ package git_provider
 
 import (
 	"fmt"
-	"github.com/rookout/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/conf"
 )
 
 func NewGitProviderClient(cfg *conf.GlobalConfig) (Client, error) {

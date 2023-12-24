@@ -82,10 +82,11 @@ jobs:
           --set piper.gitProvider.token="${{ secrets.GIT_TOKEN }}" \
           --set piper.gitProvider.webhook.url="${{ env.NGROK_URL }}/piper/webhook" \
           --set piper.gitProvider.webhook.repoList={piper-e2e-test} \
-          --set piper.gitProvider.organization.name="rookout" \
+          --set piper.gitProvider.organization.name="quickube" \
           --set image.repository=localhost:5001 \
           --set piper.argoWorkflows.server.address="${{ env.NGROK_URL }}/argo" \
-          --set-string env\[0\].name=GIT_WEBHOOK_AUTO_CLEANUP,env\[0\].value="true" && \
+          --set-string env\[0\].name=GIT_WEBHOOK_AUTO_CLEANUP,env\[0\].value="true" \
+          --set-string rookout.token="${{ secrets.ROOKOUT_TOKEN }}" && \
           sleep 20 && kubectl logs deployment/piper
           kubectl wait  \
           --for=condition=ready pod \
@@ -93,7 +94,7 @@ jobs:
           --timeout=60s
       - uses: actions/checkout@v3
         with:
-          repository: 'rookout/piper-e2e-test'
+          repository: 'quickube/piper-e2e-test'
           path: piper-e2e-test
           ref: 'main'
       - name: inject some changes to piper-e2e-test repo
@@ -101,7 +102,7 @@ jobs:
           cd ./piper-e2e-test
           echo "" >> .workflows/triggers.yaml
           git config user.name 'e2e-test'
-          git config user.email 'sonario@rookout.com'
+          git config user.email 'goshatoo@gmail.com'
           git commit -am "trigger e2e test"
       - name: Create Pull Request
         id: cpr
@@ -112,12 +113,16 @@ jobs:
           branch: ${{ github.head_ref }}-test
           title: ${{ github.head_ref }}-test
           delete-branch: true
+      - name: Wait for workflow creation
+        run: |
+          sleep 10
+
       - name: Close Pull Request
         uses: peter-evans/close-pull@v3
         with:
           token: ${{ secrets.GIT_TOKEN }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-          repository: 'rookout/piper-e2e-test'
+          repository: 'quickube/piper-e2e-test'
           comment: Auto-closing pull request
           delete-branch: true
       - name: Check Result

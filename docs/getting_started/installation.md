@@ -3,14 +3,14 @@
 Piper should be deployed in the cluster with Argo Workflows. 
 Piper will create a CRD that Argo Workflows will pick, so install or configure Piper to create those CRDs in the right namespace. 
 
-Please check out [values.yaml](https://github.com/Rookout/piper/tree/main/helm-chart/values.yaml) file of the helm chart configurations.
+Please check out [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/values.yaml) file of the helm chart configurations.
 
 To add piper helm repo run:
 ```bash
 helm repo add piper https://piper.quickube.com
 ```
 
-After configuring Piper [values.yaml](https://github.com/Rookout/piper/tree/main/helm-chart/values.yaml), run the following command for installation:
+After configuring Piper [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/values.yaml), run the following command for installation:
 ```bash
 helm upgrade --install piper piper/piper \
 -f YOUR_VALUES_FILE.yaml
@@ -26,7 +26,7 @@ Piper should listen to webhooks from your git provider.
 Expose it using ingress or service, then provide the address to `piper.webhook.url` as followed:
 `https://PIPER_EXPOESED_URL/webhook`
 
-Checkout [values.yaml](https://github.com/Rookout/piper/tree/main/helm-chart/values.yaml)
+Checkout [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/values.yaml)
 
 ### Git
 

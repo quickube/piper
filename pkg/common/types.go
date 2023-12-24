@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/rookout/piper/pkg/git_provider"
+	"github.com/quickube/piper/pkg/git_provider"
 )
 
 type WorkflowsBatch struct {

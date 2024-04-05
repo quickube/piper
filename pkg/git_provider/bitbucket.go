@@ -102,7 +102,7 @@ func (b BitbucketClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Ho
 		Description: "Piper",
 		Url:         b.cfg.GitProviderConfig.WebhookURL,
 		Active:      true,
-		Events:      []string{"repo:push", "pullrequest:created", "pullrequest:updated", "pullrequest:fulfilled"},
+		Events:      []string{"repo:push", "pullrequest:created", "pullrequest:updated", "pullrequest:fulfilled", "pullrequest:approved"},
 	}
 
 	hook, exists := b.isRepoWebhookExists(*repo)
@@ -189,7 +189,7 @@ func (b BitbucketClientImpl) HandlePayload(ctx *context.Context, request *http.R
 			}
 		}
 
-	case "pullrequest:created", "pullrequest:updated":
+	case "pullrequest:created", "pullrequest:updated", "pullrequest:approved":
 		webhookPayload = &WebhookPayload{
 			Event:            "pull_request",
 			Repo:             utils.SanitizeString(gjson.GetBytes(buf.Bytes(), "repository.name").Value().(string)),

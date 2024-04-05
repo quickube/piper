@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.5.1](https://github.com/quickube/piper/compare/v1.5.0...v1.5.1) (2024-04-05)
+
+
+### Bug Fixes
+
+* change rookout to quickube ([f45a0c9](https://github.com/quickube/piper/commit/f45a0c9d0ce2384e0423e8be66a33e92c1359f18))
+* change rookout to quickube ([a77454b](https://github.com/quickube/piper/commit/a77454b28d2b71fbd614bf30fc29d6d241a9f475))
+* change rookout to quickube ([53265e1](https://github.com/quickube/piper/commit/53265e112ecaffb1db16b82c8b749fe835d402c8))
+* change rookout to quickube ([4cee863](https://github.com/quickube/piper/commit/4cee863c11c0ea3d80ca21bd46963bbd9b63eb58))
+* change rookout to quickube ([fd3bc16](https://github.com/quickube/piper/commit/fd3bc160f219ac3598ed7c13552e1add5e9589f2))
+* change rookout to quickube ([3ab4b62](https://github.com/quickube/piper/commit/3ab4b628ee62cfd60083e19d545189d7e74bc54a))
+* change rookout to quickube ([d990336](https://github.com/quickube/piper/commit/d990336a4d4703ee41b6424dc32535e62ebba8cb))
+* trigger ([9d62140](https://github.com/quickube/piper/commit/9d6214031c0da96bb3a8132c58e09785fa427335))
+* trigger ([564bdc8](https://github.com/quickube/piper/commit/564bdc85b5e78687a8465fb6b6e661bb379622fb))
+* trigger ([53ddeb0](https://github.com/quickube/piper/commit/53ddeb0abc280791c15fa341cd5fa1a7735b9cb1))
+
 ## [1.5.0](https://github.com/quickube/piper/compare/v1.4.0...v1.5.0) (2023-09-06)
 
 

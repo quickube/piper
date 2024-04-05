@@ -32,7 +32,7 @@ The helm chart populate them using [values.yaml](https://github.com/quickube/pip
 
 * GIT_FULL_HEALTH_CHECK
   Enables full health check of webhook. Full health check contains expecting and validating ping event from a webhook.
-  Doesn't work for bitbucket, because the API call don't
+  Doesn't work for bitbucket, because the API call doesn't exists.
 
 
 ### Argo Workflows Server

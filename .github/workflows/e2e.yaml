@@ -110,8 +110,8 @@ jobs:
         with:
           token: ${{ secrets.GIT_TOKEN }}
           path: piper-e2e-test
-          branch: ${{ github.head_ref }}-test
-          title: ${{ github.head_ref }}-test
+          branch: ${{ github.ref_name }}-test
+          title: ${{ github.ref_name }}-test
           delete-branch: true
       - name: Wait for workflow creation
         run: |
@@ -129,7 +129,7 @@ jobs:
         run: |
           kubectl logs deployment/piper
           kubectl get workflows.argoproj.io -n workflows
-          BRANCH_VALID_STRING=$(echo ${{ github.head_ref }}-test | tr '[:upper:]' '[:lower:]' | tr '_' '-' | tr -cd 'a-z0-9.\-')
+          BRANCH_VALID_STRING=$(echo ${{ github.ref_name }}-test | tr '[:upper:]' '[:lower:]' | tr '_' '-' | tr -cd 'a-z0-9.\-')
           
           ## check if created
           RESULT=$(kubectl get workflows.argoproj.io -n workflows --selector=branch=$BRANCH_VALID_STRING --no-headers | grep piper-e2e-test)

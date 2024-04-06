@@ -128,7 +128,7 @@ jobs:
       - name: Check Result
         run: |
           kubectl logs deployment/piper
-          kube ctl get workflows.argoproj.io -n workflows
+          kubectl get workflows.argoproj.io -n workflows
           BRANCH_VALID_STRING=$(echo ${{ github.ref_name }}-test | tr '[:upper:]' '[:lower:]' | tr '_' '-' | tr -cd 'a-z0-9.\-')
           
           ## check if created

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/quickube/piper/compare/v1.5.1...v1.6.0) (2024-04-06)
+
+
+### Features
+
+* bitbucket pullrequest:approved event support ([#19](https://github.com/quickube/piper/issues/19)) ([57d39cc](https://github.com/quickube/piper/commit/57d39ccce6d8baadc4c23a56f253ef55ccc5e61e))
+
 ## [1.5.1](https://github.com/quickube/piper/compare/v1.5.0...v1.5.1) (2024-04-05)
 
 

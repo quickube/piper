@@ -75,50 +75,45 @@ func (c *GitlabClientImpl) ListFiles(ctx *context.Context, repo string, branch s
 }
 
 func (c *GitlabClientImpl) GetFile(ctx *context.Context, repo string, branch string, path string) (*CommitFile, error) {
-// 	var commitFile CommitFile
+	var commitFile CommitFile
 
-// 	opt := &github.RepositoryContentGetOptions{Ref: branch}
-// 	fileContent, _, resp, err := c.client.Repositories.GetContents(*ctx, c.cfg.GitProviderConfig.OrgName, repo, path, opt)
-// 	if err != nil {
-// 		return &commitFile, err
-// 	}
-// 	if resp.StatusCode == 404 {
-// 		log.Printf("File %s not found in repo %s branch %s", path, repo, branch)
-// 		return nil, nil
-// 	}
-// 	if resp.StatusCode != 200 {
-// 		return &commitFile, err
-// 	}
-// 	if fileContent == nil {
-// 		return &commitFile, nil
-// 	}
-// 	filePath := fileContent.GetPath()
-// 	commitFile.Path = &filePath
-// 	fileContentString, err := fileContent.GetContent()
-// 	if err != nil {
-// 		return &commitFile, err
-// 	}
-// 	commitFile.Content = &fileContentString
+	opt := &gitlab.GetFileOptions{Ref: &branch,}
+	fileContent, resp, err := c.client.RepositoryFiles.GetFile(repo, path,opt)
+	if err != nil {
+		return &commitFile, err
+	}
+	if resp.StatusCode == 404 {
+		log.Printf("File %s not found in repo %s branch %s", path, repo, branch)
+		return nil, nil
+	}
+	if resp.StatusCode != 200 {
+		return &commitFile, err
+	}
+	if fileContent == nil {
+		return &commitFile, nil
+	}
+	filePath := fileContent.FilePath
+	commitFile.Path = &filePath
+	fileContentString := fileContent.Content
+	commitFile.Content = &fileContentString
 
-// 	return &commitFile, nil
-	panic("implement me")
+	return &commitFile, nil
 }
 
 func (c *GitlabClientImpl) GetFiles(ctx *context.Context, repo string, branch string, paths []string) ([]*CommitFile, error) {
-// 	var commitFiles []*CommitFile
-// 	for _, path := range paths {
-// 		file, err := c.GetFile(ctx, repo, branch, path)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		if file == nil {
-// 			log.Printf("file %s not found in repo %s branch %s", path, repo, branch)
-// 			continue
-// 		}
-// 		commitFiles = append(commitFiles, file)
-// 	}
-// 	return commitFiles, nil
-panic("implement me")
+	var commitFiles []*CommitFile
+	for _, path := range paths {
+		file, err := c.GetFile(ctx, repo, branch, path)
+		if err != nil {
+			return nil, err
+		}
+		if file == nil {
+			log.Printf("file %s not found in repo %s branch %s", path, repo, branch)
+			continue
+		}
+		commitFiles = append(commitFiles, file)
+	}
+	return commitFiles, nil
 }
 
 func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*HookWithStatus, error) {

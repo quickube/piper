@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/google/go-github/v52/github"
 	"github.com/quickube/piper/pkg/conf"
 
 	"github.com/xanzy/go-gitlab"
@@ -24,21 +25,21 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 		log.Fatalf("Failed to create client: %v", err)
 	}
 
-	
-	err := ValidateGitlabPermissions(ctx, client, cfg)
+	err = ValidateGitlabPermissions(ctx, client, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to validate permissions: %v", err)
 	}
-	user, resp, err := client.Users.Get(context.Background(), cfg.OrgName)
+
+	group, resp, err := client.Groups.GetGroup(cfg.OrgName, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get org id: %v", err)
+		return nil, fmt.Errorf("failed to get organization: %v", err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to get organization id %s", resp.Status)
+		return nil, fmt.Errorf("failed to get organization data %s", resp.Status)
 	}
 
-	cfg.OrgID = user.GetID()
+	cfg.OrgID = int64(group.ID)
 
 	log.Printf("Org ID is: %d\n", cfg.OrgID)
 
@@ -48,7 +49,8 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 	}, err
 }
 
-// func (c *GithubClientImpl) ListFiles(ctx *context.Context, repo string, branch string, path string) ([]string, error) {
+
+func (c *GitlabClientImpl) ListFiles(ctx *context.Context, repo string, branch string, path string) ([]string, error) {
 // 	var files []string
 
 // 	opt := &github.RepositoryContentGetOptions{Ref: branch}
@@ -66,9 +68,10 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 // 		files = append(files, file.GetName())
 // 	}
 // 	return files, nil
-// }
+	panic("implement me")
+}
 
-// func (c *GithubClientImpl) GetFile(ctx *context.Context, repo string, branch string, path string) (*CommitFile, error) {
+func (c *GitlabClientImpl) GetFile(ctx *context.Context, repo string, branch string, path string) (*CommitFile, error) {
 // 	var commitFile CommitFile
 
 // 	opt := &github.RepositoryContentGetOptions{Ref: branch}
@@ -95,9 +98,10 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 // 	commitFile.Content = &fileContentString
 
 // 	return &commitFile, nil
-// }
+	panic("implement me")
+}
 
-// func (c *GithubClientImpl) GetFiles(ctx *context.Context, repo string, branch string, paths []string) ([]*CommitFile, error) {
+func (c *GitlabClientImpl) GetFiles(ctx *context.Context, repo string, branch string, paths []string) ([]*CommitFile, error) {
 // 	var commitFiles []*CommitFile
 // 	for _, path := range paths {
 // 		file, err := c.GetFile(ctx, repo, branch, path)
@@ -111,9 +115,10 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 // 		commitFiles = append(commitFiles, file)
 // 	}
 // 	return commitFiles, nil
-// }
+panic("implement me")
+}
 
-// func (c *GithubClientImpl) SetWebhook(ctx *context.Context, repo *string) (*HookWithStatus, error) {
+func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*HookWithStatus, error) {
 // 	if c.cfg.OrgLevelWebhook && repo != nil {
 // 		return nil, fmt.Errorf("trying to set repo scope. repo: %s", *repo)
 // 	}
@@ -126,7 +131,7 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 // 		},
 // 		Events: []string{"push", "pull_request", "create", "release"},
 // 		Active: github.Bool(true),
-// 	}
+	// }
 
 // 	if repo == nil {
 // 		respHook, ok := isOrgWebhookEnabled(*ctx, c)
@@ -194,9 +199,11 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 // 		}
 
 // 	}
-// }
+panic("implement me")
 
-// func (c *GithubClientImpl) UnsetWebhook(ctx *context.Context, hook *HookWithStatus) error {
+}
+
+func (c *GitlabClientImpl) UnsetWebhook(ctx *context.Context, hook *HookWithStatus) error {
 
 // 	if hook.RepoName == nil {
 
@@ -224,9 +231,11 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 // 	}
 
 // 	return nil
-// }
+panic("implement me")
 
-// func (c *GithubClientImpl) HandlePayload(ctx *context.Context, request *http.Request, secret []byte) (*WebhookPayload, error) {
+}
+
+func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Request, secret []byte) (*WebhookPayload, error) {
 // 	var webhookPayload *WebhookPayload
 
 // 	payload, err := github.ValidatePayload(request, secret)
@@ -305,10 +314,13 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 // 		return nil, fmt.Errorf("webhook send from non organizational member")
 // 	}
 // 	return webhookPayload, nil
+panic("implement me")
 
-// }
+}
 
-// func (c *GithubClientImpl) SetStatus(ctx *context.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error {
+func (c *GitlabClientImpl) SetStatus(ctx *context.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error {
+panic("implement me")
+
 // 	if !utils.ValidateHTTPFormat(*linkURL) {
 // 		return fmt.Errorf("invalid linkURL")
 // 	}
@@ -331,9 +343,11 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 
 // 	log.Printf("successfully set status on repo:%s commit: %s to status: %s\n", *repo, *commit, *status)
 // 	return nil
-// }
+}
 
-// func (c *GithubClientImpl) PingHook(ctx *context.Context, hook *HookWithStatus) error {
+func (c *GitlabClientImpl) PingHook(ctx *context.Context, hook *HookWithStatus) error {
+	panic("implement me")
+
 // 	if c.cfg.OrgLevelWebhook && hook.RepoName != nil {
 // 		return fmt.Errorf("trying to ping repo scope webhook while configured for org level webhook. repo: %s", *hook.RepoName)
 // 	}
@@ -358,9 +372,11 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 // 	}
 
 // 	return nil
-// }
+}
 
-// func (c *GithubClientImpl) refToSHA(ctx *context.Context, ref string, repo string) (*string, error) {
+func (c *GitlabClientImpl) refToSHA(ctx *context.Context, ref string, repo string) (*string, error) {
+panic("implement me")
+
 // 	respSHA, resp, err := c.client.Repositories.GetCommitSHA1(*ctx, c.cfg.OrgName, repo, ref, "")
 // 	if err != nil {
 // 		return nil, err
@@ -372,12 +388,14 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 
 // 	log.Printf("resolved ref: %s to SHA: %s", ref, respSHA)
 // 	return &respSHA, nil
-// }
+}
 
-// func (c *GithubClientImpl) extractLabelNames(labels []*github.Label) []string {
+func (c *GitlabClientImpl) extractLabelNames(labels []*github.Label) []string {
+	panic("implement me")
+
 // 	var returnLabelsList []string
 // 	for _, label := range labels {
 // 		returnLabelsList = append(returnLabelsList, *label.Name)
 // 	}
 // 	return returnLabelsList
-// }
+}

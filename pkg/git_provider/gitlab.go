@@ -51,24 +51,27 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 
 
 func (c *GitlabClientImpl) ListFiles(ctx *context.Context, repo string, branch string, path string) ([]string, error) {
-// 	var files []string
+	var files []string
+	opt := &gitlab.ListTreeOptions{
+		Ref: &branch,
+		Path: &path,}
+	
+	dirFiles, resp, err := c.client.Repositories.ListTree(repo, opt)
 
-// 	opt := &github.RepositoryContentGetOptions{Ref: branch}
-// 	_, directoryContent, resp, err := c.client.Repositories.GetContents(*ctx, c.cfg.GitProviderConfig.OrgName, repo, path, opt)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	if resp.StatusCode != 200 {
-// 		return nil, fmt.Errorf("github provider returned %d: failed to get contents of %s/%s%s", resp.StatusCode, repo, branch, path)
-// 	}
-// 	if directoryContent == nil {
-// 		return nil, nil
-// 	}
-// 	for _, file := range directoryContent {
-// 		files = append(files, file.GetName())
-// 	}
-// 	return files, nil
-	panic("implement me")
+
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("gitlab provider returned %d: failed to get contents of %s/%s%s", resp.StatusCode, repo, branch, path)
+	}
+	if files == nil {
+		return nil, nil
+	}
+	for _, file := range dirFiles {
+		files = append(files, file.Name)
+	}
+	return files, nil
 }
 
 func (c *GitlabClientImpl) GetFile(ctx *context.Context, repo string, branch string, path string) (*CommitFile, error) {

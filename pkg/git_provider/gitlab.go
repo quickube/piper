@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/google/go-github/v52/github"
 	"github.com/quickube/piper/pkg/conf"
+	"github.com/quickube/piper/pkg/utils"
 
 	"github.com/xanzy/go-gitlab"
 )
@@ -317,83 +317,54 @@ panic("implement me")
 }
 
 func (c *GitlabClientImpl) SetStatus(ctx *context.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error {
-panic("implement me")
+	if !utils.ValidateHTTPFormat(*linkURL) {
+		return fmt.Errorf("invalid linkURL")
+	}
 
-// 	if !utils.ValidateHTTPFormat(*linkURL) {
-// 		return fmt.Errorf("invalid linkURL")
-// 	}
-// 	repoStatus := &github.RepoStatus{
-// 		State:       status, // pending, success, error, or failure.
-// 		TargetURL:   linkURL,
-// 		Description: utils.SPtr(fmt.Sprintf("Workflow %s %s", *status, *message)),
-// 		Context:     utils.SPtr("Piper/ArgoWorkflows"),
-// 		AvatarURL:   utils.SPtr("https://argoproj.github.io/argo-workflows/assets/logo.png"),
-// 	}
+	repoStatus := &gitlab.SetCommitStatusOptions{
+		State:       gitlab.BuildStateValue(*status), // pending, success, error, or failure.
+		Ref: commit,
+		TargetURL:   linkURL,
+		Description: gitlab.Ptr(fmt.Sprintf("Workflow %s %s", *status, *message)),
+		Context:     gitlab.Ptr("Piper/ArgoWorkflows"),
+	}
+	
+	_, resp, err := c.client.Commits.SetCommitStatus(*repo, *commit, repoStatus)
+	if err != nil {
+		return err
+	}
 
-// 	_, resp, err := c.client.Repositories.CreateStatus(*ctx, c.cfg.OrgName, *repo, *commit, repoStatus)
-// 	if err != nil {
-// 		return err
-// 	}
+	if resp.StatusCode != http.StatusCreated {
+		return fmt.Errorf("failed to set status on repo:%s, commit:%s, API call returned %d", *repo, *commit, resp.StatusCode)
+	}
 
-// 	if resp.StatusCode != http.StatusCreated {
-// 		return fmt.Errorf("failed to set status on repo:%s, commit:%s, API call returned %d", *repo, *commit, resp.StatusCode)
-// 	}
-
-// 	log.Printf("successfully set status on repo:%s commit: %s to status: %s\n", *repo, *commit, *status)
-// 	return nil
+	log.Printf("successfully set status on repo:%s commit: %s to status: %s\n", *repo, *commit, *status)
+	return nil
 }
 
 func (c *GitlabClientImpl) PingHook(ctx *context.Context, hook *HookWithStatus) error {
-	panic("implement me")
+	if c.cfg.OrgLevelWebhook && hook.RepoName != nil {
+		return fmt.Errorf("trying to ping repo scope webhook while configured for org level webhook. repo: %s", *hook.RepoName)
+	}
+	if hook.RepoName == nil {
+		_,resp, err := c.client.Groups.GetGroupHook(c.cfg.OrgName,int(hook.HookID), nil)
+		if err != nil {
+			return err
+		}
 
-// 	if c.cfg.OrgLevelWebhook && hook.RepoName != nil {
-// 		return fmt.Errorf("trying to ping repo scope webhook while configured for org level webhook. repo: %s", *hook.RepoName)
-// 	}
-// 	if hook.RepoName == nil {
-// 		resp, err := c.client.Organizations.PingHook(*ctx, c.cfg.OrgName, hook.HookID)
-// 		if err != nil {
-// 			return err
-// 		}
+		if resp.StatusCode == http.StatusNotFound {
+			return fmt.Errorf("unable to find organization webhook for hookID: %d", hook.HookID)
+		}
+	} else {
+		_,resp, err := c.client.Projects.GetProjectHook(hook.RepoName, int(hook.HookID), nil)
+		if err != nil {
+			return err
+		}
 
-// 		if resp.StatusCode == http.StatusNotFound {
-// 			return fmt.Errorf("unable to find organization webhook for hookID: %d", hook.HookID)
-// 		}
-// 	} else {
-// 		resp, err := c.client.Repositories.PingHook(*ctx, c.cfg.GitProviderConfig.OrgName, *hook.RepoName, hook.HookID)
-// 		if err != nil {
-// 			return err
-// 		}
+		if resp.StatusCode == http.StatusNotFound {
+			return fmt.Errorf("unable to find repo webhook for repo:%s hookID: %d", *hook.RepoName, hook.HookID)
+		}
+	}
 
-// 		if resp.StatusCode == http.StatusNotFound {
-// 			return fmt.Errorf("unable to find repo webhook for repo:%s hookID: %d", *hook.RepoName, hook.HookID)
-// 		}
-// 	}
-
-// 	return nil
-}
-
-func (c *GitlabClientImpl) refToSHA(ctx *context.Context, ref string, repo string) (*string, error) {
-panic("implement me")
-
-// 	respSHA, resp, err := c.client.Repositories.GetCommitSHA1(*ctx, c.cfg.OrgName, repo, ref, "")
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	if resp.StatusCode != http.StatusOK {
-// 		return nil, fmt.Errorf("failed to set status on repo:%s, commit:%s, API call returned %d", repo, ref, resp.StatusCode)
-// 	}
-
-// 	log.Printf("resolved ref: %s to SHA: %s", ref, respSHA)
-// 	return &respSHA, nil
-}
-
-func (c *GitlabClientImpl) extractLabelNames(labels []*github.Label) []string {
-	panic("implement me")
-
-// 	var returnLabelsList []string
-// 	for _, label := range labels {
-// 		returnLabelsList = append(returnLabelsList, *label.Name)
-// 	}
-// 	return returnLabelsList
+	return nil
 }

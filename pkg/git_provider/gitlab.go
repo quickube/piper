@@ -169,7 +169,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 			log.Printf("edited webhook for %s: %s\n", c.cfg.GitProviderConfig.OrgName, gitlabHook.URL)
 		}
 	} else {
-		respHook, ok := isProjectWebhookEnabled(*ctx, c, *repo)
+		respHook, ok := isProjectWebhookEnabled(c, *repo)
 		if !ok {
 			addProjectHookOpts := gitlab.AddProjectHookOptions{
 				URL: gitlab.Ptr(c.cfg.GitProviderConfig.WebhookURL),

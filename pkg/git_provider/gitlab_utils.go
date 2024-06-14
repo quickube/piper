@@ -71,3 +71,45 @@ func GetGitlabScopes(ctx context.Context, client *gitlab.Client) ([]string, erro
 	scopes = strings.ReplaceAll(scopes, " ", "")
 	return strings.Split(scopes, ","), nil
 }
+
+func isGroupWebhookEnabled(c *GitlabClientImpl) (*gitlab.GroupHook, bool) {
+	emptyHook := gitlab.GroupHook{}
+	hooks, resp, err := c.client.Groups.ListGroupHooks(c.cfg.GitProviderConfig.OrgName, nil)
+	if err != nil {
+		return &emptyHook, false
+	}
+	if resp.StatusCode != 200 {
+		return &emptyHook, false
+	}
+	if len(hooks) == 0 {
+		return &emptyHook, false
+	}
+	for _, hook := range hooks {
+		if hook.AlertStatus == "triggered" && hook.URL == c.cfg.GitProviderConfig.WebhookURL {
+			return hook, true
+		}
+	}
+	return &emptyHook, false
+}
+
+func isProjectWebhookEnabled(c *GitlabClientImpl, repo string) (*gitlab.ProjectHook, bool) {
+	emptyHook := gitlab.ProjectHook{}
+	hooks, resp, err := c.client.Projects.ListProjectHooks(repo, nil)
+	if err != nil {
+		return &emptyHook, false
+	}
+	if resp.StatusCode != 200 {
+		return &emptyHook, false
+	}
+	if len(hooks) == 0 {
+		return &emptyHook, false
+	}
+
+	for _, hook := range hooks {
+		if hook.URL == c.cfg.GitProviderConfig.WebhookURL {
+			return hook, true
+		}
+	}
+
+	return &emptyHook, false
+}

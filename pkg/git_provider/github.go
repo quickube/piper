@@ -22,6 +22,7 @@ func NewGithubClient(cfg *conf.GlobalConfig) (Client, error) {
 	ctx := context.Background()
 
 	client := github.NewTokenClient(ctx, cfg.GitProviderConfig.Token)
+
 	err := ValidatePermissions(ctx, client, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to validate permissions: %v", err)

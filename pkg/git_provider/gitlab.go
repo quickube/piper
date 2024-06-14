@@ -49,7 +49,6 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 	}, err
 }
 
-
 func (c *GitlabClientImpl) ListFiles(ctx *context.Context, repo string, branch string, path string) ([]string, error) {
 	var files []string
 	opt := &gitlab.ListTreeOptions{
@@ -117,120 +116,130 @@ func (c *GitlabClientImpl) GetFiles(ctx *context.Context, repo string, branch st
 }
 
 func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*HookWithStatus, error) {
-// 	if c.cfg.OrgLevelWebhook && repo != nil {
-// 		return nil, fmt.Errorf("trying to set repo scope. repo: %s", *repo)
-// 	}
+	if c.cfg.OrgLevelWebhook && repo != nil {
+		return nil, fmt.Errorf("trying to set repo scope. repo: %s", *repo)
+	}
+	var gitlabHook gitlab.Hook
 
-// 	hookConf := &github.Hook{
-// 		Config: map[string]interface{}{
-// 			"url":          c.cfg.GitProviderConfig.WebhookURL,
-// 			"content_type": "json",
-// 			"secret":       c.cfg.GitProviderConfig.WebhookSecret,
-// 		},
-// 		Events: []string{"push", "pull_request", "create", "release"},
-// 		Active: github.Bool(true),
-	// }
+	if repo == nil {
+		respHook, ok := isGroupWebhookEnabled(c)
 
-// 	if repo == nil {
-// 		respHook, ok := isOrgWebhookEnabled(*ctx, c)
-// 		if !ok {
-// 			createdHook, resp, err := c.client.Organizations.CreateHook(
-// 				*ctx,
-// 				c.cfg.GitProviderConfig.OrgName,
-// 				hookConf,
-// 			)
-// 			if err != nil {
-// 				return nil, err
-// 			}
-// 			if resp.StatusCode != 201 {
-// 				return nil, fmt.Errorf("failed to create org level webhhok, API returned %d", resp.StatusCode)
-// 			}
-// 			log.Printf("edited webhook of type %s for %s name: %s\n", createdHook.GetType(), c.cfg.GitProviderConfig.OrgName, createdHook.Config["url"])
-// 			hookID := createdHook.GetID()
-// 			return &HookWithStatus{HookID: hookID, HealthStatus: true, RepoName: repo}, nil
-// 		} else {
-// 			updatedHook, resp, err := c.client.Organizations.EditHook(
-// 				*ctx,
-// 				c.cfg.GitProviderConfig.OrgName,
-// 				respHook.GetID(),
-// 				hookConf,
-// 			)
-// 			if err != nil {
-// 				return nil, err
-// 			}
-// 			if resp.StatusCode != http.StatusOK {
-// 				return nil, fmt.Errorf(
-// 					"failed to update org level webhhok for %s, API returned %d",
-// 					c.cfg.GitProviderConfig.OrgName,
-// 					resp.StatusCode,
-// 				)
-// 			}
-// 			log.Printf("edited webhook of type %s for %s: %s\n", updatedHook.GetType(), c.cfg.GitProviderConfig.OrgName, updatedHook.Config["url"])
-// 			hookID := updatedHook.GetID()
-// 			return &HookWithStatus{HookID: hookID, HealthStatus: true, RepoName: repo}, nil
-// 		}
-// 	} else {
-// 		respHook, ok := isRepoWebhookEnabled(*ctx, c, *repo)
-// 		if !ok {
-// 			createdHook, resp, err := c.client.Repositories.CreateHook(*ctx, c.cfg.GitProviderConfig.OrgName, *repo, hookConf)
-// 			if err != nil {
-// 				return nil, err
-// 			}
+		if !ok {
+			groupHookOptions := gitlab.AddGroupHookOptions{
+				URL: gitlab.Ptr(c.cfg.GitProviderConfig.WebhookURL),
+				Token: gitlab.Ptr(c.cfg.GitProviderConfig.WebhookSecret),
+				MergeRequestsEvents: gitlab.Ptr(true),
+				PushEvents: gitlab.Ptr(true),
+				ReleasesEvents: gitlab.Ptr(true),
+				TagPushEvents: gitlab.Ptr(true),				
+			}
 
-// 			if resp.StatusCode != 201 {
-// 				return nil, fmt.Errorf("failed to create repo level webhhok for %s, API returned %d", *repo, resp.StatusCode)
-// 			}
-// 			log.Printf("created webhook of type %s for %s: %s\n", createdHook.GetType(), *repo, createdHook.Config["url"])
-// 			hookID := createdHook.GetID()
-// 			return &HookWithStatus{HookID: hookID, HealthStatus: true, RepoName: repo}, nil
-// 		} else {
-// 			updatedHook, resp, err := c.client.Repositories.EditHook(*ctx, c.cfg.GitProviderConfig.OrgName, *repo, respHook.GetID(), hookConf)
-// 			if err != nil {
-// 				return nil, err
-// 			}
-// 			if resp.StatusCode != http.StatusOK {
-// 				return nil, fmt.Errorf("failed to update repo level webhhok for %s, API returned %d", *repo, resp.StatusCode)
-// 			}
-// 			log.Printf("edited webhook of type %s for %s: %s\n", updatedHook.GetType(), *repo, updatedHook.Config["url"])
-// 			hookID := updatedHook.GetID()
-// 			return &HookWithStatus{HookID: hookID, HealthStatus: true, RepoName: repo}, nil
-// 		}
+			gitlabHook, resp, err := c.client.Groups.AddGroupHook(c.cfg.GitProviderConfig.OrgName, &groupHookOptions)
+			if err != nil {
+				return nil, err
+			}
+			if resp.StatusCode != 201 {
+				return nil, fmt.Errorf("failed to create group level webhhok, API returned %d", resp.StatusCode)
+			}
+			log.Printf("added webhook for %s name: %s\n", c.cfg.GitProviderConfig.OrgName, gitlabHook.URL)
+		} else {
+			editedGroupHookOpt := gitlab.EditGroupHookOptions{
+				URL: gitlab.Ptr(c.cfg.GitProviderConfig.WebhookURL),
+				Token: gitlab.Ptr(c.cfg.GitProviderConfig.WebhookSecret),
+				MergeRequestsEvents: gitlab.Ptr(true),
+				PushEvents: gitlab.Ptr(true),
+				ReleasesEvents: gitlab.Ptr(true),
+				TagPushEvents: gitlab.Ptr(true),				
+			}
+			gitlabHook, resp, err := c.client.Groups.EditGroupHook(
+				c.cfg.GitProviderConfig.OrgName,
+				respHook.ID,
+				&editedGroupHookOpt,
+			)
+			if err != nil {
+				return nil, err
+			}
+			if resp.StatusCode != http.StatusOK {
+				return nil, fmt.Errorf(
+					"failed to update group level webhook for %s, API returned %d",
+					c.cfg.GitProviderConfig.OrgName,
+					resp.StatusCode,
+				)
+			}
+			log.Printf("edited webhook for %s: %s\n", c.cfg.GitProviderConfig.OrgName, gitlabHook.URL)
+		}
+	} else {
+		respHook, ok := isProjectWebhookEnabled(*ctx, c, *repo)
+		if !ok {
+			addProjectHookOpts := gitlab.AddProjectHookOptions{
+				URL: gitlab.Ptr(c.cfg.GitProviderConfig.WebhookURL),
+				Token: gitlab.Ptr(c.cfg.GitProviderConfig.WebhookSecret),
+				MergeRequestsEvents: gitlab.Ptr(true),
+				PushEvents: gitlab.Ptr(true),
+				ReleasesEvents: gitlab.Ptr(true),
+				TagPushEvents: gitlab.Ptr(true),
+			}
 
-// 	}
-panic("implement me")
+			gitlabHook, resp, err := c.client.Projects.AddProjectHook(repo, &addProjectHookOpts)
+			if err != nil {
+				return nil, err
+			}
+			if resp.StatusCode != 201 {
+				return nil, fmt.Errorf("failed to create repo level webhhok for %s, API returned %d", *repo, resp.StatusCode)
+			}
+			log.Printf("created webhook for %s: %s\n", *repo, gitlabHook.URL)
+		} else {
+			
+			editProjectHookOpts := gitlab.EditProjectHookOptions{
+				URL: gitlab.Ptr(c.cfg.GitProviderConfig.WebhookURL),
+				Token: gitlab.Ptr(c.cfg.GitProviderConfig.WebhookSecret),
+				MergeRequestsEvents: gitlab.Ptr(true),
+				PushEvents: gitlab.Ptr(true),
+				ReleasesEvents: gitlab.Ptr(true),
+				TagPushEvents: gitlab.Ptr(true),
+			}
+			gitlabHook, resp, err := c.client.Projects.EditProjectHook(repo, respHook.ID, &editProjectHookOpts)
+			if err != nil {
+				return nil, err
+			}
+			if resp.StatusCode != http.StatusOK {
+				return nil, fmt.Errorf("failed to update repo level webhhok for %s, API returned %d", *repo, resp.StatusCode)
+			}
+			log.Printf("edited webhook for %s: %s\n", *repo, gitlabHook.URL)
+		}
 
+	}
+
+	hookID := int64(gitlabHook.ID)
+	return &HookWithStatus{HookID: hookID, HealthStatus: true, RepoName: repo}, nil
 }
 
 func (c *GitlabClientImpl) UnsetWebhook(ctx *context.Context, hook *HookWithStatus) error {
 
-// 	if hook.RepoName == nil {
+	if hook.RepoName == nil {
+		resp, err := c.client.Groups.DeleteGroupHook( c.cfg.GitProviderConfig.OrgName, int(hook.HookID))
+		if err != nil {
+			return err
+		}
 
-// 		resp, err := c.client.Organizations.DeleteHook(*ctx, c.cfg.GitProviderConfig.OrgName, hook.HookID)
+		if resp.StatusCode != 204 {
+			return fmt.Errorf("failed to delete group level webhhok, API call returned %d", resp.StatusCode)
+		}
+		log.Printf("removed group webhook, hookID :%d\n", hook.HookID)
+	} else {
+		resp, err := c.client.Projects.DeleteProjectHook(*hook.RepoName, int(hook.HookID))
 
-// 		if err != nil {
-// 			return err
-// 		}
+		if err != nil {
+			return fmt.Errorf("failed to delete project level webhhok for %s, API call returned %d. %s", *hook.RepoName, resp.StatusCode, err)
+		}
 
-// 		if resp.StatusCode != 204 {
-// 			return fmt.Errorf("failed to delete org level webhhok, API call returned %d", resp.StatusCode)
-// 		}
-// 		log.Printf("removed org webhook, hookID :%d\n", hook.HookID) // INFO
-// 	} else {
-// 		resp, err := c.client.Repositories.DeleteHook(*ctx, c.cfg.GitProviderConfig.OrgName, *hook.RepoName, hook.HookID)
+		if resp.StatusCode != 204 {
+			return fmt.Errorf("failed to delete project level webhhok for %s, API call returned %d", *hook.RepoName, resp.StatusCode)
+		}
+		log.Printf("removed project webhook, project:%s hookID :%d\n", *hook.RepoName, hook.HookID) // INFO
+	}
 
-// 		if err != nil {
-// 			return fmt.Errorf("failed to delete repo level webhhok for %s, API call returned %d. %s", *hook.RepoName, resp.StatusCode, err)
-// 		}
-
-// 		if resp.StatusCode != 204 {
-// 			return fmt.Errorf("failed to delete repo level webhhok for %s, API call returned %d", *hook.RepoName, resp.StatusCode)
-// 		}
-// 		log.Printf("removed repo webhook, repo:%s hookID :%d\n", *hook.RepoName, hook.HookID) // INFO
-// 	}
-
-// 	return nil
-panic("implement me")
-
+	return nil
 }
 
 func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Request, secret []byte) (*WebhookPayload, error) {

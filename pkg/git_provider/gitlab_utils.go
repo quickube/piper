@@ -1,7 +1,11 @@
 package git_provider
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -112,4 +116,38 @@ func isProjectWebhookEnabled(c *GitlabClientImpl, repo string) (*gitlab.ProjectH
 	}
 
 	return &emptyHook, false
+}
+
+func extractLabelsId(labels []*gitlab.EventLabel) []string {
+	var returnLabelsList []string
+	for _, label := range labels {
+		returnLabelsList = append(returnLabelsList, fmt.Sprint(label.ID))
+	}
+	return returnLabelsList
+}
+
+func validatePayload(r *http.Request, secret []byte) ([]byte, error){
+	payload, err := io.ReadAll(r.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading request body: %v", err)
+	}
+
+	// Get GitLab signature from headers
+	gitlabSignature := r.Header.Get("X-Gitlab-Token")
+	if gitlabSignature == "" {
+		return nil, fmt.Errorf("no GitLab signature found in headers")
+	}
+
+	h := hmac.New(sha256.New, secret)
+	_, err = h.Write(payload)
+	if err != nil {
+		return nil, fmt.Errorf("error computing HMAC: %v", err)
+	}
+	expectedMAC := hex.EncodeToString(h.Sum(nil))
+
+	isEquall := hmac.Equal([]byte(gitlabSignature), []byte(expectedMAC))
+	if !isEquall {
+		return nil, fmt.Errorf("secret not correct")
+	}
+	return payload, nil
 }

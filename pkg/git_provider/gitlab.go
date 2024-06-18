@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/quickube/piper/pkg/conf"
 	"github.com/quickube/piper/pkg/utils"
@@ -243,86 +244,62 @@ func (c *GitlabClientImpl) UnsetWebhook(ctx *context.Context, hook *HookWithStat
 }
 
 func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Request, secret []byte) (*WebhookPayload, error) {
-// 	var webhookPayload *WebhookPayload
+	var webhookPayload *WebhookPayload
 
-// 	payload, err := github.ValidatePayload(request, secret)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	payload, err := validatePayload(request, secret)
+	if err != nil {
+		return nil, err
+	}
 
-// 	event, err := github.ParseWebHook(github.WebHookType(request), payload)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	event, err := gitlab.ParseWebhook(gitlab.WebhookEventType(request), payload)
+	if err != nil {
+		return nil, err
+	}
 
-// 	switch e := event.(type) {
-// 	case *github.PingEvent:
-// 		webhookPayload = &WebhookPayload{
-// 			Event:   "ping",
-// 			Repo:    e.GetRepo().GetFullName(),
-// 			HookID:  e.GetHookID(),
-// 			OwnerID: e.GetSender().GetID(),
-// 		}
-// 	case *github.PushEvent:
-// 		webhookPayload = &WebhookPayload{
-// 			Event:     "push",
-// 			Action:    e.GetAction(),
-// 			Repo:      e.GetRepo().GetName(),
-// 			Branch:    strings.TrimPrefix(e.GetRef(), "refs/heads/"),
-// 			Commit:    e.GetHeadCommit().GetID(),
-// 			User:      e.GetSender().GetLogin(),
-// 			UserEmail: e.GetHeadCommit().GetAuthor().GetEmail(),
-// 			OwnerID:   e.GetSender().GetID(),
-// 		}
-// 	case *github.PullRequestEvent:
-// 		webhookPayload = &WebhookPayload{
-// 			Event:            "pull_request",
-// 			Action:           e.GetAction(),
-// 			Repo:             e.GetRepo().GetName(),
-// 			Branch:           e.GetPullRequest().GetHead().GetRef(),
-// 			Commit:           e.GetPullRequest().GetHead().GetSHA(),
-// 			User:             e.GetPullRequest().GetUser().GetLogin(),
-// 			UserEmail:        e.GetSender().GetEmail(), // e.GetPullRequest().GetUser().GetEmail() Not working. GitHub missing email for PR events in payload.
-// 			PullRequestTitle: e.GetPullRequest().GetTitle(),
-// 			PullRequestURL:   e.GetPullRequest().GetHTMLURL(),
-// 			DestBranch:       e.GetPullRequest().GetBase().GetRef(),
-// 			Labels:           c.extractLabelNames(e.GetPullRequest().Labels),
-// 			OwnerID:          e.GetSender().GetID(),
-// 		}
-// 	case *github.CreateEvent:
-// 		webhookPayload = &WebhookPayload{
-// 			Event:     "create",
-// 			Action:    e.GetRefType(), // Possible values are: "repository", "branch", "tag".
-// 			Repo:      e.GetRepo().GetName(),
-// 			Branch:    e.GetRef(),
-// 			Commit:    e.GetRef(),
-// 			User:      e.GetSender().GetLogin(),
-// 			UserEmail: e.GetSender().GetEmail(),
-// 			OwnerID:   e.GetSender().GetID(),
-// 		}
-// 	case *github.ReleaseEvent:
-// 		commitSHA, _err := c.refToSHA(ctx, e.GetRelease().GetName(), e.GetRepo().GetName())
-// 		if _err != nil {
-// 			return webhookPayload, _err
-// 		}
-// 		webhookPayload = &WebhookPayload{
-// 			Event:     "release",
-// 			Action:    e.GetAction(), // "created", "edited", "deleted", or "prereleased".
-// 			Repo:      e.GetRepo().GetName(),
-// 			Branch:    e.GetRelease().GetTagName(),
-// 			Commit:    *commitSHA,
-// 			User:      e.GetSender().GetLogin(),
-// 			UserEmail: e.GetSender().GetEmail(),
-// 			OwnerID:   e.GetSender().GetID(),
-// 		}
-// 	}
 
-// 	if c.cfg.EnforceOrgBelonging && (webhookPayload.OwnerID == 0 || webhookPayload.OwnerID != c.cfg.OrgID) {
-// 		return nil, fmt.Errorf("webhook send from non organizational member")
-// 	}
-// 	return webhookPayload, nil
-panic("implement me")
+	switch e := event.(type) {
+	case gitlab.PushEvent:
+		webhookPayload = &WebhookPayload{
+			Event:     "push",
+			Action:    e.EventName,
+			Repo:      e.Project.Name,
+			Branch:    strings.TrimPrefix(e.Ref, "refs/heads/"),
+			Commit:    e.CheckoutSHA,
+			User:      e.UserName,
+			UserEmail: e.UserEmail,
+			OwnerID:   int64(e.UserID),
+		}
+	case gitlab.MergeEvent:
+		webhookPayload = &WebhookPayload{
+			Event:            "pull_request",
+			Action:           e.ObjectAttributes.Action,
+			Repo:             e.Repository.Name,
+			Branch:           e.ObjectAttributes.SourceBranch,
+			Commit:           e.ObjectAttributes.LastCommit.ID,
+			User:             e.User.Name,
+			UserEmail:        e.User.Email,
+			PullRequestTitle: e.ObjectAttributes.Title,
+			PullRequestURL:   e.ObjectAttributes.URL,
+			DestBranch:       e.ObjectAttributes.TargetBranch,
+			Labels:           extractLabelsId(e.Labels),
+			OwnerID:          int64(e.User.ID),
+		}
+	case gitlab.ReleaseEvent:
+		webhookPayload = &WebhookPayload{
+			Event:     "release",
+			Action:    e.Action, // "create" | "update" | "delete"
+			Repo:      e.Project.Name,
+			Branch:    e.Tag,
+			Commit:    e.Commit.ID,
+			User:      e.Commit.Author.Name,
+			UserEmail: e.Commit.Author.Email,
+		}
+	}
 
+	if c.cfg.EnforceOrgBelonging && (webhookPayload.OwnerID == 0 || webhookPayload.OwnerID != c.cfg.OrgID) {
+		return nil, fmt.Errorf("webhook send from non organizational member")
+	}
+	return webhookPayload, nil
 }
 
 func (c *GitlabClientImpl) SetStatus(ctx *context.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error {

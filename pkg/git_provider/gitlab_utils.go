@@ -19,9 +19,8 @@ import (
 
 func ValidateGitlabPermissions(ctx context.Context, client *gitlab.Client, cfg *conf.GlobalConfig) error {
 
-	orgScopes := []string{"admin:org_hook"}
-	repoAdminScopes := []string{"admin:repo_hook"}
-	repoGranularScopes := []string{"write:repo_hook", "read:repo_hook"}
+	repoAdminScopes := []string{"api"}
+	repoGranularScopes := []string{"write_repository", "read_api"}
 
 	scopes, err := GetGitlabScopes(ctx, client)
 
@@ -32,13 +31,6 @@ func ValidateGitlabPermissions(ctx context.Context, client *gitlab.Client, cfg *
 		return fmt.Errorf("permissions error: no scopes found for the gitlab client")
 	}
 
-	if cfg.GitProviderConfig.OrgLevelWebhook {
-		if utils.ListContains(orgScopes, scopes) {
-			return nil
-		}
-		return fmt.Errorf("permissions error: %v is not a valid scope for the org level permissions", scopes)
-	}
-
 	if utils.ListContains(repoAdminScopes, scopes) {
 		return nil
 	}
@@ -46,20 +38,24 @@ func ValidateGitlabPermissions(ctx context.Context, client *gitlab.Client, cfg *
 		return nil
 	}
 
-	return fmt.Errorf("permissions error: %v is not a valid scope for the repo level permissions", scopes)
+	return fmt.Errorf("permissions error: %v is not a valid scope for the project level permissions", scopes)
 }
 
 func GetGitlabScopes(ctx context.Context, client *gitlab.Client) ([]string, error) {
-	req, err := retryablehttp.NewRequest("GET", "https://gitlab.com/api/v4/user", nil)
+	req, err := retryablehttp.NewRequest("GET", "https://gitlab.com/api/v4/personal_access_tokens", nil)
     if err != nil {
         log.Fatalf("Failed to create request: %v", err)
+		return nil, err
     }
-
-    resp, err := client.Do(req, nil)
+    var tokens []struct {
+        ID     int      `json:"id"`
+        Name   string   `json:"name"`
+        Scopes []string `json:"scopes"`
+    }
+    resp, err := client.Do(req, &tokens)
     if err != nil {
         log.Fatalf("Failed to perform request: %v", err)
 		return nil, err
-
     }
     defer resp.Body.Close()
 
@@ -68,12 +64,10 @@ func GetGitlabScopes(ctx context.Context, client *gitlab.Client) ([]string, erro
         log.Fatalf("Failed to get user: %v", resp.Status)
 		return nil, err
     }
+	scopes := tokens[0].Scopes
+	fmt.Println("Gitlab Token Scopes are:", scopes)
 
-	scopes := resp.Header.Get("X-OAuth-Scopes")
-	fmt.Println("Github Token Scopes are:", scopes)
-
-	scopes = strings.ReplaceAll(scopes, " ", "")
-	return strings.Split(scopes, ","), nil
+	return scopes, nil
 }
 
 func isGroupWebhookEnabled(c *GitlabClientImpl) (*gitlab.GroupHook, bool) {
@@ -96,9 +90,9 @@ func isGroupWebhookEnabled(c *GitlabClientImpl) (*gitlab.GroupHook, bool) {
 	return &emptyHook, false
 }
 
-func isProjectWebhookEnabled(c *GitlabClientImpl, repo string) (*gitlab.ProjectHook, bool) {
+func isProjectWebhookEnabled(c *GitlabClientImpl, project string) (*gitlab.ProjectHook, bool) {
 	emptyHook := gitlab.ProjectHook{}
-	hooks, resp, err := c.client.Projects.ListProjectHooks(repo, nil)
+	hooks, resp, err := c.client.Projects.ListProjectHooks(project, nil)
 	if err != nil {
 		return &emptyHook, false
 	}

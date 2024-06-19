@@ -23,7 +23,7 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 
 	client, err := gitlab.NewClient(cfg.GitProviderConfig.Token)
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		return nil, err
 	}
 
 	err = ValidateGitlabPermissions(ctx, client, cfg)
@@ -65,9 +65,6 @@ func (c *GitlabClientImpl) ListFiles(ctx *context.Context, repo string, branch s
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("gitlab provider returned %d: failed to get contents of %s/%s%s", resp.StatusCode, repo, branch, path)
 	}
-	if files == nil {
-		return nil, nil
-	}
 	for _, file := range dirFiles {
 		files = append(files, file.Name)
 	}
@@ -82,20 +79,11 @@ func (c *GitlabClientImpl) GetFile(ctx *context.Context, repo string, branch str
 	if err != nil {
 		return &commitFile, err
 	}
-	if resp.StatusCode == 404 {
-		log.Printf("File %s not found in repo %s branch %s", path, repo, branch)
-		return nil, nil
-	}
 	if resp.StatusCode != 200 {
 		return &commitFile, err
 	}
-	if fileContent == nil {
-		return &commitFile, nil
-	}
-	filePath := fileContent.FilePath
-	commitFile.Path = &filePath
-	fileContentString := fileContent.Content
-	commitFile.Content = &fileContentString
+	commitFile.Path = &fileContent.FilePath
+	commitFile.Content = &fileContent.Content
 
 	return &commitFile, nil
 }
@@ -271,7 +259,7 @@ func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Req
 		}
 	case gitlab.MergeEvent:
 		webhookPayload = &WebhookPayload{
-			Event:            "pull_request",
+			Event:            "merge_request",
 			Action:           e.ObjectAttributes.Action,
 			Repo:             e.Repository.Name,
 			Branch:           e.ObjectAttributes.SourceBranch,

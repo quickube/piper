@@ -21,7 +21,7 @@ type GitlabClientImpl struct {
 func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 	ctx := context.Background()
 
-	client, err := gitlab.NewClient(cfg.GitProviderConfig.Token)
+	client, err := gitlab.NewClient(cfg.GitProviderConfig.Token,  gitlab.WithBaseURL(cfg.GitProviderConfig.Url))
 	if err != nil {
 		return nil, err
 	}

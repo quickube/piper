@@ -9,6 +9,7 @@ import (
 type GitProviderConfig struct {
 	Provider           string `envconfig:"GIT_PROVIDER" required:"true"`
 	Token              string `envconfig:"GIT_TOKEN" required:"true"`
+	Url			       string `envconfig:"GIT_URL" required:"true"`
 	OrgName            string `envconfig:"GIT_ORG_NAME" required:"true"`
 	OrgLevelWebhook    bool   `envconfig:"GIT_ORG_LEVEL_WEBHOOK" default:"false" required:"false"`
 	RepoList           string `envconfig:"GIT_WEBHOOK_REPO_LIST" required:"false"`

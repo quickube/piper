@@ -6,11 +6,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
-	"strings"
 
-	"github.com/hashicorp/go-retryablehttp"
 	"github.com/quickube/piper/pkg/conf"
 	"github.com/quickube/piper/pkg/utils"
 	"github.com/xanzy/go-gitlab"
@@ -42,35 +39,34 @@ func ValidateGitlabPermissions(ctx context.Context, client *gitlab.Client, cfg *
 }
 
 func GetGitlabScopes(ctx context.Context, client *gitlab.Client) ([]string, error) {
-	req, err := retryablehttp.NewRequest("GET", "https://gitlab.com/api/v4/personal_access_tokens", nil)
-    if err != nil {
-        log.Fatalf("Failed to create request: %v", err)
+   
+    user, resp,err := client.Users.CurrentUser()
+	fmt.Println(user.ID)
+    if err != nil{
 		return nil, err
     }
-    var tokens []struct {
-        ID     int      `json:"id"`
-        Name   string   `json:"name"`
-        Scopes []string `json:"scopes"`
-    }
-    resp, err := client.Do(req, &tokens)
-    if err != nil {
-        log.Fatalf("Failed to perform request: %v", err)
+    if resp.StatusCode == 400 {
 		return nil, err
     }
-    defer resp.Body.Close()
+    a := gitlab.ListPersonalAccessTokensOptions{
+        UserID: &user.ID,
+	}
+    accessTokens, resp,err := client.PersonalAccessTokens.ListPersonalAccessTokens(&a)
+    fmt.Println(accessTokens)
+    if err != nil{
+		return nil, err
+    }
+    if resp.StatusCode == 400 {
+		return nil, err
+    }
 
-    // Check for successful response
-    if resp.StatusCode != http.StatusOK {
-        log.Fatalf("Failed to get user: %v", resp.Status)
-		return nil, err
-    }
-	scopes := tokens[0].Scopes
+	scopes := accessTokens[0].Scopes
 	fmt.Println("Gitlab Token Scopes are:", scopes)
 
 	return scopes, nil
 }
 
-func isGroupWebhookEnabled(c *GitlabClientImpl) (*gitlab.GroupHook, bool) {
+func IsGroupWebhookEnabled(c *GitlabClientImpl) (*gitlab.GroupHook, bool) {
 	emptyHook := gitlab.GroupHook{}
 	hooks, resp, err := c.client.Groups.ListGroupHooks(c.cfg.GitProviderConfig.OrgName, nil)
 	if err != nil {
@@ -145,3 +141,5 @@ func validatePayload(r *http.Request, secret []byte) ([]byte, error){
 	}
 	return payload, nil
 }
+
+

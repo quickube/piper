@@ -111,7 +111,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 	var gitlabHook gitlab.Hook
 
 	if repo == nil {
-		respHook, ok := isGroupWebhookEnabled(c)
+		respHook, ok := IsGroupWebhookEnabled(c)
 
 		if !ok {
 			groupHookOptions := gitlab.AddGroupHookOptions{

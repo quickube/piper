@@ -2,14 +2,17 @@ package git_provider
 
 import (
 	"fmt"
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-github/v52/github"
-	"github.com/ktrysmt/go-bitbucket"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
 	"testing"
+	"time"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-github/v52/github"
+	"github.com/ktrysmt/go-bitbucket"
+	"github.com/xanzy/go-gitlab"
 )
 
 const (
@@ -87,4 +90,26 @@ func setupBitbucket() (client *bitbucket.Client, mux *http.ServeMux, serverURL s
 	client.SetApiBaseURL(*url)
 
 	return client, mux, server.URL, server.Close
+}
+func setupGitlab(t *testing.T) (*http.ServeMux, *gitlab.Client) {
+	// mux is the HTTP request multiplexer used with the test server.
+	mux := http.NewServeMux()
+
+	// server is a test HTTP server used to provide mock API responses.
+	server := httptest.NewServer(mux)
+	t.Cleanup(server.Close)
+
+	// client is the Gitlab client being tested.
+	client, err := gitlab.NewClient("",
+	gitlab.WithBaseURL(server.URL),
+		// Disable backoff to speed up tests that expect errors.
+		gitlab.WithCustomBackoff(func(_, _ time.Duration, _ int, _ *http.Response) time.Duration {
+			return 0
+		}),
+	)
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	return mux, client
 }

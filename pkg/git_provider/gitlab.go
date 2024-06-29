@@ -58,7 +58,8 @@ func (c *GitlabClientImpl) ListFiles(ctx *context.Context, repo string, branch s
 		Ref: &branch,
 		Path: &path,}
 	
-	dirFiles, resp, err := c.client.Repositories.ListTree(repo, opt)
+	projectName := fmt.Sprintf("%s/%s", c.cfg.GitProviderConfig.OrgName ,repo)
+	dirFiles, resp, err := c.client.Repositories.ListTree(projectName, opt)
 
 
 	if err != nil {

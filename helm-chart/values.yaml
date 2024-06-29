@@ -4,7 +4,7 @@
 # Map of Piper configurations.
 piper:
   gitProvider:
-    # -- Name of your git provider (github/bitbucket).
+    # -- Name of your git provider (github/bitbucket/gitlab).
     name: github
     # -- The token for authentication with the Git provider.
     # -- This will create a secret named <RELEASE_NAME>-git-token and with the key 'token'
@@ -13,6 +13,9 @@ piper:
     # -- Reference to existing token with 'token' key.
     # -- can be created with `kubectl create secret generic piper-git-token --from-literal=token=YOUR_TOKEN`
     existingSecret: #piper-git-token
+    # -- git provider url
+    # -- relevant when using gitlab self hosted
+    url: ""
     # Map of organization configurations.
     organization:
       # -- Name of your Git Organization (GitHub) or Workspace (Bitbucket)
@@ -51,8 +54,9 @@ piper:
       existingSecret: #piper-argo-token
     # -- Whether create Workflow CRD or send direct commands to Argo Workflows server.
     crdCreation: true
-  
-  workflowsConfig: {}
+
+  workflowsConfig:
+    {}
     # default: |
     #   spec:
     #     volumes:
@@ -126,22 +130,21 @@ podAnnotations: {}
 
 # -- Security Context to set on the pod level
 podSecurityContext:
-   fsGroup: 1001
-   runAsUser: 1001
-   runAsGroup: 1001
+  fsGroup: 1001
+  runAsUser: 1001
+  runAsGroup: 1001
 
 # -- Security Context to set on the container level
 securityContext:
   runAsUser: 1001
   capabilities:
     drop:
-     - ALL
+      - ALL
   readOnlyRootFilesystem: true
   runAsNonRoot: true
 
-
 service:
-    # -- Sets the type of the Service
+  # -- Sets the type of the Service
   type: ClusterIP
   # -- Service port
   # For TLS mode change the port to 443
@@ -158,10 +161,11 @@ ingress:
   # -- Piper ingress class name
   className: ""
   # -- Piper ingress annotations
-  annotations: {}
+  annotations:
+    {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  
+
   # -- Piper ingress hosts
   ## Hostnames must be provided if Ingress is enabled.
   hosts:

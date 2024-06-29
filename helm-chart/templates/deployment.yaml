@@ -100,6 +100,8 @@ spec:
                 key: token
           - name: GIT_ORG_NAME
             value: {{ .Values.piper.gitProvider.organization.name | quote }}
+          - name: GIT_URL
+            value: {{ .Values.piper.gitProvider.url | quote }}
           - name: GIT_WEBHOOK_URL
             value: {{ .Values.piper.gitProvider.webhook.url | quote }}
           - name: GIT_WEBHOOK_SECRET

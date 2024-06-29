@@ -13,15 +13,6 @@ import (
 	"golang.org/x/net/context"
 )
 
-// import (
-// 	"fmt"
-// 	"net/http"
-// 	"testing"
-
-// 	assertion "github.com/stretchr/testify/assert"
-// 	"golang.org/x/net/context"
-// )
-
 func mockHTTPResponse(t *testing.T, w io.Writer, response interface{}) {
 	json.NewEncoder(w).Encode(response)
 }
@@ -90,16 +81,21 @@ func TestIsGroupWebhookEnabled(t *testing.T){
 		client: client,
 		cfg: &conf.GlobalConfig{
 			GitProviderConfig: conf.GitProviderConfig{
-				OrgLevelWebhook: false,
+				OrgLevelWebhook: true,
 				OrgName:         "group1",
-				RepoList:        "test-repo1",
+				WebhookURL: "testing-url",
 			},
 		},
 	}
-	mux.HandleFunc("api/v4/groups/group1/hooks", func(w http.ResponseWriter, r *http.Request) {
+
+	hook := []gitlab.GroupHook{{
+		ID: 1234,
+		URL: c.cfg.GitProviderConfig.WebhookURL,
+	},}
+
+	mux.HandleFunc(fmt.Sprintf("/api/v4/groups/%s/hooks", c.cfg.GitProviderConfig.OrgName), func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
-		fmt.Println("ding ding")
-		// mockHTTPResponse(t, w, gitlab.User{ID:1234})
+		mockHTTPResponse(t, w, hook)
 	})
 	//
 	// Execute
@@ -109,7 +105,47 @@ func TestIsGroupWebhookEnabled(t *testing.T){
 	// Assert
 	//
 	assert := assertion.New(t)
-	assert.Equal(isEnabled, false)
-	assert.NotEqual(string(groupHook.GroupID), "group1")
+	assert.Equal(isEnabled, true)
+	assert.Equal(groupHook.URL, c.cfg.GitProviderConfig.WebhookURL)
+}
+
+func TestIsProjectWebhookEnabled(t *testing.T){
+	//
+	// Prepare
+	//
+	mux, client := setupGitlab(t)
+	project := "test-repo1"
+	c := GitlabClientImpl{
+		client: client,
+		cfg: &conf.GlobalConfig{
+			GitProviderConfig: conf.GitProviderConfig{
+				OrgLevelWebhook: false,
+				OrgName: "group1",
+				WebhookURL: "testing-url",
+				RepoList: project,
+			},
+		},
+	}
+
+	hook := []gitlab.ProjectHook{{
+		ID: 1234,
+		URL: c.cfg.GitProviderConfig.WebhookURL,
+	},}
+	
+	hooksUrl := fmt.Sprintf("/api/v4/projects/%s/%s/hooks",c.cfg.GitProviderConfig.OrgName, project)
+	mux.HandleFunc(hooksUrl, func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodGet)
+		mockHTTPResponse(t, w, hook)
+	})
+	//
+	// Execute
+	//
+	projectHook, isEnabled := IsProjectWebhookEnabled(&c, "test-repo1")
+	//
+	// Assert
+	//
+	assert := assertion.New(t)
+	assert.Equal(isEnabled, true)
+	assert.Equal(projectHook.URL, c.cfg.GitProviderConfig.WebhookURL)
 }
 

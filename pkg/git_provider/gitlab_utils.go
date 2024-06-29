@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/quickube/piper/pkg/conf"
 	"github.com/quickube/piper/pkg/utils"
@@ -19,7 +20,7 @@ func ValidateGitlabPermissions(ctx context.Context, client *gitlab.Client, cfg *
 	repoAdminScopes := []string{"api"}
 	repoGranularScopes := []string{"write_repository", "read_api"}
 
-	scopes, err := GetGitlabScopes(ctx, client)
+	scopes, err := getGitlabScopes(ctx, client)
 
 	if err != nil {
 		return fmt.Errorf("failed to get scopes: %v", err)
@@ -38,7 +39,7 @@ func ValidateGitlabPermissions(ctx context.Context, client *gitlab.Client, cfg *
 	return fmt.Errorf("permissions error: %v is not a valid scope for the project level permissions", scopes)
 }
 
-func GetGitlabScopes(ctx context.Context, client *gitlab.Client) ([]string, error) {
+func getGitlabScopes(ctx context.Context, client *gitlab.Client) ([]string, error) {
    
     user, resp,err := client.Users.CurrentUser()
 	fmt.Println(user.ID)
@@ -79,16 +80,17 @@ func IsGroupWebhookEnabled(c *GitlabClientImpl) (*gitlab.GroupHook, bool) {
 		return &emptyHook, false
 	}
 	for _, hook := range hooks {
-		if hook.AlertStatus == "triggered" && hook.URL == c.cfg.GitProviderConfig.WebhookURL {
+		if hook.URL == c.cfg.GitProviderConfig.WebhookURL {
 			return hook, true
 		}
 	}
 	return &emptyHook, false
 }
 
-func isProjectWebhookEnabled(c *GitlabClientImpl, project string) (*gitlab.ProjectHook, bool) {
+func IsProjectWebhookEnabled(c *GitlabClientImpl, project string) (*gitlab.ProjectHook, bool) {
 	emptyHook := gitlab.ProjectHook{}
-	hooks, resp, err := c.client.Projects.ListProjectHooks(project, nil)
+	projectFullName := fmt.Sprintf("%s/%s", c.cfg.GitProviderConfig.OrgName ,project)
+	hooks, resp, err := c.client.Projects.ListProjectHooks(projectFullName, nil)
 	if err != nil {
 		return &emptyHook, false
 	}
@@ -108,7 +110,7 @@ func isProjectWebhookEnabled(c *GitlabClientImpl, project string) (*gitlab.Proje
 	return &emptyHook, false
 }
 
-func extractLabelsId(labels []*gitlab.EventLabel) []string {
+func ExtractLabelsId(labels []*gitlab.EventLabel) []string {
 	var returnLabelsList []string
 	for _, label := range labels {
 		returnLabelsList = append(returnLabelsList, fmt.Sprint(label.ID))
@@ -116,7 +118,7 @@ func extractLabelsId(labels []*gitlab.EventLabel) []string {
 	return returnLabelsList
 }
 
-func validatePayload(r *http.Request, secret []byte) ([]byte, error){
+func ValidatePayload(r *http.Request, secret []byte) ([]byte, error){
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading request body: %v", err)
@@ -143,3 +145,12 @@ func validatePayload(r *http.Request, secret []byte) ([]byte, error){
 }
 
 
+func FixRepoNames(c *GitlabClientImpl) error{
+	var formattedRepos []string
+	for _, repo := range strings.Split(c.cfg.GitProviderConfig.RepoList, ",") {
+		userRepo := fmt.Sprintf("%s/%s", c.cfg.GitProviderConfig.OrgName ,repo)
+		formattedRepos = append(formattedRepos, userRepo)
+	}
+	c.cfg.GitProviderConfig.RepoList = strings.Join(formattedRepos, ",")
+	return nil
+}

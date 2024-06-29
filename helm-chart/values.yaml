@@ -18,7 +18,7 @@ piper:
     url: ""
     # Map of organization configurations.
     organization:
-      # -- Name of your Git Organization (GitHub) or Workspace (Bitbucket)
+      # -- Name of your Git Organization (GitHub) / Workspace (Bitbucket) or Group (Gitlab)
       name: ""
     # Map of webhook configurations.
     webhook:
@@ -34,7 +34,7 @@ piper:
       url: "" #https://piper.example.local/webhook
       # -- Whether config webhook on org level (GitHub) or at workspace level (Bitbucket - not supported yet)
       orgLevel: false
-      # -- (Github) Used of orgLevel=false, to configure webhook for each of the repos provided.
+      # -- (Github/Gitlab) Used of orgLevel=false, to configure webhook for each of the repos provided.
       repoList: []
 
   # Map of Argo Workflows configurations.

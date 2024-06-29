@@ -3,6 +3,7 @@ package git_provider
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -31,7 +32,7 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 		return nil, fmt.Errorf("failed to validate permissions: %v", err)
 	}
 
-	group, resp, err := client.Groups.GetGroup(cfg.OrgName, nil)
+	group, resp, err := client.Groups.GetGroup(cfg.GitProviderConfig.OrgName, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get organization: %v", err)
 	}
@@ -40,14 +41,15 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 		return nil, fmt.Errorf("failed to get organization data %s", resp.Status)
 	}
 
-	cfg.OrgID = int64(group.ID)
-
-	log.Printf("Org ID is: %d\n", cfg.OrgID)
-
-	return &GitlabClientImpl{
+	c := &GitlabClientImpl{
 		client: client,
 		cfg:    cfg,
-	}, err
+	}
+
+	c.cfg.GitProviderConfig.OrgID = int64(group.ID)
+	log.Printf("Org ID is: %d\n", cfg.OrgID)
+	
+	return c, err
 }
 
 func (c *GitlabClientImpl) ListFiles(ctx *context.Context, repo string, branch string, path string) ([]string, error) {
@@ -158,7 +160,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 			log.Printf("edited webhook for %s: %s\n", c.cfg.GitProviderConfig.OrgName, gitlabHook.URL)
 		}
 	} else {
-		respHook, ok := isProjectWebhookEnabled(c, *repo)
+		respHook, ok := IsProjectWebhookEnabled(c, *repo)
 		if !ok {
 			addProjectHookOpts := gitlab.AddProjectHookOptions{
 				URL: gitlab.Ptr(c.cfg.GitProviderConfig.WebhookURL),
@@ -233,12 +235,10 @@ func (c *GitlabClientImpl) UnsetWebhook(ctx *context.Context, hook *HookWithStat
 
 func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Request, secret []byte) (*WebhookPayload, error) {
 	var webhookPayload *WebhookPayload
-
-	payload, err := validatePayload(request, secret)
+	payload, err := io.ReadAll(request.Body)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error reading request body: %v", err)
 	}
-
 	event, err := gitlab.ParseWebhook(gitlab.WebhookEventType(request), payload)
 	if err != nil {
 		return nil, err
@@ -269,7 +269,7 @@ func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Req
 			PullRequestTitle: e.ObjectAttributes.Title,
 			PullRequestURL:   e.ObjectAttributes.URL,
 			DestBranch:       e.ObjectAttributes.TargetBranch,
-			Labels:           extractLabelsId(e.Labels),
+			Labels:           ExtractLabelsId(e.Labels),
 			OwnerID:          int64(e.User.ID),
 		}
 	case gitlab.ReleaseEvent:

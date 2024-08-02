@@ -109,7 +109,7 @@ func (c *GitlabClientImpl) GetFiles(ctx *context.Context, repo string, branch st
 
 func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*HookWithStatus, error) {
 	if c.cfg.OrgLevelWebhook && repo != nil {
-		return nil, fmt.Errorf("trying to set repo scope. repo: %s", *repo)
+		return nil, fmt.Errorf("trying to set project scope. project: %s", *repo)
 	}
 	var gitlabHook gitlab.Hook
 
@@ -127,6 +127,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 			}
 
 			gitlabHook, resp, err := c.client.Groups.AddGroupHook(c.cfg.GitProviderConfig.OrgName, &groupHookOptions)
+
 			if err != nil {
 				return nil, err
 			}
@@ -171,8 +172,8 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 				ReleasesEvents: gitlab.Ptr(true),
 				TagPushEvents: gitlab.Ptr(true),
 			}
-
-			gitlabHook, resp, err := c.client.Projects.AddProjectHook(repo, &addProjectHookOpts)
+			
+			gitlabHook, resp, err := c.client.Projects.AddProjectHook(*repo, &addProjectHookOpts)
 			if err != nil {
 				return nil, err
 			}
@@ -181,7 +182,6 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 			}
 			log.Printf("created webhook for %s: %s\n", *repo, gitlabHook.URL)
 		} else {
-			
 			editProjectHookOpts := gitlab.EditProjectHookOptions{
 				URL: gitlab.Ptr(c.cfg.GitProviderConfig.WebhookURL),
 				Token: gitlab.Ptr(c.cfg.GitProviderConfig.WebhookSecret),
@@ -190,7 +190,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 				ReleasesEvents: gitlab.Ptr(true),
 				TagPushEvents: gitlab.Ptr(true),
 			}
-			gitlabHook, resp, err := c.client.Projects.EditProjectHook(repo, respHook.ID, &editProjectHookOpts)
+			gitlabHook, resp, err := c.client.Projects.EditProjectHook(*repo, respHook.ID, &editProjectHookOpts)
 			if err != nil {
 				return nil, err
 			}
@@ -285,7 +285,7 @@ func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Req
 		}
 	}
 
-	if c.cfg.EnforceOrgBelonging && (webhookPayload.OwnerID == 0 || webhookPayload.OwnerID != c.cfg.OrgID) {
+	if (webhookPayload.OwnerID == 0) || (webhookPayload.OwnerID != c.cfg.OrgID) {
 		return nil, fmt.Errorf("webhook send from non organizational member")
 	}
 	return webhookPayload, nil
@@ -319,7 +319,7 @@ func (c *GitlabClientImpl) SetStatus(ctx *context.Context, repo *string, commit 
 
 func (c *GitlabClientImpl) PingHook(ctx *context.Context, hook *HookWithStatus) error {
 	if c.cfg.OrgLevelWebhook && hook.RepoName != nil {
-		return fmt.Errorf("trying to ping repo scope webhook while configured for org level webhook. repo: %s", *hook.RepoName)
+		return fmt.Errorf("trying o ping repo scope webhook while configured for org level webhook. repo: %s", *hook.RepoName)
 	}
 	if hook.RepoName == nil {
 		_,resp, err := c.client.Groups.GetGroupHook(c.cfg.OrgName,int(hook.HookID), nil)
@@ -331,7 +331,7 @@ func (c *GitlabClientImpl) PingHook(ctx *context.Context, hook *HookWithStatus) 
 			return fmt.Errorf("unable to find organization webhook for hookID: %d", hook.HookID)
 		}
 	} else {
-		_,resp, err := c.client.Projects.GetProjectHook(hook.RepoName, int(hook.HookID), nil)
+		_ , resp, err := c.client.Projects.GetProjectHook(*hook.RepoName, int(hook.HookID), nil)
 		if err != nil {
 			return err
 		}

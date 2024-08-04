@@ -1,16 +1,18 @@
 ## Instalation
 
-Piper should be deployed in the cluster with Argo Workflows. 
-Piper will create a CRD that Argo Workflows will pick, so install or configure Piper to create those CRDs in the right namespace. 
+Piper should be deployed in the cluster with Argo Workflows.
+Piper will create a CRD that Argo Workflows will pick, so install or configure Piper to create those CRDs in the right namespace.
 
 Please check out [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/values.yaml) file of the helm chart configurations.
 
 To add piper helm repo run:
+
 ```bash
 helm repo add piper https://piper.quickube.com
 ```
 
 After configuring Piper [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/values.yaml), run the following command for installation:
+
 ```bash
 helm upgrade --install piper piper/piper \
 -f YOUR_VALUES_FILE.yaml
@@ -22,7 +24,7 @@ helm upgrade --install piper piper/piper \
 
 ### Ingress
 
-Piper should listen to webhooks from your git provider. 
+Piper should listen to webhooks from your git provider.
 Expose it using ingress or service, then provide the address to `piper.webhook.url` as followed:
 `https://PIPER_EXPOESED_URL/webhook`
 
@@ -32,9 +34,9 @@ Checkout [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/va
 
 Piper will use git for fetching `.workflows` folder and receiving events using webhooks.
 
-To pick which git provider you are using provide `gitProvider.name` configuration in helm chart (Now only supports GitHub and Bitbucket).
+To pick which git provider you are using provide `gitProvider.name` configuration in helm chart (supports GitHub, Bitbucket and Gitlab).
 
-Also configure you organization (Github) or workspace (Bitbucket) name using `gitProvider.organization.name` in helm chart.
+Also configure you organization (Github), workspace (Bitbucket) or group (Gitlab) name using `gitProvider.organization.name` in helm chart.
 
 #### Git Token Permissions
 
@@ -44,11 +46,12 @@ For Bitbucket configure `Repositories:read`, `Webhooks:read and write` and `Pull
 
 #### Token
 
-The git token should be passed as secret in the helm chart at `gitProvider.token`. 
+The git token should be passed as secret in the helm chart at `gitProvider.token`.
 Can be passed as parameter in helm install command using `--set piper.gitProvider.token=YOUR_GIT_TOKEN`
 
 Alternatively, you can consume already existing secret and fill up `piper.gipProvider.existingSecret`.
-The key should be name `token`. Can be created using 
+The key should be name `token`. Can be created using
+
 ```bash
 kubectl create secret generic piper-git-token --from-literal=token=YOUR_GIT_OKEN
 ```
@@ -61,13 +64,13 @@ Configure `piper.webhook.url` the address of piper that exposed with ingress wit
 
 For organization level configure: `gitProvider.webhook.orgLevel` to `true`.
 
-For granular repo webhook provide list of repos at: `gitProvider.webhook.repoList`. 
+For granular repo webhook provide list of repos at: `gitProvider.webhook.repoList`.
 
-Piper implements graceful shutdown, it will delete all the webhooks when terminated. 
+Piper implements graceful shutdown, it will delete all the webhooks when terminated.
 
 #### Status check
 
-Piper will handle status checks for you. 
+Piper will handle status checks for you.
 It will notify the GitProvider for the status of Workflow for specific commit that triggered Piper.
 For linking provide valid URL of your Argo Workflows server address at: `argoWorkflows.server.address`
 

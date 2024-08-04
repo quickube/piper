@@ -154,3 +154,11 @@ func FixRepoNames(c *GitlabClientImpl) error{
 	c.cfg.GitProviderConfig.RepoList = strings.Join(formattedRepos, ",")
 	return nil
 }
+
+func EnsureGitlabURL(c *conf.GlobalConfig) *conf.GlobalConfig{
+	saasGitlabUrl := "https://gitlab.com"
+	if c.Url == "" {
+		c.Url = saasGitlabUrl
+	}
+	return c
+}

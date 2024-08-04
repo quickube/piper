@@ -41,6 +41,8 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 		return nil, fmt.Errorf("failed to get organization data %s", resp.Status)
 	}
 
+	cfg = EnsureGitlabURL(cfg)
+
 	c := &GitlabClientImpl{
 		client: client,
 		cfg:    cfg,

@@ -127,7 +127,6 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 			}
 
 			gitlabHook, resp, err := c.client.Groups.AddGroupHook(c.cfg.GitProviderConfig.OrgName, &groupHookOptions)
-
 			if err != nil {
 				return nil, err
 			}
@@ -144,11 +143,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 				ReleasesEvents: gitlab.Ptr(true),
 				TagPushEvents: gitlab.Ptr(true),				
 			}
-			gitlabHook, resp, err := c.client.Groups.EditGroupHook(
-				c.cfg.GitProviderConfig.OrgName,
-				respHook.ID,
-				&editedGroupHookOpt,
-			)
+			gitlabHook, resp, err := c.client.Groups.EditGroupHook(c.cfg.GitProviderConfig.OrgName,respHook.ID,&editedGroupHookOpt,)
 			if err != nil {
 				return nil, err
 			}

@@ -316,8 +316,6 @@ func TestGitlabSetStatus(t *testing.T) {
 	}
 }
 
-
-
 func TestGitlabSetWebhook(t *testing.T) {
 	// Prepare
 	ctx := context.Background()
@@ -326,16 +324,38 @@ func TestGitlabSetWebhook(t *testing.T) {
 
 	hookUrl := "https://url"
 
+	// new group webhook
+	mux.HandleFunc("/api/v4/groups/groupA/hooks", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "GET" {
+			mockHTTPResponse(t,w,[]*gitlab.GroupHook{})
+		} else if r.Method == "POST"{
+			w.WriteHeader(http.StatusCreated)
+			mockHTTPResponse(t,w,gitlab.GroupHook{ID:123,URL: hookUrl})
+		}
+	})
+	// existing group Webhook
+	mux.HandleFunc("/api/v4/groups/groupB/hooks", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "GET" {
+			mockHTTPResponse(t,w,[]*gitlab.GroupHook{{ID:123,URL: hookUrl}})
+		}
+	})
+	mux.HandleFunc("/api/v4/groups/groupB/hooks/123", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "PUT"{
+			w.WriteHeader(http.StatusOK)
+			mockHTTPResponse(t,w,gitlab.GroupHook{ID:123,URL: hookUrl})
+		}
+	})
+
 	// new project Webhook
 	mux.HandleFunc("/api/v4/projects/test/test-repo1/hooks", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
-			mockHTTPResponse(t,w,[]*gitlab.ProjectHook{})
+			mockHTTPResponse(t,w,[]*gitlab.ProjectHook{{}})
 		}		
 	})
 	mux.HandleFunc("/api/v4/projects/test-repo1/hooks", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			w.WriteHeader(http.StatusCreated)
-			mockHTTPResponse(t,w, &gitlab.ProjectHook{ID:123,URL: hookUrl})
+			mockHTTPResponse(t,w, gitlab.ProjectHook{ID:123,URL: hookUrl})
 		}		
 	})
 	// existing project webhook
@@ -347,23 +367,9 @@ func TestGitlabSetWebhook(t *testing.T) {
 	mux.HandleFunc("/api/v4/projects/test-repo2/hooks/123", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "PUT" {
 			w.WriteHeader(http.StatusOK)
-			mockHTTPResponse(t,w, &gitlab.ProjectHook{ID:123,URL: hookUrl})
+			mockHTTPResponse(t,w, gitlab.ProjectHook{ID:123,URL: hookUrl})
 		}		
 	})
-
-
-
-	// #TODO:
-	// # new group webhook
-	// # exisitng group webhook 
-	// # error if group and project
-
-
-
-
-
-
-
 
 
 
@@ -381,6 +387,39 @@ func TestGitlabSetWebhook(t *testing.T) {
 		config      *conf.GitProviderConfig
 		wantedError error
 	}{
+		{
+			name: "Repo and orgWebHook enabled",
+			repo: utils.SPtr("repo"),
+			config: &conf.GitProviderConfig{
+				OrgLevelWebhook: true,
+				OrgName:         "test",
+				RepoList:        "test-repo1",
+				WebhookURL:      hookUrl,
+			},
+			wantedError: errors.New("error"),
+		},
+		{
+			name: "New group webhook",
+			repo: nil,
+			config: &conf.GitProviderConfig{
+				OrgLevelWebhook: true,
+				OrgName:         "groupA",
+				RepoList:        "test-repo1",
+				WebhookURL:      hookUrl,
+			},
+			wantedError: nil,
+		},
+		{
+			name: "Existing group webhook",
+			repo: nil,
+			config: &conf.GitProviderConfig{
+				OrgLevelWebhook: true,
+				OrgName:         "groupB",
+				RepoList:        "test-repo1",
+				WebhookURL:      hookUrl,
+			},
+			wantedError: nil,
+		},
 		{
 			name: "New project webhook",
 			repo: utils.SPtr("test-repo1"),
@@ -421,5 +460,4 @@ func TestGitlabSetWebhook(t *testing.T) {
 			}
 		})
 	}
-
 }

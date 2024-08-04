@@ -12,7 +12,7 @@ The helm chart populate them using [values.yaml](https://github.com/quickube/pip
   The git token that will be used.
 
 - GIT_URL
-  the git url that will be used, mostly relevant when running gitlab on-prem
+  the git url that will be used, only relevant when running gitlab self hosted
 
 - GIT_ORG_NAME
   The organization name.

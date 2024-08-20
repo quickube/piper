@@ -24,7 +24,7 @@ data:
           key: node_pool
           operator: Equal
           value: workflows
-    onExit: # optinal, will be overwritten if specifc in .wokrflows/exit.yaml.
+    onExit: # optional, will be overwritten if specifc in .workflows/exit.yaml.
       - name: github-status
         template: exit-handler
         arguments:

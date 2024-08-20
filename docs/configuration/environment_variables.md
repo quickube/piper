@@ -24,8 +24,8 @@ The helm chart populate them using [values.yaml](https://github.com/quickube/pip
   URL of piper ingress, to configure webhooks.
 
 * GIT_WEBHOOK_AUTO_CLEANUP
-  Will cleanup all webhook that were created with piper. 
-  Notice that there will be a race conditions between pod that being terminated and the new one. 
+  Will cleanup all webhook that were created with piper.
+  Notice that there will be a race conditions between pod that being terminated and the new one.
 
 * GIT_ENFORCE_ORG_BELONGING
   Boolean variable, whether to enforce organizational belonging of git event creator. default `false`
@@ -34,14 +34,14 @@ The helm chart populate them using [values.yaml](https://github.com/quickube/pip
   Enables full health check of webhook. Full health check contains expecting and validating ping event from a webhook.
   Doesn't work for bitbucket, because the API call doesn't exists.
 
-
 ### Argo Workflows Server
+
 * ARGO_WORKFLOWS_TOKEN
   The token of Argo Workflows server.
 
 * ARGO_WORKFLOWS_ADDRESS
   The address of Argo Workflows Server.
-  
+
 * ARGO_WORKFLOWS_CREATE_CRD
   Whether to directly send Workflows instruction or create a CRD in the Cluster.
 
@@ -52,9 +52,10 @@ The helm chart populate them using [values.yaml](https://github.com/quickube/pip
   Used to configure Argo Workflows client with local kube configurations.
 
 ### Rookout
+
 * ROOKOUT_TOKEN
   The token used to configure Rookout agent. If not provided, will not start the agent.
-* ROOKOUT_LABELS 
+* ROOKOUT_LABELS
   The labels to label instances at Rookout, default to "service:piper"
 * ROOKOUT_REMOTE_ORIGIN
   The repo URL for source code fetching, default:"https://github.com/quickube/piper.git".

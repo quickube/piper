@@ -1,6 +1,6 @@
 ## Health Check
 
-Health check executed every 1 minute as configured in the helm chart under `livenessProbe`, and triggered by `/healthz` endpoint:
+The following examples shows a health check being executed every 1 minute as configured in the helm chart under `livenessProbe`, and triggered by `/healthz` endpoint:
 
 ```yaml
 livenessProbe:

@@ -26,7 +26,7 @@ helm upgrade --install piper piper/piper \
 
 Piper works best when it is able to listen to webhooks from your git provider.
 Expose Piper using an ingress or service, then provide the address to `piper.webhook.url` as follows:
-`https://PIPER_EXPOSEED_URL/webhook`
+`https://PIPER_EXPOSED_URL/webhook`
 
 Refer to [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/values.yaml) for more information.
 

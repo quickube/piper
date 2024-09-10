@@ -1,4 +1,4 @@
-## Global variables
+## Global Variables
 
 Piper will automatically add Workflow scope parameters that can be referenced from any template.
 The parameters taken from webhook metadata, and will be populated respectively to GitProvider and event that triggered the workflow.

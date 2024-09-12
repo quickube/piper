@@ -13,9 +13,12 @@ import (
 	"log"
 	"strings"
 
+	workflowapliclient "github.com/argoproj/argo-workflows/v3/pkg/apiclient"
+	workflowpkg "github.com/argoproj/argo-workflows/v3/pkg/apiclient/workflow"
 	"github.com/quickube/piper/pkg/common"
 	"github.com/quickube/piper/pkg/conf"
 	"github.com/quickube/piper/pkg/utils"
+	restclient "k8s.io/client-go/rest"
 )
 
 const (
@@ -98,7 +101,7 @@ func (wfc *WorkflowsClientImpl) CreateWorkflow(spec *v1alpha1.WorkflowSpec, work
 			GenerateName: ConvertToValidString(workflowsBatch.Payload.Repo + "-" + workflowsBatch.Payload.Branch + "-"),
 			Namespace:    wfc.cfg.Namespace,
 			Labels: map[string]string{
-				"piper.quickube.com/notified": "false",
+				"piper.rookout.com/notified": "false",
 				"repo":                       ConvertToValidString(workflowsBatch.Payload.Repo),
 				"branch":                     ConvertToValidString(workflowsBatch.Payload.Branch),
 				"user":                       ConvertToValidString(workflowsBatch.Payload.User),
@@ -228,7 +231,7 @@ func (wfc *WorkflowsClientImpl) UpdatePiperWorkflowLabel(ctx *context.Context, w
 
 	patch, err := json.Marshal(map[string]interface{}{"metadata": metav1.ObjectMeta{
 		Labels: map[string]string{
-			fmt.Sprintf("piper.quickube.com/%s", label): value,
+			fmt.Sprintf("piper.rookout.com/%s", label): value,
 		},
 	}})
 	if err != nil {
@@ -239,6 +242,6 @@ func (wfc *WorkflowsClientImpl) UpdatePiperWorkflowLabel(ctx *context.Context, w
 		return err
 	}
 
-	fmt.Printf("workflow %s labels piper.quickube.com/%s updated to %s\n", workflowName, label, value)
+	fmt.Printf("workflow %s labels piper.rookout.com/%s updated to %s\n", workflowName, label, value)
 	return nil
 }

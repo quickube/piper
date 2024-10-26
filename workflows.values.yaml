@@ -11,8 +11,7 @@ server:
   ingress:
     enabled: true
     annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: /$1
-      nginx.ingress.kubernetes.io/backend-protocol: HTTP
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
     paths:
-      - /argo/(.*)
-      - /argo
+      - /argo(/|$)(.*)
+    pathType: ImplementationSpecific

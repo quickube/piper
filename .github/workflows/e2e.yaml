@@ -112,7 +112,6 @@ jobs:
         git commit -am "trigger e2e test"
     - name: Create Pull Request
       id: cpr
-
       run: |
         make init-argo-workflows
     - name: Build Docker Image

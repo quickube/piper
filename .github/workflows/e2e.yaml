@@ -3,13 +3,13 @@ name: E2E tests
 on:
   push:
     branches:
-      - "main"
+      - "add-gitlab-provider"
     paths:
       - '**'
       - '!docs/**'
   pull_request:
     branches:
-      - "main"
+      - "add-gitlab-provider"
 
 concurrency:
   group: ${{ github.workflow }} # Bottleneck in ngrok tunnel, only one tunnel can exist for specific token -${{ github.ref }}
@@ -48,7 +48,7 @@ jobs:
         chmod +x kind
         sudo mv kind /usr/local/bin/kind
         kind version
-    - name:  Install Kubectl
+    - name: Install Kubectl
       run: |
         curl -sSLO "https://storage.googleapis.com/kubernetes-release/release/v1.26.1/bin/linux/amd64/kubectl"
         chmod +x kubectl
@@ -63,6 +63,12 @@ jobs:
     - name: install workflows
       run: |
         make init-argo-workflows
+    - name: install gitlab
+      run: |
+       make init-gitlab
+    - name: populate gitlab
+      run: |
+       sh ./scripts/setup-gitlab
     - name: Build Docker Image
       uses: docker/build-push-action@v4
       with:
@@ -75,9 +81,6 @@ jobs:
       run: |
         echo "NGROK_URL=$(cat ~/ngrok.log | grep -o 'url=https://.*' | cut -d '=' -f 2)" >> $GITHUB_ENV
         cat ~/ngrok.log | grep -o 'url=https://.*' | cut -d '=' -f 2
-    - name: setup gitlab
-      run: |
-       make setup-gitlab
     - name: init piper
       run: |
         helm upgrade --install piper ./helm-chart \

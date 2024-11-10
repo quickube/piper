@@ -16,3 +16,4 @@ server:
     paths:
       - /argo/(.*)
       - /argo
+    pathType: ImplementationSpecific

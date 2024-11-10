@@ -40,26 +40,25 @@ func ValidateGitlabPermissions(ctx context.Context, client *gitlab.Client, cfg *
 }
 
 func getGitlabScopes(ctx context.Context, client *gitlab.Client) ([]string, error) {
-   
-    user, resp,err := client.Users.CurrentUser()
-	fmt.Println(user.ID)
-    if err != nil{
+
+	user, resp, err := client.Users.CurrentUser(gitlab.WithContext(ctx))
+	if err != nil {
 		return nil, err
-    }
-    if resp.StatusCode == 400 {
-		return nil, err
-    }
-    a := gitlab.ListPersonalAccessTokensOptions{
-        UserID: &user.ID,
 	}
-    accessTokens, resp,err := client.PersonalAccessTokens.ListPersonalAccessTokens(&a)
-    fmt.Println(accessTokens)
-    if err != nil{
+	if resp.StatusCode == 400 {
 		return nil, err
-    }
-    if resp.StatusCode == 400 {
+	}
+	a := gitlab.ListPersonalAccessTokensOptions{
+		UserID: &user.ID,
+	}
+	accessTokens, resp, err := client.PersonalAccessTokens.ListPersonalAccessTokens(&a)
+	fmt.Println(accessTokens)
+	if err != nil {
 		return nil, err
-    }
+	}
+	if resp.StatusCode == 400 {
+		return nil, err
+	}
 
 	scopes := accessTokens[0].Scopes
 	fmt.Println("Gitlab Token Scopes are:", scopes)
@@ -67,9 +66,9 @@ func getGitlabScopes(ctx context.Context, client *gitlab.Client) ([]string, erro
 	return scopes, nil
 }
 
-func IsGroupWebhookEnabled(c *GitlabClientImpl) (*gitlab.GroupHook, bool) {
+func IsGroupWebhookEnabled(ctx *context.Context, c *GitlabClientImpl) (*gitlab.GroupHook, bool) {
 	emptyHook := gitlab.GroupHook{}
-	hooks, resp, err := c.client.Groups.ListGroupHooks(c.cfg.GitProviderConfig.OrgName, nil)
+	hooks, resp, err := c.client.Groups.ListGroupHooks(c.cfg.GitProviderConfig.OrgName, nil, gitlab.WithContext(*ctx))
 	if err != nil {
 		return &emptyHook, false
 	}
@@ -87,10 +86,10 @@ func IsGroupWebhookEnabled(c *GitlabClientImpl) (*gitlab.GroupHook, bool) {
 	return &emptyHook, false
 }
 
-func IsProjectWebhookEnabled(c *GitlabClientImpl, project string) (*gitlab.ProjectHook, bool) {
+func IsProjectWebhookEnabled(ctx *context.Context, c *GitlabClientImpl, project string) (*gitlab.ProjectHook, bool) {
 	emptyHook := gitlab.ProjectHook{}
-	projectFullName := fmt.Sprintf("%s/%s", c.cfg.GitProviderConfig.OrgName ,project)
-	hooks, resp, err := c.client.Projects.ListProjectHooks(projectFullName, nil)
+	projectFullName := fmt.Sprintf("%s/%s", c.cfg.GitProviderConfig.OrgName, project)
+	hooks, resp, err := c.client.Projects.ListProjectHooks(projectFullName, nil, gitlab.WithContext(*ctx))
 	if err != nil {
 		return &emptyHook, false
 	}
@@ -118,7 +117,7 @@ func ExtractLabelsId(labels []*gitlab.EventLabel) []string {
 	return returnLabelsList
 }
 
-func ValidatePayload(r *http.Request, secret []byte) ([]byte, error){
+func ValidatePayload(r *http.Request, secret []byte) ([]byte, error) {
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading request body: %v", err)
@@ -137,28 +136,19 @@ func ValidatePayload(r *http.Request, secret []byte) ([]byte, error){
 	}
 	expectedMAC := hex.EncodeToString(h.Sum(nil))
 
-	isEquall := hmac.Equal([]byte(gitlabSignature), []byte(expectedMAC))
-	if !isEquall {
+	isEqual := hmac.Equal([]byte(gitlabSignature), []byte(expectedMAC))
+	if !isEqual {
 		return nil, fmt.Errorf("secret not correct")
 	}
 	return payload, nil
 }
 
-
-func FixRepoNames(c *GitlabClientImpl) error{
+func FixRepoNames(c *GitlabClientImpl) error {
 	var formattedRepos []string
 	for _, repo := range strings.Split(c.cfg.GitProviderConfig.RepoList, ",") {
-		userRepo := fmt.Sprintf("%s/%s", c.cfg.GitProviderConfig.OrgName ,repo)
+		userRepo := fmt.Sprintf("%s/%s", c.cfg.GitProviderConfig.OrgName, repo)
 		formattedRepos = append(formattedRepos, userRepo)
 	}
 	c.cfg.GitProviderConfig.RepoList = strings.Join(formattedRepos, ",")
 	return nil
-}
-
-func EnsureGitlabURL(c *conf.GlobalConfig) *conf.GlobalConfig{
-	saasGitlabUrl := "https://gitlab.com"
-	if c.Url == "" {
-		c.Url = saasGitlabUrl
-	}
-	return c
 }

@@ -31,6 +31,9 @@ nodes:
   - containerPort: 443
     hostPort: 443
     protocol: TCP
+  - containerPort: 32080
+    hostPort: 8080
+    listenAddress: "0.0.0.0"
 containerdConfigPatches:
 - |-
   [plugins."io.containerd.grpc.v1.cri".registry]

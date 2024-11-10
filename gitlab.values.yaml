@@ -1,0 +1,49 @@
+gitlab:
+  toolbox:
+    enabled: false
+  gitlab-shell:
+    enabled: false
+  gitlab-pages:
+    enabled: false
+  gitlab-exporter:
+    enabled: false
+  kas:
+    minReplicas: 1
+  webservice:
+    minReplicas: 1
+    ingress:
+      requireBasePath: false
+global:
+  hosts:
+    domain: localhost
+    https: false
+    gitlab:
+      name: localhost
+      https: false
+  ingress:
+    enabled: true
+    configureCertmanager: false
+    tls:
+      enabled: false
+  redis:
+    install: false
+traefik:
+  enabled: false
+gitlab-runner:
+  install: false
+registry:
+  enabled: false
+prometheus:
+  install: false
+certmanager:
+  installCRDs: false
+  install: false
+
+nginx-ingress:
+  controller:
+    replicaCount: 1
+    minAavailable: 1
+    service:
+      type: NodePort
+      nodePorts:
+        http: 32080

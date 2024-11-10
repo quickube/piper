@@ -41,9 +41,6 @@ certmanager:
 
 nginx-ingress:
   controller:
-    ingressClassResource:
-      name: gitlab-nginx
-      controllerValue: "k8s.io/ingress-nginx-gitlab"
     replicaCount: 1
     minAavailable: 1
     service:

@@ -1,0 +1,43 @@
+global:
+  hosts:
+    domain: local
+    https: false
+    gitlab:
+      name: ""
+      https: false
+    # registry:
+    #   name: none
+    #   https: false
+    # minio:
+    #   name: none
+    #   https: false
+    # smartcard:
+    #   name: none
+    # kas:
+    #   name: none
+    # pages:
+    #   name: none
+    #   https: false
+  ingress:
+    class: none
+    tls:
+      enabled: false
+    configureCertmanager: false
+# gitlab:
+#   omniauth:
+#     enabled: true
+#     providers:
+#       - { name: "github", app_id: "your_github_app_id", app_secret: "your_github_app_secret" }
+#   applicationSettings:
+#     githubImportEnabled: true
+
+gitlab-runner:
+  install: false
+prometheus:
+  install: false
+certmanager:
+  install: false
+nginx-ingress:
+  enabled: false
+certmanager-issuer:
+  install: false

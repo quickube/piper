@@ -34,6 +34,11 @@ init-argo-workflows: init-kind
 init-piper: init-kind local-build
 	sh ./scripts/init-piper.sh
 
+
+.PHONY: init-gitlab
+init-gitlab: init-kind
+	sh ./scripts/init-gitlab.sh
+
 .PHONY: deploy
 deploy: init-kind init-nginx init-argo-workflows local-build local-push init-piper
 

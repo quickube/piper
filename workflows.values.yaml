@@ -1,6 +1,9 @@
 controller:
   workflowNamespaces:
     - workflows
+  workflowDefaults:
+    spec:
+      serviceAccountName: argo-workflows-sa
 server:
   baseHref: /argo/
   serviceAccount:

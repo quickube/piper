@@ -1,43 +1,52 @@
+gitlab:
+  toolbox:
+    enabled: false
+  gitlab-shell:
+    enabled: false
+  gitlab-pages:
+    enabled: false
+  gitlab-exporter:
+    enabled: false
+  kas:
+    minReplicas: 1
+  webservice:
+    minReplicas: 1
+    ingress:
+      requireBasePath: false
 global:
   hosts:
-    domain: local
+    domain: localhost
     https: false
     gitlab:
-      name: ""
+      name: localhost
       https: false
-    # registry:
-    #   name: none
-    #   https: false
-    # minio:
-    #   name: none
-    #   https: false
-    # smartcard:
-    #   name: none
-    # kas:
-    #   name: none
-    # pages:
-    #   name: none
-    #   https: false
   ingress:
-    class: none
+    enabled: true
+    configureCertmanager: false
     tls:
       enabled: false
-    configureCertmanager: false
-# gitlab:
-#   omniauth:
-#     enabled: true
-#     providers:
-#       - { name: "github", app_id: "your_github_app_id", app_secret: "your_github_app_secret" }
-#   applicationSettings:
-#     githubImportEnabled: true
-
+  redis:
+    install: false
+traefik:
+  enabled: false
 gitlab-runner:
   install: false
+registry:
+  enabled: false
 prometheus:
   install: false
 certmanager:
+  installCRDs: false
   install: false
+
 nginx-ingress:
-  enabled: false
-certmanager-issuer:
-  install: false
+  controller:
+    ingressClassResource:
+      name: gitlab-nginx
+      controllerValue: "k8s.io/ingress-nginx-gitlab"
+    replicaCount: 1
+    minAavailable: 1
+    service:
+      type: NodePort
+      nodePorts:
+        http: 32080

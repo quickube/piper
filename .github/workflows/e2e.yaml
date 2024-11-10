@@ -5,8 +5,8 @@ on:
     branches:
       - "add-gitlab-provider"
     paths:
-      - '**'
-      - '!docs/**'
+      - "**"
+      - "!docs/**"
   pull_request:
     branches:
       - "add-gitlab-provider"
@@ -16,11 +16,11 @@ concurrency:
 #  cancel-in-progress: true
 
 permissions:
-  contents: read 
+  contents: read
 
 jobs:
-  gitlab-e2e:
-    name: Gitlab E2E Tests (on development)
+  gitlab-e2e-env:
+    name: E2E Tests (on development)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -100,9 +100,9 @@ jobs:
           --timeout=60s
       - uses: actions/checkout@v3
         with:
-          repository: 'quickube/piper-e2e-test'
+          repository: "quickube/piper-e2e-test"
           path: piper-e2e-test
-          ref: 'main'
+          ref: "main"
       - name: inject some changes to piper-e2e-test repo
         run: |
           cd ./piper-e2e-test
@@ -112,21 +112,141 @@ jobs:
           git commit -am "trigger e2e test"
       - name: Create Pull Request
         id: cpr
-
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+          path: piper-e2e-test
+          branch: ${{ github.ref_name }}-test
+          title: ${{ github.ref_name }}-test
+          delete-branch: true
+      - name: Wait for workflow creation
+        run: |
+          sleep 10
+      - name: Close Pull Request
+        uses: peter-evans/close-pull@v3
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          repository: "quickube/piper-e2e-test"
+          comment: Auto-closing pull request
+          delete-branch: true
+      - name: Check Result
+  github-e2e-env:
+    name: E2E Tests (on development)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-qemu-action@v2
+      - uses: docker/setup-buildx-action@v2
+        with:
+          driver-opts: network=host
+      - uses: actions/setup-go@v4
+        with:
+          go-version: "1.20"
+          cache: true
+      - name: Install Ngrok Tunnel
+        run: |
+          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null && \
+          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list && \
+          sudo apt update && \
+          sudo apt install ngrok
+          touch ~/ngrok.log
+          (timeout 30m ngrok http 80 --authtoken ${{ secrets.NGROK_AUTHTOKEN }} --log ~/ngrok.log) &
+          echo $?
+      - name: Install kind
+        run: |
+          curl -sSLo kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.19.0/kind-linux-amd64"
+          chmod +x kind
+          sudo mv kind /usr/local/bin/kind
+          kind version
+      - name: Install Kubectl
+        run: |
+          curl -sSLO "https://storage.googleapis.com/kubernetes-release/release/v1.26.1/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/kubectl
+          kubectl version --client --output=yaml
+      - name: Kubernetes KinD Cluster
+        run: |
+          make init-kind
+      - name: install nginx
+        run: |
+          make init-nginx
+      - name: install workflows
         run: |
           make init-argo-workflows
       - name: Build Docker Image
-      uses: docker/build-push-action@v4
-      with:
-        kubectl logs deployment/piper
-        kubectl get workflows.argoproj.io -n workflows
-        BRANCH_VALID_STRING=$(echo ${{ github.ref_name }}-test | tr '[:upper:]' '[:lower:]' | tr '_' '-' | tr -cd 'a-z0-9.\-')
-        
-        ## check if created
-        RESULT=$(kubectl get workflows.argoproj.io -n workflows --selector=branch=$BRANCH_VALID_STRING --no-headers | grep piper-e2e-test)
-        [ ! -z "$RESULT" ] && echo "CRD created $RESULT" || { echo "Workflow not exists, existing..."; exit 1; }
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: localhost:5001/piper:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Check tunnel existence
+        run: |
+          echo "NGROK_URL=$(cat ~/ngrok.log | grep -o 'url=https://.*' | cut -d '=' -f 2)" >> $GITHUB_ENV
+          cat ~/ngrok.log | grep -o 'url=https://.*' | cut -d '=' -f 2
+      - name: init piper
+        run: |
+          helm upgrade --install piper ./helm-chart \
+          -f ./examples/template.values.dev.yaml \
+          --set piper.gitProvider.token="${{ secrets.GIT_TOKEN }}" \
+          --set piper.gitProvider.webhook.url="${{ env.NGROK_URL }}/piper/webhook" \
+          --set piper.gitProvider.webhook.repoList={piper-e2e-test} \
+          --set piper.gitProvider.organization.name="quickube" \
+          --set image.repository=localhost:5001 \
+          --set piper.argoWorkflows.server.address="${{ env.NGROK_URL }}/argo" \
+          --set-string env\[0\].name=GIT_WEBHOOK_AUTO_CLEANUP,env\[0\].value="true" \
+          --set-string rookout.token="${{ secrets.ROOKOUT_TOKEN }}" && \
+          sleep 20 && kubectl logs deployment/piper
+          kubectl wait  \
+          --for=condition=ready pod \
+          --selector=app=piper \
+          --timeout=60s
+      - uses: actions/checkout@v3
+        with:
+          repository: "quickube/piper-e2e-test"
+          path: piper-e2e-test
+          ref: "main"
+      - name: inject some changes to piper-e2e-test repo
+        run: |
+          cd ./piper-e2e-test
+          echo "" >> .workflows/triggers.yaml
+          git config user.name 'e2e-test'
+          git config user.email 'goshatoo@gmail.com'
+          git commit -am "trigger e2e test"
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+          path: piper-e2e-test
+          branch: ${{ github.ref_name }}-test
+          title: ${{ github.ref_name }}-test
+          delete-branch: true
+      - name: Wait for workflow creation
+        run: |
+          sleep 10
+      - name: Close Pull Request
+        uses: peter-evans/close-pull@v3
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          repository: "quickube/piper-e2e-test"
+          comment: Auto-closing pull request
+          delete-branch: true
+      - name: Check Result
+        run: |
+          kubectl logs deployment/piper
+          kubectl get workflows.argoproj.io -n workflows
+          BRANCH_VALID_STRING=$(echo ${{ github.ref_name }}-test | tr '[:upper:]' '[:lower:]' | tr '_' '-' | tr -cd 'a-z0-9.\-')
 
-        ## check if status phase not Failed, if yes, show message
-        RESULT=$(kubectl get workflows.argoproj.io -n workflows --selector=branch=$BRANCH_VALID_STRING  --no-headers -o custom-columns="Status:status.phase")
-        MESSAGE=$(kubectl get workflows.argoproj.io -n workflows --selector=branch=$BRANCH_VALID_STRING --no-headers -o custom-columns="Status:status.message")
-        [ ! "$RESULT" == "Failed"  ] && echo "CRD created $MESSAGE" || { echo "Workflow Failed $MESSAGE, existing..."; exit 1; }
+          ## check if created
+          RESULT=$(kubectl get workflows.argoproj.io -n workflows --selector=branch=$BRANCH_VALID_STRING --no-headers | grep piper-e2e-test)
+          [ ! -z "$RESULT" ] && echo "CRD created $RESULT" || { echo "Workflow not exists, existing..."; exit 1; }
+
+          ## check if status phase not Failed, if yes, show message
+          RESULT=$(kubectl get workflows.argoproj.io -n workflows --selector=branch=$BRANCH_VALID_STRING  --no-headers -o custom-columns="Status:status.phase")
+          MESSAGE=$(kubectl get workflows.argoproj.io -n workflows --selector=branch=$BRANCH_VALID_STRING --no-headers -o custom-columns="Status:status.message")
+          [ ! "$RESULT" == "Failed"  ] && echo "CRD created $MESSAGE" || { echo "Workflow Failed $MESSAGE, existing..."; exit 1; }

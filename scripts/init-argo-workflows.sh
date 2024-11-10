@@ -10,7 +10,7 @@ else
 fi
 
 
-cat <<EOF | kubectl apply -n workflows -f -
+cat <<EOF | kubectl apply -n cas -f -
 apiVersion: v1
 kind: ServiceAccount
 metadata:

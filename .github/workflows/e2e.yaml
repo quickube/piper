@@ -65,10 +65,10 @@ jobs:
         make init-argo-workflows
     - name: install gitlab
       run: |
-       make init-gitlab
+        make init-gitlab
     - name: populate gitlab
       run: |
-       sh ./scripts/setup-gitlab
+        sh ./scripts/setup-gitlab
     - name: Build Docker Image
       uses: docker/build-push-action@v4
       with:
@@ -111,6 +111,8 @@ jobs:
         git config user.email 'goshatoo@gmail.com'
         git commit -am "trigger e2e test"
     - name: Create Pull Request
+      id: cpr
+
       run: |
         make init-argo-workflows
     - name: Build Docker Image
@@ -214,6 +216,8 @@ jobs:
           git config user.email 'goshatoo@gmail.com'
           git commit -am "trigger e2e test"
       - name: Create Pull Request
+        id: cpr
+
         run: |
           make init-argo-workflows
       - name: Build Docker Image

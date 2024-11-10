@@ -127,7 +127,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 				TagPushEvents:       gitlab.Ptr(true),
 			}
 
-			gitlabHook, resp, err := c.client.Groups.AddGroupHook(c.cfg.GitProviderConfig.OrgName, &groupHookOptions)
+			gitlabHook, resp, err := c.client.Groups.AddGroupHook(c.cfg.GitProviderConfig.OrgName, &groupHookOptions, gitlab.WithContext(*ctx))
 			if err != nil {
 				return nil, err
 			}
@@ -144,7 +144,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 				ReleasesEvents:      gitlab.Ptr(true),
 				TagPushEvents:       gitlab.Ptr(true),
 			}
-			gitlabHook, resp, err := c.client.Groups.EditGroupHook(c.cfg.GitProviderConfig.OrgName, respHook.ID, &editedGroupHookOpt)
+			gitlabHook, resp, err := c.client.Groups.EditGroupHook(c.cfg.GitProviderConfig.OrgName, respHook.ID, &editedGroupHookOpt, gitlab.WithContext(*ctx))
 			if err != nil {
 				return nil, err
 			}
@@ -169,7 +169,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 				TagPushEvents:       gitlab.Ptr(true),
 			}
 
-			gitlabHook, resp, err := c.client.Projects.AddProjectHook(*repo, &addProjectHookOpts)
+			gitlabHook, resp, err := c.client.Projects.AddProjectHook(*repo, &addProjectHookOpts, gitlab.WithContext(*ctx))
 			if err != nil {
 				return nil, err
 			}
@@ -186,7 +186,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 				ReleasesEvents:      gitlab.Ptr(true),
 				TagPushEvents:       gitlab.Ptr(true),
 			}
-			gitlabHook, resp, err := c.client.Projects.EditProjectHook(*repo, respHook.ID, &editProjectHookOpts)
+			gitlabHook, resp, err := c.client.Projects.EditProjectHook(*repo, respHook.ID, &editProjectHookOpts, gitlab.WithContext(*ctx))
 			if err != nil {
 				return nil, err
 			}

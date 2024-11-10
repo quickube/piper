@@ -1,6 +1,9 @@
 controller:
   workflowNamespaces:
     - workflows
+  workflowDefaults:
+    spec:
+      serviceAccountName: argo-workflows-sa
 server:
   baseHref: /argo/
   serviceAccount:
@@ -16,3 +19,4 @@ server:
     paths:
       - /argo/(.*)
       - /argo
+    pathType: ImplementationSpecific

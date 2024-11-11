@@ -26,10 +26,9 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 	if cfg.GitProviderConfig.Url != "" {
 		options = append(options, gitlab.WithBaseURL(cfg.GitProviderConfig.Url))
 	}
-
 	client, err := gitlab.NewClient(cfg.GitProviderConfig.Token, options...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to authenticate user: %v", err)
 	}
 
 	err = ValidateGitlabPermissions(ctx, client, cfg)
@@ -37,17 +36,32 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 		return nil, fmt.Errorf("failed to validate permissions: %v", err)
 	}
 
-	group, resp, err := client.Groups.GetGroup(cfg.GitProviderConfig.OrgName, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get organization: %v", err)
+	orgType := "Organization"
+	if cfg.GitProviderConfig.OrgLevelWebhook {
+		group, resp, err := client.Groups.GetGroup(cfg.GitProviderConfig.OrgName, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get organization: %v", err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("failed to get organization data %s", resp.Status)
+		}
+
+		cfg.GitProviderConfig.OrgID = int64(group.ID)
+	} else {
+		orgType = "User"
+		user, resp, err := client.Users.CurrentUser()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get user info: %v", err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("failed to get user data %s", resp.Status)
+		}
+		cfg.GitProviderConfig.OrgID = int64(user.ID)
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to get organization data %s", resp.Status)
-	}
-
-	cfg.GitProviderConfig.OrgID = int64(group.ID)
-	log.Printf("Org ID is: %d\n", cfg.OrgID)
+	log.Printf("%s ID is: %d\n", orgType, cfg.OrgID)
 
 	return &GitlabClientImpl{
 		client: client,
@@ -61,8 +75,8 @@ func (c *GitlabClientImpl) ListFiles(ctx *context.Context, repo string, branch s
 		Ref:  &branch,
 		Path: &path}
 
-	projectName := fmt.Sprintf("%s/%s", c.cfg.GitProviderConfig.OrgName, repo)
-	dirFiles, resp, err := c.client.Repositories.ListTree(projectName, opt, gitlab.WithContext(*ctx))
+	projectId := GetProjectId(ctx, c, &repo)
+	dirFiles, resp, err := c.client.Repositories.ListTree(projectId, opt, gitlab.WithContext(*ctx))
 
 	if err != nil {
 		return nil, err
@@ -78,8 +92,9 @@ func (c *GitlabClientImpl) ListFiles(ctx *context.Context, repo string, branch s
 
 func (c *GitlabClientImpl) GetFile(ctx *context.Context, repo string, branch string, path string) (*CommitFile, error) {
 	var commitFile CommitFile
+	projectId := GetProjectId(ctx, c, &repo)
 
-	fileContent, resp, err := c.client.RepositoryFiles.GetFile(repo, path, &gitlab.GetFileOptions{Ref: &branch}, gitlab.WithContext(*ctx))
+	fileContent, resp, err := c.client.RepositoryFiles.GetFile(projectId, path, &gitlab.GetFileOptions{Ref: &branch}, gitlab.WithContext(*ctx))
 	if err != nil {
 		return &commitFile, err
 	}
@@ -158,7 +173,10 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 			log.Printf("edited webhook for %s: %s\n", c.cfg.GitProviderConfig.OrgName, gitlabHook.URL)
 		}
 	} else {
-		respHook, ok := IsProjectWebhookEnabled(ctx, c, *repo)
+		projectId := GetProjectId(ctx, c, repo)
+		log.Printf("project id is: %d\n", projectId)
+		respHook, ok := IsProjectWebhookEnabled(ctx, c, projectId)
+
 		if !ok {
 			addProjectHookOpts := gitlab.AddProjectHookOptions{
 				URL:                 gitlab.Ptr(c.cfg.GitProviderConfig.WebhookURL),
@@ -168,8 +186,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 				ReleasesEvents:      gitlab.Ptr(true),
 				TagPushEvents:       gitlab.Ptr(true),
 			}
-
-			gitlabHook, resp, err := c.client.Projects.AddProjectHook(*repo, &addProjectHookOpts, gitlab.WithContext(*ctx))
+			gitlabHook, resp, err := c.client.Projects.AddProjectHook(projectId, &addProjectHookOpts, gitlab.WithContext(*ctx))
 			if err != nil {
 				return nil, err
 			}
@@ -186,7 +203,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 				ReleasesEvents:      gitlab.Ptr(true),
 				TagPushEvents:       gitlab.Ptr(true),
 			}
-			gitlabHook, resp, err := c.client.Projects.EditProjectHook(*repo, respHook.ID, &editProjectHookOpts, gitlab.WithContext(*ctx))
+			gitlabHook, resp, err := c.client.Projects.EditProjectHook(projectId, respHook.ID, &editProjectHookOpts, gitlab.WithContext(*ctx))
 			if err != nil {
 				return nil, err
 			}
@@ -218,7 +235,11 @@ func (c *GitlabClientImpl) UnsetWebhook(ctx *context.Context, hook *HookWithStat
 		resp, err := c.client.Projects.DeleteProjectHook(*hook.RepoName, int(hook.HookID), gitlab.WithContext(*ctx))
 
 		if err != nil {
-			return fmt.Errorf("failed to delete project level webhhok for %s, API call returned %d. %s", *hook.RepoName, resp.StatusCode, err)
+			statusCode := "unknown"
+			if resp != nil {
+				statusCode = fmt.Sprintf("%d", resp.StatusCode)
+			}
+			return fmt.Errorf("failed to delete project level webhhok for %s, API call returned %s. %s", *hook.RepoName, statusCode, err)
 		}
 
 		if resp.StatusCode != 204 {

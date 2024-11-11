@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 
@@ -20,11 +21,12 @@ func ValidateGitlabPermissions(ctx context.Context, client *gitlab.Client, cfg *
 	repoAdminScopes := []string{"api"}
 	repoGranularScopes := []string{"write_repository", "read_api"}
 
-	scopes, err := getGitlabScopes(ctx, client)
-
+	token, _, err := client.PersonalAccessTokens.GetSinglePersonalAccessToken()
 	if err != nil {
 		return fmt.Errorf("failed to get scopes: %v", err)
 	}
+	scopes := token.Scopes
+
 	if len(scopes) == 0 {
 		return fmt.Errorf("permissions error: no scopes found for the gitlab client")
 	}
@@ -37,33 +39,6 @@ func ValidateGitlabPermissions(ctx context.Context, client *gitlab.Client, cfg *
 	}
 
 	return fmt.Errorf("permissions error: %v is not a valid scope for the project level permissions", scopes)
-}
-
-func getGitlabScopes(ctx context.Context, client *gitlab.Client) ([]string, error) {
-
-	user, resp, err := client.Users.CurrentUser(gitlab.WithContext(ctx))
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode == 400 {
-		return nil, err
-	}
-	a := gitlab.ListPersonalAccessTokensOptions{
-		UserID: &user.ID,
-	}
-	accessTokens, resp, err := client.PersonalAccessTokens.ListPersonalAccessTokens(&a)
-	fmt.Println(accessTokens)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode == 400 {
-		return nil, err
-	}
-
-	scopes := accessTokens[0].Scopes
-	fmt.Println("Gitlab Token Scopes are:", scopes)
-
-	return scopes, nil
 }
 
 func IsGroupWebhookEnabled(ctx *context.Context, c *GitlabClientImpl) (*gitlab.GroupHook, bool) {
@@ -86,10 +61,10 @@ func IsGroupWebhookEnabled(ctx *context.Context, c *GitlabClientImpl) (*gitlab.G
 	return &emptyHook, false
 }
 
-func IsProjectWebhookEnabled(ctx *context.Context, c *GitlabClientImpl, project string) (*gitlab.ProjectHook, bool) {
+func IsProjectWebhookEnabled(ctx *context.Context, c *GitlabClientImpl, projectId int) (*gitlab.ProjectHook, bool) {
 	emptyHook := gitlab.ProjectHook{}
-	projectFullName := fmt.Sprintf("%s/%s", c.cfg.GitProviderConfig.OrgName, project)
-	hooks, resp, err := c.client.Projects.ListProjectHooks(projectFullName, nil, gitlab.WithContext(*ctx))
+
+	hooks, resp, err := c.client.Projects.ListProjectHooks(projectId, nil, gitlab.WithContext(*ctx))
 	if err != nil {
 		return &emptyHook, false
 	}
@@ -115,6 +90,15 @@ func ExtractLabelsId(labels []*gitlab.EventLabel) []string {
 		returnLabelsList = append(returnLabelsList, fmt.Sprint(label.ID))
 	}
 	return returnLabelsList
+}
+
+func GetProjectId(ctx *context.Context, c *GitlabClientImpl, repo *string) int {
+	projectFullName := fmt.Sprintf("%s/%s", c.cfg.GitProviderConfig.OrgName, *repo)
+	IProject, _, err := c.client.Projects.GetProject(projectFullName, nil, gitlab.WithContext(*ctx))
+	if err != nil {
+		log.Fatalf("Failed to get project: %v", err)
+	}
+	return IProject.ID
 }
 
 func ValidatePayload(r *http.Request, secret []byte) ([]byte, error) {

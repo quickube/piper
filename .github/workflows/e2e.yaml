@@ -85,10 +85,11 @@ jobs:
         run: |
           helm upgrade --install piper ./helm-chart \
           -f ./examples/template.values.dev.yaml \
+          --set piper.gitProvider.token="gitlab" \
           --set piper.gitProvider.token="${{ secrets.GIT_TOKEN }}" \
           --set piper.gitProvider.webhook.url="${{ env.NGROK_URL }}/piper/webhook" \
           --set piper.gitProvider.webhook.repoList={piper-e2e-test} \
-          --set piper.gitProvider.organization.name="quickube" \
+          --set piper.gitProvider.organization.name="Pied Pipers" \
           --set image.repository=localhost:5001 \
           --set piper.argoWorkflows.server.address="${{ env.NGROK_URL }}/argo" \
           --set-string env\[0\].name=GIT_WEBHOOK_AUTO_CLEANUP,env\[0\].value="true" \
@@ -103,12 +104,18 @@ jobs:
           repository: "quickube/piper-e2e-test"
           path: piper-e2e-test
           ref: "main"
+      - name: clone-project
+        run: |
+          GITLAB_TOKEN=$(curl --location "http://localhost:8080/api/v4/users/${user_id}/personal_access_tokens" --header "PRIVATE-TOKEN: ${GITLAB_ROOT_TOKEN}" --header "Content-Type: application/json" \
+            --data '{"name":"clone-token", "scopes": ["read_repository"]}' | jq -r ".token")
+          cd ./gitlab
+          git clone http://oauth2:${GITLAB_TOKEN}@localhost:8080/piper-user/piper-e2e-test.git
+          cp ../piper-e2e-test ./gitlab/piper-e2e-test
       - name: inject some changes to piper-e2e-test repo
         run: |
-          cd ./piper-e2e-test
           echo "" >> .workflows/triggers.yaml
-          git config user.name 'e2e-test'
-          git config user.email 'goshatoo@gmail.com'
+          git config user.name 'piper-user'
+          git config user.email 'piper@example.com'
           git commit -am "trigger e2e test"
       - name: Create Pull Request
         id: cpr

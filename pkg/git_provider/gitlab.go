@@ -2,6 +2,7 @@ package git_provider
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"log"
@@ -94,15 +95,20 @@ func (c *GitlabClientImpl) GetFile(ctx *context.Context, repo string, branch str
 	var commitFile CommitFile
 	projectId := GetProjectId(ctx, c, &repo)
 
-	fileContent, resp, err := c.client.RepositoryFiles.GetFile(projectId, path, &gitlab.GetFileOptions{Ref: &branch}, gitlab.WithContext(*ctx))
+	file, resp, err := c.client.RepositoryFiles.GetFile(projectId, path, &gitlab.GetFileOptions{Ref: &branch}, gitlab.WithContext(*ctx))
 	if err != nil {
 		return &commitFile, err
 	}
 	if resp.StatusCode != 200 {
 		return &commitFile, err
 	}
-	commitFile.Path = &fileContent.FilePath
-	commitFile.Content = &fileContent.Content
+	commitFile.Path = &file.FilePath
+	contentBytes, err := base64.StdEncoding.DecodeString(file.Content)
+	if err != nil {
+		return &commitFile, err
+	}
+	content := string(contentBytes)
+	commitFile.Content = &content
 
 	return &commitFile, nil
 }
@@ -263,7 +269,7 @@ func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Req
 	}
 
 	switch e := event.(type) {
-	case gitlab.PushEvent:
+	case *gitlab.PushEvent:
 		webhookPayload = &WebhookPayload{
 			Event:     "push",
 			Action:    e.EventName,
@@ -274,7 +280,7 @@ func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Req
 			UserEmail: e.UserEmail,
 			OwnerID:   int64(e.UserID),
 		}
-	case gitlab.MergeEvent:
+	case *gitlab.MergeEvent:
 		webhookPayload = &WebhookPayload{
 			Event:            "merge_request",
 			Action:           e.ObjectAttributes.Action,
@@ -289,7 +295,7 @@ func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Req
 			Labels:           ExtractLabelsId(e.Labels),
 			OwnerID:          int64(e.User.ID),
 		}
-	case gitlab.ReleaseEvent:
+	case *gitlab.ReleaseEvent:
 		webhookPayload = &WebhookPayload{
 			Event:     "release",
 			Action:    e.Action, // "create" | "update" | "delete"
@@ -301,9 +307,6 @@ func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Req
 		}
 	}
 
-	if (webhookPayload.OwnerID == 0) || (webhookPayload.OwnerID != c.cfg.OrgID) {
-		return nil, fmt.Errorf("webhook send from non organizational member")
-	}
 	return webhookPayload, nil
 }
 

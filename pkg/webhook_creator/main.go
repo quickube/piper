@@ -87,6 +87,14 @@ func (wc *WebhookCreatorImpl) initWebhooks() error {
 	if wc.cfg.GitProviderConfig.OrgLevelWebhook && len(wc.cfg.GitProviderConfig.RepoList) != 0 {
 		return fmt.Errorf("org level webhook wanted but provided repositories list")
 	}
+	if wc.cfg.GitProviderConfig.OrgLevelWebhook {
+		hook, err := wc.clients.GitProvider.SetWebhook(&ctx, nil)
+		if err != nil {
+			return err
+		}
+		wc.setWebhook(hook.HookID, hook.HealthStatus, "")
+		return nil
+	}
 	for _, repo := range strings.Split(wc.cfg.GitProviderConfig.RepoList, ",") {
 		if wc.cfg.GitProviderConfig.Provider == "bitbucket" {
 			repo = utils.SanitizeString(repo)

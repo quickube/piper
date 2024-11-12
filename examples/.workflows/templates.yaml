@@ -6,5 +6,5 @@
     image: alpine
     command: [ sh ]
     source: |
-      echo "wellcome to {{ workflow.parameters.global }}
+      echo "welcome to {{ workflow.parameters.global }}
       echo "{{ inputs.parameters.message }}"

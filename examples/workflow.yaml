@@ -19,7 +19,7 @@ spec:
   archiveLogs: true
   arguments:
     parameters:
-      - name: PLACHOLDER
+      - name: PLACEHOLDER
   artifactRepositoryRef:
     configMap: artifact-repositories
   onExit: exit-handler
@@ -50,7 +50,7 @@ spec:
       image: alpine
       command: [sh]
       source: |
-        echo "wellcome to {{ workflow.parameters.global }}
+        echo "welcome to {{ workflow.parameters.global }}
         echo "{{ inputs.parameters.message }}"
   - name: exit-handler
     script:
@@ -75,6 +75,3 @@ spec:
             value: step-2
         dependencies:
         - local-step1
-        
-        
-    

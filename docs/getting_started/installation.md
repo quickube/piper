@@ -1,6 +1,6 @@
-## Instalation
+## Installation
 
-Piper should be deployed in the cluster with Argo Workflows.
+You must deploy Piper to a cluster with a pre-existing Argo Workflows deployment.
 Piper will create a CRD that Argo Workflows will pick, so install or configure Piper to create those CRDs in the right namespace.
 
 Please check out [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/values.yaml) file of the helm chart configurations.
@@ -24,15 +24,15 @@ helm upgrade --install piper piper/piper \
 
 ### Ingress
 
-Piper should listen to webhooks from your git provider.
-Expose it using ingress or service, then provide the address to `piper.webhook.url` as followed:
-`https://PIPER_EXPOESED_URL/webhook`
+Piper works best when it is able to listen to webhooks from your git provider.
+Expose Piper using an ingress or service, then provide the address to `piper.webhook.url` as follows:
+`https://PIPER_EXPOSED_URL/webhook`
 
-Checkout [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/values.yaml)
+Refer to [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/values.yaml) for more information.
 
 ### Git
 
-Piper will use git for fetching `.workflows` folder and receiving events using webhooks.
+Piper will use git to fetch the `.workflows` folder and receive events using webhooks.
 
 To pick which git provider you are using provide `gitProvider.name` configuration in helm chart (supports GitHub, Bitbucket and Gitlab).
 
@@ -41,16 +41,16 @@ Also configure you organization (Github), workspace (Bitbucket) or group (Gitlab
 #### Git Token Permissions
 
 The token should have access for creating webhooks and read repositories content.
-For GitHub configure `admin:org` and `write:org` permissions in Classic Token.
-For Bitbucket configure `Repositories:read`, `Webhooks:read and write` and `Pull requests:read` permissions (for multiple repos use workspace token).
+For GitHub, configure `admin:org` and `write:org` permissions in Classic Token.
+For Bitbucket, configure `Repositories:read`, `Webhooks:read and write` and `Pull requests:read` permissions (for multiple repos use workspace token).
 
 #### Token
 
 The git token should be passed as secret in the helm chart at `gitProvider.token`.
-Can be passed as parameter in helm install command using `--set piper.gitProvider.token=YOUR_GIT_TOKEN`
+The token can be passed as parameter via helm install command using `--set piper.gitProvider.token=YOUR_GIT_TOKEN`
 
-Alternatively, you can consume already existing secret and fill up `piper.gipProvider.existingSecret`.
-The key should be name `token`. Can be created using
+Alternatively, you can consume an already existing secret by configuring `piper.gipProvider.existingSecret`.
+The key should have the name `token`. You can be create a Secret using this command:
 
 ```bash
 kubectl create secret generic piper-git-token --from-literal=token=YOUR_GIT_OKEN
@@ -60,9 +60,9 @@ kubectl create secret generic piper-git-token --from-literal=token=YOUR_GIT_OKEN
 
 Piper will create a webhook configuration for you, for the whole organization or for each repo you configure.
 
-Configure `piper.webhook.url` the address of piper that exposed with ingress with `/webhook` postfix.
+Configure `piper.webhook.url` with the address of Piper that you exposed using an Ingress or Service with `/webhook` postfix.
 
-For organization level configure: `gitProvider.webhook.orgLevel` to `true`.
+For organization level configuration: `gitProvider.webhook.orgLevel` to `true`.
 
 For granular repo webhook provide list of repos at: `gitProvider.webhook.repoList`.
 

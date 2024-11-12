@@ -20,6 +20,12 @@ func NewGitProviderClient(cfg *conf.GlobalConfig) (Client, error) {
 			return nil, err
 		}
 		return gitClient, nil
+	case "gitlab":
+		gitClient, err := NewGitlabClient(cfg)
+		if err != nil {
+			return nil, err
+		}
+		return gitClient, nil
 	}
 
 	return nil, fmt.Errorf("didn't find matching git provider %s", cfg.GitProviderConfig.Provider)

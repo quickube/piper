@@ -9,7 +9,6 @@ else
   echo "Workflows release exists, skipping installation"
 fi
 
-
 cat <<EOF | kubectl apply -n workflows -f -
 apiVersion: v1
 kind: ServiceAccount

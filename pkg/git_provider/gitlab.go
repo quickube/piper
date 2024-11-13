@@ -36,32 +36,18 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 		return nil, fmt.Errorf("failed to validate permissions: %v", err)
 	}
 
-	orgType := "Organization"
-	if cfg.GitProviderConfig.OrgLevelWebhook {
-		group, resp, err := client.Groups.GetGroup(cfg.GitProviderConfig.OrgName, nil)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get organization: %v", err)
-		}
-
-		if resp.StatusCode != http.StatusOK {
-			return nil, fmt.Errorf("failed to get organization data %s", resp.Status)
-		}
-
-		cfg.GitProviderConfig.OrgID = int64(group.ID)
-	} else {
-		orgType = "User"
-		user, resp, err := client.Users.CurrentUser()
-		if err != nil {
-			return nil, fmt.Errorf("failed to get user info: %v", err)
-		}
-
-		if resp.StatusCode != http.StatusOK {
-			return nil, fmt.Errorf("failed to get user data %s", resp.Status)
-		}
-		cfg.GitProviderConfig.OrgID = int64(user.ID)
+	group, resp, err := client.Groups.GetGroup(cfg.GitProviderConfig.OrgName, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get organization: %v", err)
 	}
 
-	log.Printf("%s ID is: %d\n", orgType, cfg.OrgID)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to get organization data %s", resp.Status)
+	}
+
+	cfg.GitProviderConfig.OrgID = int64(group.ID)
+
+	log.Printf("Group ID is: %d\n", cfg.OrgID)
 
 	return &GitlabClientImpl{
 		client: client,
@@ -70,6 +56,7 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 }
 
 func (c *GitlabClientImpl) ListFiles(ctx *context.Context, repo string, branch string, path string) ([]string, error) {
+	log.Printf("Listing filed for repo: %s", repo)
 	var files []string
 	opt := &gitlab.ListTreeOptions{
 		Ref:  &branch,
@@ -91,6 +78,7 @@ func (c *GitlabClientImpl) ListFiles(ctx *context.Context, repo string, branch s
 }
 
 func (c *GitlabClientImpl) GetFile(ctx *context.Context, repo string, branch string, path string) (*CommitFile, error) {
+	log.Printf("Getting file: %s", path)
 	var commitFile CommitFile
 	projectId := GetProjectId(ctx, c, &repo)
 
@@ -108,6 +96,7 @@ func (c *GitlabClientImpl) GetFile(ctx *context.Context, repo string, branch str
 }
 
 func (c *GitlabClientImpl) GetFiles(ctx *context.Context, repo string, branch string, paths []string) ([]*CommitFile, error) {
+	log.Println("Getting multiple files")
 	var commitFiles []*CommitFile
 	for _, path := range paths {
 		file, err := c.GetFile(ctx, repo, branch, path)
@@ -188,7 +177,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 			}
 			gitlabHook, resp, err := c.client.Projects.AddProjectHook(projectId, &addProjectHookOpts, gitlab.WithContext(*ctx))
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("problem with group token role, should be maintainer+ ,%d", err)
 			}
 			if resp.StatusCode != 201 {
 				return nil, fmt.Errorf("failed to create repo level webhhok for %s, API returned %d", *repo, resp.StatusCode)
@@ -252,6 +241,7 @@ func (c *GitlabClientImpl) UnsetWebhook(ctx *context.Context, hook *HookWithStat
 }
 
 func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Request, secret []byte) (*WebhookPayload, error) {
+	log.Printf("starting with payload")
 	var webhookPayload *WebhookPayload
 	payload, err := io.ReadAll(request.Body)
 	if err != nil {
@@ -335,7 +325,7 @@ func (c *GitlabClientImpl) SetStatus(ctx *context.Context, repo *string, commit 
 
 func (c *GitlabClientImpl) PingHook(ctx *context.Context, hook *HookWithStatus) error {
 	if c.cfg.OrgLevelWebhook && hook.RepoName != nil {
-		return fmt.Errorf("trying o ping repo scope webhook while configured for org level webhook. repo: %s", *hook.RepoName)
+		return fmt.Errorf("trying to ping repo scope webhook while configured for org level webhook. repo: %s", *hook.RepoName)
 	}
 	if hook.RepoName == nil {
 		_, resp, err := c.client.Groups.GetGroupHook(c.cfg.OrgName, int(hook.HookID), nil, gitlab.WithContext(*ctx))

@@ -323,7 +323,9 @@ func (c *GitlabClientImpl) SetStatus(ctx *context.Context, repo *string, commit 
 		Context:     gitlab.Ptr("Piper/ArgoWorkflows"),
 	}
 
-	_, resp, err := c.client.Commits.SetCommitStatus(*repo, *commit, repoStatus, gitlab.WithContext(*ctx))
+	projectFullName := fmt.Sprintf("%s/%s", c.cfg.GitProviderConfig.OrgName, *repo)
+
+	_, resp, err := c.client.Commits.SetCommitStatus(projectFullName, *commit, repoStatus, gitlab.WithContext(*ctx))
 	if err != nil {
 		return err
 	}

@@ -27,6 +27,15 @@ var workflowTranslationToBitbucketMap = map[string]string{
 	"Error":     "STOPPED",
 }
 
+var workflowTranslationToGitlabMap = map[string]string{
+	"":          "pending",
+	"Pending":   "pending",
+	"Running":   "running",
+	"Succeeded": "success",
+	"Failed":    "failed",
+	"Error":     "failed",
+}
+
 type githubNotifier struct {
 	cfg     *conf.GlobalConfig
 	clients *clients.Clients
@@ -72,13 +81,19 @@ func (gn *githubNotifier) translateWorkflowStatus(status string, workflowName st
 	case "github":
 		result, ok := workflowTranslationToGithubMap[status]
 		if !ok {
-			return "", fmt.Errorf("failed to translate workflow status to github stasuts for %s status: %s", workflowName, status)
+			return "", fmt.Errorf("failed to translate workflow status to github status for %s status: %s", workflowName, status)
 		}
 		return result, nil
 	case "bitbucket":
 		result, ok := workflowTranslationToBitbucketMap[status]
 		if !ok {
-			return "", fmt.Errorf("failed to translate workflow status to bitbucket stasuts for %s status: %s", workflowName, status)
+			return "", fmt.Errorf("failed to translate workflow status to bitbucket status for %s status: %s", workflowName, status)
+		}
+		return result, nil
+	case "gitlab":
+		result, ok := workflowTranslationToGitlabMap[status]
+		if !ok {
+			return "", fmt.Errorf("failed to translate workflow status to gitlab status for %s status: %s", workflowName, status)
 		}
 		return result, nil
 	}

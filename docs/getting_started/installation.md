@@ -34,9 +34,9 @@ Refer to [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/va
 
 Piper will use git to fetch the `.workflows` folder and receive events using webhooks.
 
-To pick which git provider you are using provide `gitProvider.name` configuration in helm chart (Currently we only support GitHub and Bitbucket).
+To pick which git provider you are using provide `gitProvider.name` configuration in helm chart (supports GitHub, Bitbucket and Gitlab).
 
-You must also configure your organization (GitHub) or workspace (Bitbucket) name using `gitProvider.organization.name` in the helm chart.
+Also configure you organization (Github), workspace (Bitbucket) or group (Gitlab) name using `gitProvider.organization.name` in helm chart.
 
 #### Git Token Permissions
 

@@ -28,7 +28,6 @@ func main() {
 			log.Printf("failed to start Rookout, error: %v\n", err)
 		}
 	}
-
 	err = cfg.WorkflowsConfig.WorkflowsSpecLoad("/piper-config/..data")
 	if err != nil {
 		log.Panicf("Failed to load workflow spec configuration, error: %v", err)

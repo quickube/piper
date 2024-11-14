@@ -1,6 +1,6 @@
 gitlab:
   toolbox:
-    enabled: false
+    enabled: true
   gitlab-shell:
     enabled: false
   gitlab-pages:

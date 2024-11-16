@@ -56,7 +56,7 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 }
 
 func (c *GitlabClientImpl) ListFiles(ctx *context.Context, repo string, branch string, path string) ([]string, error) {
-	log.Printf("Listing filed for repo: %s", repo)
+	log.Printf("Listing files for repo: %s", repo)
 	var files []string
 	opt := &gitlab.ListTreeOptions{
 		Ref:  &branch,
@@ -79,20 +79,26 @@ func (c *GitlabClientImpl) ListFiles(ctx *context.Context, repo string, branch s
 
 func (c *GitlabClientImpl) GetFile(ctx *context.Context, repo string, branch string, path string) (*CommitFile, error) {
 	log.Printf("Getting file: %s", path)
-	var commitFile CommitFile
+	commitFile := &CommitFile{}
 	projectId := GetProjectId(ctx, c, &repo)
 
 	fileContent, resp, err := c.client.RepositoryFiles.GetFile(projectId, path, &gitlab.GetFileOptions{Ref: &branch}, gitlab.WithContext(*ctx))
 	if err != nil {
-		return &commitFile, err
+		return commitFile, err
 	}
 	if resp.StatusCode != 200 {
-		return &commitFile, err
+		return commitFile, err
 	}
-	commitFile.Path = &fileContent.FilePath
-	commitFile.Content = &fileContent.Content
 
-	return &commitFile, nil
+	decodedText, err := DecodeBase64ToStringPtr(fileContent.Content)
+	if err != nil {
+		return commitFile, err
+	}
+
+	commitFile.Path = &fileContent.FilePath
+	commitFile.Content = decodedText
+
+	return commitFile, nil
 }
 
 func (c *GitlabClientImpl) GetFiles(ctx *context.Context, repo string, branch string, paths []string) ([]*CommitFile, error) {
@@ -109,6 +115,7 @@ func (c *GitlabClientImpl) GetFiles(ctx *context.Context, repo string, branch st
 		}
 		commitFiles = append(commitFiles, file)
 	}
+	log.Println("commit file", commitFiles)
 	return commitFiles, nil
 }
 
@@ -116,7 +123,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 	if c.cfg.OrgLevelWebhook && repo != nil {
 		return nil, fmt.Errorf("trying to set project scope. project: %s", *repo)
 	}
-	var gitlabHook gitlab.Hook
+	gitlabHookId := 0
 
 	if repo == nil {
 		respHook, ok := IsGroupWebhookEnabled(ctx, c)
@@ -138,7 +145,8 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 			if resp.StatusCode != 201 {
 				return nil, fmt.Errorf("failed to create group level webhhok, API returned %d", resp.StatusCode)
 			}
-			log.Printf("added webhook for %s name: %s\n", c.cfg.GitProviderConfig.OrgName, gitlabHook.URL)
+			gitlabHookId = gitlabHook.ID
+			log.Printf("added webhook: %d for %s name: %s\n", gitlabHook.ID, c.cfg.GitProviderConfig.OrgName, gitlabHook.URL)
 		} else {
 			editedGroupHookOpt := gitlab.EditGroupHookOptions{
 				URL:                 gitlab.Ptr(c.cfg.GitProviderConfig.WebhookURL),
@@ -159,6 +167,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 					resp.StatusCode,
 				)
 			}
+			gitlabHookId = gitlabHook.ID
 			log.Printf("edited webhook for %s: %s\n", c.cfg.GitProviderConfig.OrgName, gitlabHook.URL)
 		}
 	} else {
@@ -177,12 +186,13 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 			}
 			gitlabHook, resp, err := c.client.Projects.AddProjectHook(projectId, &addProjectHookOpts, gitlab.WithContext(*ctx))
 			if err != nil {
-				return nil, fmt.Errorf("problem with group token role, should be maintainer+ ,%d", err)
+				return nil, fmt.Errorf("failed to add project hook ,%d", err)
 			}
 			if resp.StatusCode != 201 {
 				return nil, fmt.Errorf("failed to create repo level webhhok for %s, API returned %d", *repo, resp.StatusCode)
 			}
-			log.Printf("created webhook for %s: %s\n", *repo, gitlabHook.URL)
+			gitlabHookId = gitlabHook.ID
+			log.Printf("created webhook: %d for %s: %s\n", gitlabHook.ID, *repo, gitlabHook.URL)
 		} else {
 			editProjectHookOpts := gitlab.EditProjectHookOptions{
 				URL:                 gitlab.Ptr(c.cfg.GitProviderConfig.WebhookURL),
@@ -199,17 +209,18 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 			if resp.StatusCode != http.StatusOK {
 				return nil, fmt.Errorf("failed to update repo level webhhok for %s, API returned %d", *repo, resp.StatusCode)
 			}
+			gitlabHookId = gitlabHook.ID
 			log.Printf("edited webhook for %s: %s\n", *repo, gitlabHook.URL)
 		}
 
 	}
 
-	hookID := int64(gitlabHook.ID)
+	hookID := int64(gitlabHookId)
 	return &HookWithStatus{HookID: hookID, HealthStatus: true, RepoName: repo}, nil
 }
 
 func (c *GitlabClientImpl) UnsetWebhook(ctx *context.Context, hook *HookWithStatus) error {
-
+	log.Println("unsetting webhook")
 	if hook.RepoName == nil {
 		resp, err := c.client.Groups.DeleteGroupHook(c.cfg.GitProviderConfig.OrgName, int(hook.HookID), gitlab.WithContext(*ctx))
 		if err != nil {
@@ -242,21 +253,19 @@ func (c *GitlabClientImpl) UnsetWebhook(ctx *context.Context, hook *HookWithStat
 
 func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Request, secret []byte) (*WebhookPayload, error) {
 	log.Printf("starting with payload")
-	var webhookPayload *WebhookPayload
+	var webhookPayload WebhookPayload
 	payload, err := io.ReadAll(request.Body)
 	if err != nil {
-		return nil, fmt.Errorf("error reading request body: %v", err)
+		return nil, fmt.Errorf("error reading  request body: %v", err)
 	}
 	event, err := gitlab.ParseWebhook(gitlab.WebhookEventType(request), payload)
 	if err != nil {
 		return nil, err
 	}
-
 	switch e := event.(type) {
-	case gitlab.PushEvent:
-		webhookPayload = &WebhookPayload{
+	case *gitlab.PushEvent:
+		webhookPayload = WebhookPayload{
 			Event:     "push",
-			Action:    e.EventName,
 			Repo:      e.Project.Name,
 			Branch:    strings.TrimPrefix(e.Ref, "refs/heads/"),
 			Commit:    e.CheckoutSHA,
@@ -264,10 +273,12 @@ func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Req
 			UserEmail: e.UserEmail,
 			OwnerID:   int64(e.UserID),
 		}
-	case gitlab.MergeEvent:
-		webhookPayload = &WebhookPayload{
+		log.Println(e.Project.Name)
+
+	case *gitlab.MergeEvent:
+		webhookPayload = WebhookPayload{
 			Event:            "merge_request",
-			Action:           e.ObjectAttributes.Action,
+			Action:           e.ObjectAttributes.Action, //open, close, reopen, update, approved, unapproved, approval, unapproval, merge
 			Repo:             e.Repository.Name,
 			Branch:           e.ObjectAttributes.SourceBranch,
 			Commit:           e.ObjectAttributes.LastCommit.ID,
@@ -279,8 +290,8 @@ func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Req
 			Labels:           ExtractLabelsId(e.Labels),
 			OwnerID:          int64(e.User.ID),
 		}
-	case gitlab.ReleaseEvent:
-		webhookPayload = &WebhookPayload{
+	case *gitlab.ReleaseEvent:
+		webhookPayload = WebhookPayload{
 			Event:     "release",
 			Action:    e.Action, // "create" | "update" | "delete"
 			Repo:      e.Project.Name,
@@ -290,27 +301,37 @@ func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Req
 			UserEmail: e.Commit.Author.Email,
 		}
 	}
-
-	if (webhookPayload.OwnerID == 0) || (webhookPayload.OwnerID != c.cfg.OrgID) {
-		return nil, fmt.Errorf("webhook send from non organizational member")
-	}
-	return webhookPayload, nil
+	log.Printf("sending payload: %s, %s", webhookPayload.Repo, webhookPayload.User)
+	return &webhookPayload, nil
 }
 
 func (c *GitlabClientImpl) SetStatus(ctx *context.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error {
 	if !utils.ValidateHTTPFormat(*linkURL) {
+		log.Println("invalid link URL", *linkURL)
 		return fmt.Errorf("invalid linkURL")
 	}
+	projectId := GetProjectId(ctx, c, repo)
 
-	repoStatus := &gitlab.SetCommitStatusOptions{
+	currCommit, _, err1 := c.client.Commits.GetCommitStatuses(projectId, *commit, nil, gitlab.WithContext(*ctx))
+	if err1 != nil {
+		log.Println(err1)
+	}
+
+	if len(currCommit) != 0 {
+		if currCommit[0].Status == *status {
+			// https://forum.gitlab.com/t/cannot-transition-status-via-run-from-running-reason-s-status-cannot-transition-via-run/42588/6
+			log.Printf("cannot change commit description without status also, status stays: %s", *status)
+			return nil
+		}
+	}
+
+	repoStatus := gitlab.SetCommitStatusOptions{
 		State:       gitlab.BuildStateValue(*status), // pending, success, error, or failure.
-		Ref:         commit,
 		TargetURL:   linkURL,
 		Description: gitlab.Ptr(fmt.Sprintf("Workflow %s %s", *status, *message)),
 		Context:     gitlab.Ptr("Piper/ArgoWorkflows"),
 	}
-
-	_, resp, err := c.client.Commits.SetCommitStatus(*repo, *commit, repoStatus, gitlab.WithContext(*ctx))
+	_, resp, err := c.client.Commits.SetCommitStatus(projectId, *commit, &repoStatus, gitlab.WithContext(*ctx))
 	if err != nil {
 		return err
 	}
@@ -337,7 +358,8 @@ func (c *GitlabClientImpl) PingHook(ctx *context.Context, hook *HookWithStatus) 
 			return fmt.Errorf("unable to find organization webhook for hookID: %d", hook.HookID)
 		}
 	} else {
-		_, resp, err := c.client.Projects.GetProjectHook(*hook.RepoName, int(hook.HookID), nil, gitlab.WithContext(*ctx))
+		projectId := GetProjectId(ctx, c, hook.RepoName)
+		_, resp, err := c.client.Projects.GetProjectHook(projectId, int(hook.HookID), nil, gitlab.WithContext(*ctx))
 		if err != nil {
 			return err
 		}

@@ -30,8 +30,8 @@ var workflowTranslationToBitbucketMap = map[string]string{
 var workflowTranslationToGitlabMap = map[string]string{
 	"":          "pending",
 	"Pending":   "pending",
-	"Running":   "pending",
-	"Succeeded": "passed",
+	"Running":   "running",
+	"Succeeded": "success",
 	"Failed":    "failed",
 	"Error":     "failed",
 }

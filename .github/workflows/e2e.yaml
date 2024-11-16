@@ -106,39 +106,34 @@ jobs:
           repository: "quickube/piper-e2e-test"
           path: piper-e2e-test
           ref: "main"
-      - name: clone-project
-        run: |
-          GITLAB_TOKEN=$(curl --location "http://localhost:8080/api/v4/users/${user_id}/personal_access_tokens" --header "PRIVATE-TOKEN: ${{ env.GITLAB_ROOT_TOKEN }}" --header "Content-Type: application/json" \
-            --data '{"name":"clone-token", "scopes": ["read_repository"]}' | jq -r ".token")
-          cd ./gitlab
-          git clone http://oauth2:${GITLAB_TOKEN}@localhost:8080/pied-pipers/piper-e2e-test.git
-          cp ../piper-e2e-test ./gitlab/piper-e2e-test
       - name: inject some changes to piper-e2e-test repo
         run: |
-          echo "" >> .workflows/triggers.yaml
+          mkdir ./gitlab
+          cd ./gitlab
+          git clone http://oauth2:${{ env.GITLAB_TOKEN }}@localhost:8080/pied-pipers/piper-e2e-test.git
+          cp -r ../piper-e2e-test/.workflows ./piper-e2e-test/
+          cd ./piper-e2e-test
           git config user.name 'piper-user'
           git config user.email 'piper@example.com'
-          git commit -am "trigger e2e test"
-      - name: Create Pull Request
-        id: cpr
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GIT_TOKEN }}
-          path: piper-e2e-test
-          branch: ${{ github.ref_name }}-test
-          title: ${{ github.ref_name }}-test
-          delete-branch: true
+          git add -A
+          git commit -m "add stuff"
+          git push
+          git checkout -b ${{ github.ref_name }}-test          
+          echo """
+          - events: 
+            - merge_request
+            - merge_request.open
+            branches: ["*"]
+            onStart: ["main.yaml"]
+            onExit: ["exit.yaml"]
+            templates: ["templates.yaml"]
+               """ >> ./.workflows/triggers.yaml
+          git add -A
+          git commit -m "${{ github.ref_name }}-test"
+          git push --set-upstream origin ${{ github.ref_name }}-test -o merge_request.create
       - name: Wait for workflow creation
         run: |
           sleep 10
-      - name: Close Pull Request
-        uses: peter-evans/close-pull@v3
-        with:
-          token: ${{ secrets.GIT_TOKEN }}
-          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-          repository: "quickube/piper-e2e-test"
-          comment: Auto-closing pull request
-          delete-branch: true
       - name: Check Result
         run: |
           kubectl logs deployment/piper

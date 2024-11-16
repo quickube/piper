@@ -3,6 +3,7 @@ package git_provider
 import (
 	"crypto/hmac"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -135,4 +136,14 @@ func FixRepoNames(c *GitlabClientImpl) error {
 	}
 	c.cfg.GitProviderConfig.RepoList = strings.Join(formattedRepos, ",")
 	return nil
+}
+
+func DecodeBase64ToStringPtr(encoded string) (*string, error) {
+	decoded, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil {
+		return nil, err
+	}
+
+	result := string(decoded)
+	return &result, nil
 }

@@ -15,6 +15,10 @@ token = user.personal_access_tokens.create!(name: 'root-token', scopes: ['sudo',
 puts "TOKEN: #{token.token}"
 
 
+
+#enable the Admin->Network->Outbound requests -> allow for webhooks
+ApplicationSetting.current.update!(allow_local_requests_from_web_hooks_and_services: true)
+
 # #create new group
 # Group.create!(name: "Pied Pipers", path: "pied-pipers")
 # g = Group.find_by(name: "Pied Pipers")

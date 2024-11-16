@@ -14,6 +14,10 @@ gitlab:
     ingress:
       requireBasePath: false
 global:
+  gitlab:
+    license:
+      key: license_key
+      secret: gitlab-license
   hosts:
     domain: localhost
     https: false

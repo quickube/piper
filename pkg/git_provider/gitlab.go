@@ -177,8 +177,8 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 
 		if !ok {
 			addProjectHookOpts := gitlab.AddProjectHookOptions{
-				URL:                 gitlab.Ptr(c.cfg.GitProviderConfig.WebhookURL),
-				Token:               gitlab.Ptr(c.cfg.GitProviderConfig.WebhookSecret),
+				URL:                 &c.cfg.GitProviderConfig.WebhookURL,
+				Token:               &c.cfg.GitProviderConfig.WebhookSecret,
 				MergeRequestsEvents: gitlab.Ptr(true),
 				PushEvents:          gitlab.Ptr(true),
 				ReleasesEvents:      gitlab.Ptr(true),
@@ -186,6 +186,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 			}
 			gitlabHook, resp, err := c.client.Projects.AddProjectHook(projectId, &addProjectHookOpts, gitlab.WithContext(*ctx))
 			if err != nil {
+				log.Println("url", *addProjectHookOpts.URL, projectId, *addProjectHookOpts.Token)
 				return nil, fmt.Errorf("failed to add project hook ,%d", err)
 			}
 			if resp.StatusCode != 201 {
@@ -273,8 +274,6 @@ func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Req
 			UserEmail: e.UserEmail,
 			OwnerID:   int64(e.UserID),
 		}
-		log.Println(e.Project.Name)
-
 	case *gitlab.MergeEvent:
 		webhookPayload = WebhookPayload{
 			Event:            "merge_request",
@@ -345,29 +344,30 @@ func (c *GitlabClientImpl) SetStatus(ctx *context.Context, repo *string, commit 
 }
 
 func (c *GitlabClientImpl) PingHook(ctx *context.Context, hook *HookWithStatus) error {
-	if c.cfg.OrgLevelWebhook && hook.RepoName != nil {
-		return fmt.Errorf("trying to ping repo scope webhook while configured for org level webhook. repo: %s", *hook.RepoName)
-	}
-	if hook.RepoName == nil {
-		_, resp, err := c.client.Groups.GetGroupHook(c.cfg.OrgName, int(hook.HookID), nil, gitlab.WithContext(*ctx))
-		if err != nil {
-			return err
-		}
-
-		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("unable to find organization webhook for hookID: %d", hook.HookID)
-		}
-	} else {
-		projectId := GetProjectId(ctx, c, hook.RepoName)
-		_, resp, err := c.client.Projects.GetProjectHook(projectId, int(hook.HookID), nil, gitlab.WithContext(*ctx))
-		if err != nil {
-			return err
-		}
-
-		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("unable to find repo webhook for repo:%s hookID: %d", *hook.RepoName, hook.HookID)
-		}
-	}
-
-	return nil
+	panic("implement me")
+	//
+	//if c.cfg.OrgLevelWebhook && hook.RepoName != nil {
+	//	return fmt.Errorf("trying to ping repo scope webhook while configured for org level webhook. repo: %s", *hook.RepoName)
+	//}
+	//if hook.RepoName == nil {
+	//	_, resp, err := c.client.Groups.GetGroupHook(c.cfg.OrgName, int(hook.HookID), nil, gitlab.WithContext(*ctx))
+	//	if err != nil {
+	//		return err
+	//	}
+	//	if resp.StatusCode == http.StatusNotFound {
+	//		return fmt.Errorf("unable to find organization webhook for hookID: %d", hook.HookID)
+	//	}
+	//} else {
+	//	projectId := GetProjectId(ctx, c, hook.RepoName)
+	//	_, resp, err := c.client.Projects.GetProjectHook(projectId, int(hook.HookID), nil, gitlab.WithContext(*ctx))
+	//	if err != nil {
+	//		return err
+	//	}
+	//
+	//	if resp.StatusCode == http.StatusNotFound {
+	//		return fmt.Errorf("unable to find repo webhook for repo:%s hookID: %d", *hook.RepoName, hook.HookID)
+	//	}
+	//}
+	//
+	//return nil
 }

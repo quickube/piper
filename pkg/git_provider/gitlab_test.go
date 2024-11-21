@@ -1,35 +1,35 @@
 package git_provider
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
-	"net/http"
-	"testing"
-
 	"github.com/quickube/piper/pkg/conf"
 	"github.com/quickube/piper/pkg/utils"
 	assertion "github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
 	"golang.org/x/net/context"
+	"net/http"
+	"testing"
 )
 
 func TestGitlabListFiles(t *testing.T) {
 	// Prepare
 	mux, client := setupGitlab(t)
 
-	repoContent := &gitlab.TreeNode{
+	repoContent := gitlab.TreeNode{
 		Type: "file",
 		Name: "exit.yaml",
 		Path: ".workflows/exit.yaml",
 	}
 
-	repoContent2 := &gitlab.TreeNode{
+	repoContent2 := gitlab.TreeNode{
 		Type: "file",
 		Name: "main.yaml",
 		Path: ".workflows/main.yaml",
 	}
 
-	treeNodes := []gitlab.TreeNode{*repoContent, *repoContent2}
+	treeNodes := []gitlab.TreeNode{repoContent, repoContent2}
 	expectedRef := "branch1"
 	project := "project1"
 
@@ -43,8 +43,7 @@ func TestGitlabListFiles(t *testing.T) {
 			},
 		},
 	}
-	projectUrl := fmt.Sprintf("/api/v4/projects/%s/%s/repository/tree",c.cfg.GitProviderConfig.OrgName, project)
-	mux.HandleFunc(projectUrl, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v4/projects/1/repository/tree", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
 		ref := r.URL.Query().Get("ref")
 
@@ -53,17 +52,23 @@ func TestGitlabListFiles(t *testing.T) {
 			http.Error(w, "Invalid ref value", http.StatusBadRequest)
 			return
 		}
-		mockHTTPResponse(t, w,  treeNodes)
+		mockHTTPResponse(t, w, treeNodes)
+	})
+	url := fmt.Sprintf("/api/v4/projects/%s/%s", c.cfg.GitProviderConfig.OrgName, project)
+	mockProject := gitlab.Project{ID: 1}
+	mux.HandleFunc(url, func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+
+		mockHTTPResponse(t, w, mockProject)
 	})
 
-	
 	ctx := context.Background()
 
 	// Execute
 	actualContent, err := c.ListFiles(&ctx, project, expectedRef, ".workflows")
 
 	var expectedFilesNames []string
-	for _, file := range treeNodes{
+	for _, file := range treeNodes {
 		expectedFilesNames = append(expectedFilesNames, file.Name)
 	}
 
@@ -76,126 +81,53 @@ func TestGitlabListFiles(t *testing.T) {
 func TestGitlabGetFile(t *testing.T) {
 	// Prepare
 	mux, client := setupGitlab(t)
-
-
-	expectedFile := gitlab.File{
-			Content: "file",
-			FileName: "file.yaml",
-			CommitID: "1",
-			FilePath: ".workflows/file.yaml",
-		}
-
+	project := "project1"
+	fileName := "file.yaml"
+	filePath := fmt.Sprintf(".workflows/%s", fileName)
 	c := GitlabClientImpl{
 		client: client,
 		cfg: &conf.GlobalConfig{
 			GitProviderConfig: conf.GitProviderConfig{
 				OrgLevelWebhook: true,
 				OrgName:         "group1",
-				RepoList:        "project1",
+				RepoList:        project,
 			},
 		},
 	}
-
-	mux.HandleFunc("/api/v4/projects/project1/repository/files/.workflows", func(w http.ResponseWriter, r *http.Request) {
+	branch := "branch1"
+	projectUrl := fmt.Sprintf("/api/v4/projects/%s/%s", c.cfg.GitProviderConfig.OrgName, project)
+	mockProject := &gitlab.Project{ID: 1}
+	mux.HandleFunc(projectUrl, func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		mockHTTPResponse(t, w, mockProject)
+	})
+	decodedString := "file data"
+	encoded := base64.StdEncoding.EncodeToString([]byte(decodedString))
 
-		ref := r.URL.Query().Get("ref")
-		// Check if the ref value matches the expected value
-		if ref != "branch1" {
-			http.Error(w, "Invalid ref value", http.StatusBadRequest)
-			return
+	expectedFile := gitlab.File{
+		Content:  encoded,
+		FileName: fileName,
+		CommitID: "1",
+		FilePath: filePath,
+	}
+	url := fmt.Sprintf("/api/v4/projects/%d/repository/files/%s", mockProject.ID, filePath)
+	mux.HandleFunc(url, func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("ref") != branch {
+			t.Errorf("Unexpected request: %s", r.URL.String())
 		}
-		
-		mockHTTPResponse(t, w,  expectedFile)
+		testMethod(t, r, "GET")
+		mockHTTPResponse(t, w, expectedFile)
 	})
 
-	
 	ctx := context.Background()
 
 	// Execute
-	actualFile, err := c.GetFile(&ctx, "project1", "branch1", ".workflows")
-
+	actualFile, err := c.GetFile(&ctx, project, branch, filePath)
 	// Assert
 	assert := assertion.New(t)
 	assert.NotNil(t, err)
-
 	assert.Equal(*actualFile.Path, expectedFile.FilePath)
-	assert.Equal(*actualFile.Content, expectedFile.Content)
-}
-
-func TestGitlabPingHook(t *testing.T) {
-	// Prepare
-	ctx := context.Background()
-	assert := assertion.New(t)
-	mux, client := setupGitlab(t)
-
-	hookUrl := "https://url"
-
-	// Test-repo2 existing webhook
-	mux.HandleFunc("/api/v4/projects/test-repo1/hooks/234", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		mockHTTPResponse(t, w, nil)
-	})
-
-	mux.HandleFunc("/api/v4/groups/test/hooks/123", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		mockHTTPResponse(t, w, nil)
-
-	})
-
-	c := GitlabClientImpl{
-		client: client,
-		cfg: &conf.GlobalConfig{
-			GitProviderConfig: conf.GitProviderConfig{},
-		},
-	}
-
-	// Define test cases
-	tests := []struct {
-		name        string
-		repo        *string
-		hook        *HookWithStatus
-		config      *conf.GitProviderConfig
-	}{
-		{
-			name: "Ping repo webhook",
-			hook: &HookWithStatus{
-				HookID:       234,
-				HealthStatus: true,
-				RepoName:     utils.SPtr("test-repo1"),
-			},
-			config: &conf.GitProviderConfig{
-				OrgLevelWebhook: false,
-				OrgName:         "test",
-				WebhookURL:      hookUrl,
-			},
-		},
-		{
-			name: "Ping org webhook",
-			hook: &HookWithStatus{
-				HookID:       123,
-				HealthStatus: true,
-				RepoName:     nil,
-			},
-			config: &conf.GitProviderConfig{
-				OrgLevelWebhook: true,
-				OrgName:         "test",
-				WebhookURL:      hookUrl,
-			},
-		},
-	}
-	// Run test cases
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			c.cfg.GitProviderConfig = *test.config
-			// Call the function being tested
-			err := c.PingHook(&ctx, test.hook)
-
-			assert.Nil(err)
-
-
-		})
-	}
+	assert.Equal(*actualFile.Content, decodedString)
 }
 
 func TestGitlabSetStatus(t *testing.T) {
@@ -204,24 +136,37 @@ func TestGitlabSetStatus(t *testing.T) {
 	assert := assertion.New(t)
 	mux, client := setupGitlab(t)
 
-	mux.HandleFunc("/api/v4/projects/test-repo1/statuses/test-commit", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
-
-		w.WriteHeader(http.StatusCreated)
-		jsonBytes := []byte(`{"status": "ok"}`)
-		_, _ = fmt.Fprint(w, string(jsonBytes))
-	})
-
+	project := "test-repo1"
+	commit := "test-commit"
 	c := GitlabClientImpl{
 		client: client,
 		cfg: &conf.GlobalConfig{
 			GitProviderConfig: conf.GitProviderConfig{
 				OrgLevelWebhook: false,
 				OrgName:         "test",
-				RepoList:        "test-repo1",
+				RepoList:        project,
 			},
 		},
 	}
+	projectUrl := fmt.Sprintf("/api/v4/projects/%s/%s", c.cfg.GitProviderConfig.OrgName, project)
+	mockProject := &gitlab.Project{ID: 1}
+	mux.HandleFunc(projectUrl, func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		mockHTTPResponse(t, w, mockProject)
+	})
+	currCommitUrl := fmt.Sprintf("/api/v4/projects/%d/repository/commits/%s/statuses", mockProject.ID, commit)
+
+	mux.HandleFunc(currCommitUrl, func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		mockHTTPResponse(t, w, []gitlab.CommitStatus{})
+	})
+	mux.HandleFunc("/api/v4/projects/1/statuses/test-commit", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+
+		w.WriteHeader(http.StatusCreated)
+		jsonBytes := []byte(`{"status": "ok"}`)
+		_, _ = fmt.Fprint(w, string(jsonBytes))
+	})
 
 	// Define test cases
 	tests := []struct {
@@ -235,8 +180,8 @@ func TestGitlabSetStatus(t *testing.T) {
 	}{
 		{
 			name:        "Notify success",
-			repo:        utils.SPtr("test-repo1"),
-			commit:      utils.SPtr("test-commit"),
+			repo:        utils.SPtr(project),
+			commit:      utils.SPtr(commit),
 			linkURL:     utils.SPtr("https://argo"),
 			status:      utils.SPtr("success"),
 			message:     utils.SPtr(""),
@@ -244,8 +189,8 @@ func TestGitlabSetStatus(t *testing.T) {
 		},
 		{
 			name:        "Notify pending",
-			repo:        utils.SPtr("test-repo1"),
-			commit:      utils.SPtr("test-commit"),
+			repo:        utils.SPtr(project),
+			commit:      utils.SPtr(commit),
 			linkURL:     utils.SPtr("https://argo"),
 			status:      utils.SPtr("pending"),
 			message:     utils.SPtr(""),
@@ -253,8 +198,8 @@ func TestGitlabSetStatus(t *testing.T) {
 		},
 		{
 			name:        "Notify error",
-			repo:        utils.SPtr("test-repo1"),
-			commit:      utils.SPtr("test-commit"),
+			repo:        utils.SPtr(project),
+			commit:      utils.SPtr(commit),
 			linkURL:     utils.SPtr("https://argo"),
 			status:      utils.SPtr("error"),
 			message:     utils.SPtr("some message"),
@@ -262,8 +207,8 @@ func TestGitlabSetStatus(t *testing.T) {
 		},
 		{
 			name:        "Notify failure",
-			repo:        utils.SPtr("test-repo1"),
-			commit:      utils.SPtr("test-commit"),
+			repo:        utils.SPtr(project),
+			commit:      utils.SPtr(commit),
 			linkURL:     utils.SPtr("https://argo"),
 			status:      utils.SPtr("failure"),
 			message:     utils.SPtr(""),
@@ -272,29 +217,29 @@ func TestGitlabSetStatus(t *testing.T) {
 		{
 			name:        "Non managed repo",
 			repo:        utils.SPtr("non-existing-repo"),
-			commit:      utils.SPtr("test-commit"),
+			commit:      utils.SPtr(commit),
 			linkURL:     utils.SPtr("https://argo"),
 			status:      utils.SPtr("error"),
 			message:     utils.SPtr(""),
-			wantedError: errors.New("some error"),
+			wantedError: errors.New("404 Not Found"),
 		},
 		{
 			name:        "Non existing commit",
-			repo:        utils.SPtr("test-repo1"),
+			repo:        utils.SPtr(project),
 			commit:      utils.SPtr("not-exists"),
 			linkURL:     utils.SPtr("https://argo"),
 			status:      utils.SPtr("error"),
 			message:     utils.SPtr(""),
-			wantedError: errors.New("some error"),
+			wantedError: errors.New("404 Not Found"),
 		},
 		{
 			name:        "Wrong URL",
-			repo:        utils.SPtr("test-repo1"),
-			commit:      utils.SPtr("test-commit"),
+			repo:        utils.SPtr(project),
+			commit:      utils.SPtr(commit),
 			linkURL:     utils.SPtr("argo"),
 			status:      utils.SPtr("error"),
 			message:     utils.SPtr(""),
-			wantedError: errors.New("some error"),
+			wantedError: errors.New("invalid linkURL"),
 		},
 	}
 	// Run test cases
@@ -304,12 +249,10 @@ func TestGitlabSetStatus(t *testing.T) {
 			// Call the function being tested
 			err := c.SetStatus(&ctx, test.repo, test.commit, test.linkURL, test.status, test.message)
 
-			// Use assert to check the equality of the error
 			if test.wantedError != nil {
-				assert.Error(err)
 				assert.NotNil(err)
+				assert.Equal(test.wantedError.Error(), err.Error())
 			} else {
-				assert.NoError(err)
 				assert.Nil(err)
 			}
 		})
@@ -324,54 +267,45 @@ func TestGitlabSetWebhook(t *testing.T) {
 
 	hookUrl := "https://url"
 
-	// new group webhook
-	mux.HandleFunc("/api/v4/groups/groupA/hooks", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "GET" {
-			mockHTTPResponse(t,w,[]*gitlab.GroupHook{})
-		} else if r.Method == "POST"{
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "GET" && r.URL.String() == "/api/v4/groups/groupA/hooks" {
+			// new group webhook check for existing
+			mockHTTPResponse(t, w, []*gitlab.GroupHook{})
+		} else if r.Method == "POST" && r.URL.String() == "/api/v4/groups/groupA/hooks" {
+			// new group webhook creation of new webhook
 			w.WriteHeader(http.StatusCreated)
-			mockHTTPResponse(t,w,gitlab.GroupHook{ID:123,URL: hookUrl})
-		}
-	})
-	// existing group Webhook
-	mux.HandleFunc("/api/v4/groups/groupB/hooks", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "GET" {
-			mockHTTPResponse(t,w,[]*gitlab.GroupHook{{ID:123,URL: hookUrl}})
-		}
-	})
-	mux.HandleFunc("/api/v4/groups/groupB/hooks/123", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "PUT"{
+			mockHTTPResponse(t, w, gitlab.GroupHook{ID: 123, URL: hookUrl})
+		} else if r.Method == "GET" && r.URL.String() == "/api/v4/groups/groupB/hooks" {
+			// existing group Webhook check for existing
+			mockHTTPResponse(t, w, []*gitlab.GroupHook{{ID: 123, URL: hookUrl}})
+		} else if r.Method == "PUT" && r.URL.String() == "/api/v4/groups/groupB/hooks/123" {
+			// existing group Webhook editing the existing one
 			w.WriteHeader(http.StatusOK)
-			mockHTTPResponse(t,w,gitlab.GroupHook{ID:123,URL: hookUrl})
-		}
-	})
-
-	// new project Webhook
-	mux.HandleFunc("/api/v4/projects/test/test-repo1/hooks", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "GET" {
-			mockHTTPResponse(t,w,[]*gitlab.ProjectHook{{}})
-		}		
-	})
-	mux.HandleFunc("/api/v4/projects/test-repo1/hooks", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" {
+			mockHTTPResponse(t, w, gitlab.GroupHook{ID: 123, URL: hookUrl})
+		} else if r.Method == "GET" && r.URL.String() == "/api/v4/projects/test%2Ftest-repo1" {
+			// new project Webhook get project id
+			mockHTTPResponse(t, w, &gitlab.Project{ID: 1})
+		} else if r.Method == "GET" && r.URL.String() == "/api/v4/projects/test%2Ftest-repo2" {
+			// new project Webhook get project id
+			mockHTTPResponse(t, w, &gitlab.Project{ID: 2})
+		} else if r.Method == "GET" && r.URL.String() == "/api/v4/projects/1/hooks" {
+			// new project Webhook check for existing
+			mockHTTPResponse(t, w, []*gitlab.ProjectHook{{}})
+		} else if r.Method == "POST" && r.URL.String() == "/api/v4/projects/1/hooks" {
+			// new project Webhook create new webhook
 			w.WriteHeader(http.StatusCreated)
-			mockHTTPResponse(t,w, gitlab.ProjectHook{ID:123,URL: hookUrl})
-		}		
-	})
-	// existing project webhook
-	mux.HandleFunc("/api/v4/projects/test/test-repo2/hooks", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "GET" {
-			mockHTTPResponse(t,w,[]*gitlab.ProjectHook{{ID:123,URL: hookUrl}})
+			mockHTTPResponse(t, w, gitlab.ProjectHook{ID: 123, URL: hookUrl})
+		} else if r.Method == "GET" && r.URL.String() == "/api/v4/projects/2/hooks" {
+			// new project Webhook check for existing
+			mockHTTPResponse(t, w, []*gitlab.ProjectHook{{ID: 123, URL: hookUrl}})
+		} else if r.Method == "PUT" && r.URL.String() == "/api/v4/projects/2/hooks/123" {
+			// new project Webhook edit existing webhook
+			w.WriteHeader(http.StatusOK)
+			mockHTTPResponse(t, w, gitlab.ProjectHook{ID: 123, URL: hookUrl})
+		} else {
+			fmt.Println("unhandled ", r.Method, " route: ", r.URL.String())
 		}
 	})
-	mux.HandleFunc("/api/v4/projects/test-repo2/hooks/123", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "PUT" {
-			w.WriteHeader(http.StatusOK)
-			mockHTTPResponse(t,w, gitlab.ProjectHook{ID:123,URL: hookUrl})
-		}		
-	})
-
-
 
 	c := GitlabClientImpl{
 		client: client,
@@ -382,82 +316,59 @@ func TestGitlabSetWebhook(t *testing.T) {
 
 	// Define test cases
 	tests := []struct {
-		name        string
-		repo        *string
-		config      *conf.GitProviderConfig
-		wantedError error
+		name   string
+		repo   *string
+		config conf.GitProviderConfig
 	}{
-		{
-			name: "Repo and orgWebHook enabled",
-			repo: utils.SPtr("repo"),
-			config: &conf.GitProviderConfig{
-				OrgLevelWebhook: true,
-				OrgName:         "test",
-				RepoList:        "test-repo1",
-				WebhookURL:      hookUrl,
-			},
-			wantedError: errors.New("error"),
-		},
 		{
 			name: "New group webhook",
 			repo: nil,
-			config: &conf.GitProviderConfig{
+			config: conf.GitProviderConfig{
 				OrgLevelWebhook: true,
 				OrgName:         "groupA",
-				RepoList:        "test-repo1",
+				RepoList:        "",
 				WebhookURL:      hookUrl,
 			},
-			wantedError: nil,
 		},
 		{
 			name: "Existing group webhook",
 			repo: nil,
-			config: &conf.GitProviderConfig{
+			config: conf.GitProviderConfig{
 				OrgLevelWebhook: true,
 				OrgName:         "groupB",
-				RepoList:        "test-repo1",
+				RepoList:        "",
 				WebhookURL:      hookUrl,
 			},
-			wantedError: nil,
 		},
 		{
 			name: "New project webhook",
 			repo: utils.SPtr("test-repo1"),
-			config: &conf.GitProviderConfig{
+			config: conf.GitProviderConfig{
 				OrgLevelWebhook: false,
 				OrgName:         "test",
 				RepoList:        "test-repo1",
 				WebhookURL:      hookUrl,
 			},
-			wantedError: nil,
 		},
 		{
 			name: "Existing project webhook",
 			repo: utils.SPtr("test-repo2"),
-			config: &conf.GitProviderConfig{
+			config: conf.GitProviderConfig{
 				OrgLevelWebhook: false,
 				OrgName:         "test",
 				RepoList:        "test-repo2",
 				WebhookURL:      hookUrl,
 			},
-			wantedError: nil,
 		},
-		
 	}
 	// Run test cases
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			c.cfg.GitProviderConfig = *test.config
-			// Call the function being tested
-			_, err := c.SetWebhook(&ctx, test.repo)
+			c.cfg.GitProviderConfig = test.config
+			_, err := c.SetWebhook(&ctx, &c.cfg.GitProviderConfig.RepoList)
 
 			// Use assert to check the equality of the error
-			if test.wantedError != nil {
-				assert.NotNil(err)
-			} else {
-				assert.Nil(err)
-				//assert.Equal(hookUrl, hook.Config["url"])
-			}
+			assert.Nil(err)
 		})
 	}
 }

@@ -36,10 +36,17 @@ init-piper: init-kind local-build
 
 .PHONY: init-gitlab
 init-gitlab: init-kind
-	sh ./scripts/init-gitlab.sh
+	@LICENSE=$${GITLAB_LICENSE:-$(word 2, $(MAKECMDGOALS))}; sh ./scripts/init-gitlab.sh $$LICENSE
+
+.PHONY: pop-gitlab
+pop-gitlab: init-gitlab
+	sh ./scripts/setup-gitlab.sh
 
 .PHONY: deploy
 deploy: init-kind init-nginx init-argo-workflows local-build local-push init-piper
+
+.PHONY: deploy-gitlab
+deploy-gitlab: init-kind init-nginx init-argo-workflows local-build local-push init-piper init-gitlab pop-gitlab
 
 .PHONY: restart
 restart: local-build

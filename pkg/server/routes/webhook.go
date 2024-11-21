@@ -22,7 +22,6 @@ func AddWebhookRoutes(cfg *conf.GlobalConfig, clients *clients.Clients, rg *gin.
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-
 		if webhookPayload.Event == "ping" {
 			if cfg.GitProviderConfig.FullHealthCheck {
 				err = wc.SetWebhookHealth(webhookPayload.HookID, true)

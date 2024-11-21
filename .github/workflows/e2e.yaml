@@ -65,7 +65,7 @@ jobs:
           make init-argo-workflows
       - name: install gitlab
         run: |
-          make init-gitlab
+          make init-gitlab ${{ secrets.GITLABLICENSE }}
       - name: populate gitlab
         run: |
           output=$(sh ./scripts/setup-gitlab.sh)

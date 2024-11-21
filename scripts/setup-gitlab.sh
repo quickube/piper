@@ -60,7 +60,7 @@ sleep 3
 EXPIRES_AT_ONE_YEAR=$(date -d "+1 year" +"%Y-%m-%d")
 # create group access token
 GROUP_TOKEN=$(curl --location "${GITLAB_BASE_URL}/groups/${group_id}/access_tokens" --header "${CONTENT_JSON_HEADER}" --header "${GITLAB_TOKEN_HEADER}" \
---header "${IMPERSONATE_USER_HEADER}" --data "{\"name\":\"g-token\", \"scopes\": [\"api\", \"read_api\", \"write_repository\"], \"expires_at\":\"${EXPIRES_AT_ONE_YEAR}\", \"access_level\": 40 }" | jq -r ".token")
+--header "${IMPERSONATE_USER_HEADER}" --data "{\"name\":\"g-token\", \"scopes\": [\"api\", \"read_api\", \"write_repository\"], \"expires_at\":\"${EXPIRES_AT_ONE_YEAR}\", \"access_level\": 50 }" | jq -r ".token")
 sleep 3
 
 echo $GROUP_TOKEN, $GITLAB_ROOT_TOKEN

@@ -105,7 +105,7 @@ venv.bak/
 /site
 
 #mirrord config
-.mirrord
+.mirrord/
 
 # mypy
 .mypy_cache/

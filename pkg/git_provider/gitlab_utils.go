@@ -45,18 +45,18 @@ func ValidateGitlabPermissions(ctx context.Context, client *gitlab.Client, cfg *
 func IsGroupWebhookEnabled(ctx *context.Context, c *GitlabClientImpl) (*gitlab.GroupHook, bool) {
 	emptyHook := gitlab.GroupHook{}
 	hooks, resp, err := c.client.Groups.ListGroupHooks(c.cfg.GitProviderConfig.OrgName, nil, gitlab.WithContext(*ctx))
+
 	if err != nil {
 		return &emptyHook, false
 	}
 	if resp.StatusCode != 200 {
 		return &emptyHook, false
 	}
-	if len(hooks) == 0 {
-		return &emptyHook, false
-	}
-	for _, hook := range hooks {
-		if hook.URL == c.cfg.GitProviderConfig.WebhookURL {
-			return hook, true
+	if len(hooks) != 0 {
+		for _, hook := range hooks {
+			if hook.URL == c.cfg.GitProviderConfig.WebhookURL {
+				return hook, true
+			}
 		}
 	}
 	return &emptyHook, false
@@ -93,13 +93,14 @@ func ExtractLabelsId(labels []*gitlab.EventLabel) []string {
 	return returnLabelsList
 }
 
-func GetProjectId(ctx *context.Context, c *GitlabClientImpl, repo *string) int {
+func GetProjectId(ctx *context.Context, c *GitlabClientImpl, repo *string) (*int, error) {
 	projectFullName := fmt.Sprintf("%s/%s", c.cfg.GitProviderConfig.OrgName, *repo)
 	IProject, _, err := c.client.Projects.GetProject(projectFullName, nil, gitlab.WithContext(*ctx))
 	if err != nil {
-		log.Fatalf("Failed to get project: %v", err)
+		log.Printf("Failed to get project: %v", err)
+		return nil, err
 	}
-	return IProject.ID
+	return &IProject.ID, nil
 }
 
 func ValidatePayload(r *http.Request, secret []byte) ([]byte, error) {

@@ -3,7 +3,6 @@ set -o errexit
 
 
 LICENSE="${1:-$GITLAB_LICENSE}"
-echo "$LICENSE"
 
 if [ -z "$LICENSE" ]; then
   echo "no gitlab license was entered for init-gitlab.sh as argument or env: GITLAB_LICENSE"

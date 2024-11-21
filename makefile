@@ -36,7 +36,7 @@ init-piper: init-kind local-build
 
 .PHONY: init-gitlab
 init-gitlab: init-kind
-	@LICENSE=${GITLAB_LICENSE}; sh ./scripts/init-gitlab.sh $$LICENSE
+	@sh ./scripts/init-gitlab.sh $(GITLAB_LICENSE)
 
 .PHONY: pop-gitlab
 pop-gitlab: init-gitlab

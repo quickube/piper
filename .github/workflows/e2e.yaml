@@ -63,15 +63,17 @@ jobs:
       - name: install workflows
         run: |
           make init-argo-workflows
-      - name: install gitlab
+      - name: adding license env var
         run: |
           echo "GITLAB_LICENSE=${{ secrets.GITLABLICENSE }}" >> $GITHUB_ENV
+      - name: install gitlab
+        run: |
+          echo "GITLAB_LICENSE is $GITLAB_LICENSE"  # Debugging step
           make init-gitlab
       - name: populate gitlab
         run: |
-          output=$(sh ./scripts/setup-gitlab.sh)
-          echo "GIT_TOKEN=$(echo $output | cut -d' ' -f1)" >> $GITHUB_ENV
-          echo "GITLAB_ROOT_TOKEN=$(echo $output | cut -d' ' -f2)" >> $GITHUB_ENV
+          output=$(sh ./scripts/setup-gitlab.sh | tail -n1)
+          echo "GITLAB_TOKEN=$(echo $output | cut -d' ' -f1)" >> $GITHUB_ENV
       - name: Build Docker Image
         uses: docker/build-push-action@v4
         with:
@@ -88,16 +90,16 @@ jobs:
         run: |
           helm upgrade --install piper ./helm-chart \
           -f ./examples/template.values.dev.yaml \
-          --set piper.gitProvider.token="gitlab" \
-          --set piper.gitProvider.token="${{ env.GIT_TOKEN }}" \
+          --set piper.gitProvider.name="gitlab" \
+          --set piper.gitProvider.token="${{ env.GITLAB_TOKEN }}" \
+          --set piper.gitProvider.url="http://gitlab-webservice-default.gitlab:8080" \
           --set piper.gitProvider.webhook.url="${{ env.NGROK_URL }}/piper/webhook" \
           --set piper.gitProvider.webhook.repoList={piper-e2e-test} \
           --set piper.gitProvider.organization.name="pied-pipers" \
           --set image.repository=localhost:5001 \
           --set piper.argoWorkflows.server.address="${{ env.NGROK_URL }}/argo" \
-          --set-string env\[0\].name=GIT_WEBHOOK_AUTO_CLEANUP,env\[0\].value="true" \
-          --set-string rookout.token="${{ secrets.ROOKOUT_TOKEN }}" && \
-          sleep 20 && kubectl logs deployment/piper
+          --set-string env\[0\].name=GIT_WEBHOOK_AUTO_CLEANUP,env\[0\].value="true" && \
+          sleep 20 && kubectl logs deployment/piper 
           kubectl wait  \
           --for=condition=ready pod \
           --selector=app=piper \
@@ -119,11 +121,12 @@ jobs:
           git add -A
           git commit -m "add stuff"
           git push
-          git checkout -b ${{ github.ref_name }}-test          
+          git checkout -b ${{ github.ref_name }}-test      
+          rm ./.workflows/triggers.yaml
           echo """
           - events: 
-            - merge_request
-            - merge_request.open
+              - merge_request
+              - merge_request.open
             branches: ["*"]
             onStart: ["main.yaml"]
             onExit: ["exit.yaml"]
@@ -152,6 +155,7 @@ jobs:
 
   github-e2e-env:
     name: Github E2E Tests (on development)
+    needs: gitlab-e2e-env # ngrok tunnel bottleneck
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -210,14 +214,14 @@ jobs:
         run: |
           helm upgrade --install piper ./helm-chart \
           -f ./examples/template.values.dev.yaml \
+          --set piper.gitProvider.name="github" \
           --set piper.gitProvider.token="${{ secrets.GIT_TOKEN }}" \
           --set piper.gitProvider.webhook.url="${{ env.NGROK_URL }}/piper/webhook" \
           --set piper.gitProvider.webhook.repoList={piper-e2e-test} \
           --set piper.gitProvider.organization.name="quickube" \
           --set image.repository=localhost:5001 \
           --set piper.argoWorkflows.server.address="${{ env.NGROK_URL }}/argo" \
-          --set-string env\[0\].name=GIT_WEBHOOK_AUTO_CLEANUP,env\[0\].value="true" \
-          --set-string rookout.token="${{ secrets.ROOKOUT_TOKEN }}" && \
+          --set-string env\[0\].name=GIT_WEBHOOK_AUTO_CLEANUP,env\[0\].value="true" && \
           sleep 20 && kubectl logs deployment/piper
           kubectl wait  \
           --for=condition=ready pod \

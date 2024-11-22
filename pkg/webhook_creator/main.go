@@ -117,7 +117,6 @@ func (wc *WebhookCreatorImpl) Stop(ctx *context.Context) {
 }
 
 func (wc *WebhookCreatorImpl) deleteWebhooks(ctx *context.Context) error {
-
 	for hookID, hook := range wc.hooks {
 		err := wc.clients.GitProvider.UnsetWebhook(ctx, hook)
 		if err != nil {

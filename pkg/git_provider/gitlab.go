@@ -238,8 +238,8 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 }
 
 func (c *GitlabClientImpl) UnsetWebhook(ctx *context.Context, hook *HookWithStatus) error {
-	log.Println("unsetting webhook")
-	if hook.RepoName == nil {
+	log.Println("unsetting webhook", *hook.RepoName)
+	if *hook.RepoName == "" {
 		resp, err := c.client.Groups.DeleteGroupHook(c.cfg.GitProviderConfig.OrgName, int(hook.HookID), gitlab.WithContext(*ctx))
 		if resp != nil {
 			if resp.StatusCode != http.StatusNoContent {
@@ -251,14 +251,20 @@ func (c *GitlabClientImpl) UnsetWebhook(ctx *context.Context, hook *HookWithStat
 		}
 		log.Printf("removed group webhook, hookID :%d\n", hook.HookID)
 	} else {
-		resp, err := c.client.Projects.DeleteProjectHook(*hook.RepoName, int(hook.HookID), gitlab.WithContext(*ctx))
+		projectId, err := GetProjectId(ctx, c, hook.RepoName)
+		if err != nil {
+			return err
+		}
+		resp, err := c.client.Projects.DeleteProjectHook(*projectId, int(hook.HookID), gitlab.WithContext(*ctx))
 		if resp != nil {
 			if resp.StatusCode != http.StatusNoContent {
+				log.Printf("failed to delete project level webhhok for %s, API call returned %d", *hook.RepoName, resp.StatusCode)
 				return fmt.Errorf("failed to delete project level webhhok for %s, API call returned %d", *hook.RepoName, resp.StatusCode)
 			}
 		}
 		if err != nil {
-			return fmt.Errorf("failed to delete project level webhhok for %s, API call returned %s", *hook.RepoName, err)
+			log.Printf("failed to delete project level webhhok for %s, API call returned %s", *hook.RepoName, err)
+			return err
 		}
 		log.Printf("removed project webhook, project:%s hookID :%d\n", *hook.RepoName, hook.HookID) // INFO
 	}

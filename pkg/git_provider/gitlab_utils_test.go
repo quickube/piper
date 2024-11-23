@@ -14,7 +14,10 @@ import (
 )
 
 func mockHTTPResponse(t *testing.T, w io.Writer, response interface{}) {
-	json.NewEncoder(w).Encode(response)
+	err := json.NewEncoder(w).Encode(response)
+	if err != nil {
+		fmt.Printf("error %s", err)
+	}
 }
 
 func TestValidateGitlabPermissions(t *testing.T) {

@@ -23,7 +23,7 @@ func NewServer(config *conf.GlobalConfig, clients *clients.Clients) *Server {
 
 func (s *Server) startServer() *http.Server {
 	srv := &http.Server{
-		Addr:    ":8081",
+		Addr:    ":8080",
 		Handler: s.router,
 	}
 

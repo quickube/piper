@@ -3,13 +3,13 @@ name: E2E tests
 on:
   push:
     branches:
-      - "add-gitlab-provider"
+      - "main"
     paths:
       - "**"
       - "!docs/**"
   pull_request:
     branches:
-      - "add-gitlab-provider"
+      - "main"
 
 concurrency:
   group: ${{ github.workflow }} # Bottleneck in ngrok tunnel, only one tunnel can exist for specific token -${{ github.ref }}
@@ -177,18 +177,14 @@ jobs:
       - name: Kubernetes KinD Cluster
         run: |
           make init-kind
-      - name: install nginx
-        run: |
-          make init-nginx
       - name: install workflows
         run: |
           make init-argo-workflows
       - name: adding license env var
         run: |
-          echo "GITLAB_LICENSE=${{ secrets.GITLABLICENSE }}" >> $GITHUB_ENV
+          echo "GITLAB_LICENSE=${{ secrets.GITLAB_LICENSE }}" >> $GITHUB_ENV
       - name: install gitlab
         run: |
-          echo "GITLAB_LICENSE is $GITLAB_LICENSE"  # Debugging step
           make init-gitlab
       - name: populate gitlab
         run: |
@@ -213,7 +209,7 @@ jobs:
           --set piper.gitProvider.name="gitlab" \
           --set piper.gitProvider.token="${{ env.GITLAB_TOKEN }}" \
           --set piper.gitProvider.url="http://gitlab-webservice-default.gitlab:8080" \
-          --set piper.gitProvider.webhook.url="${{ env.NGROK_URL }}/piper/webhook" \
+          --set piper.gitProvider.webhook.url="http://piper.default/webhook" \
           --set piper.gitProvider.webhook.repoList={piper-e2e-test} \
           --set piper.gitProvider.organization.name="pied-pipers" \
           --set image.repository=localhost:5001 \

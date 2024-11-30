@@ -38,15 +38,11 @@ init-piper: init-kind local-build
 init-gitlab: init-kind
 	@sh ./scripts/init-gitlab.sh $(GITLAB_LICENSE)
 
-.PHONY: pop-gitlab
-pop-gitlab: init-gitlab
-	sh ./scripts/setup-gitlab.sh
-
 .PHONY: deploy
 deploy: init-kind init-nginx init-argo-workflows local-build local-push init-piper
 
 .PHONY: deploy-gitlab
-deploy-gitlab: init-kind init-nginx init-argo-workflows local-build local-push init-piper init-gitlab pop-gitlab
+deploy-gitlab: init-kind init-nginx init-argo-workflows local-build local-push init-piper init-gitlab
 
 .PHONY: restart
 restart: local-build

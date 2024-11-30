@@ -185,11 +185,9 @@ jobs:
           echo "GITLAB_LICENSE=${{ secrets.GITLAB_LICENSE }}" >> $GITHUB_ENV
       - name: install gitlab
         run: |
-          make init-gitlab
-      - name: populate gitlab
-        run: |
-          output=$(sh ./scripts/setup-gitlab.sh | tail -n1)
-          echo "GITLAB_TOKEN=$(echo $output | cut -d' ' -f1)" >> $GITHUB_ENV
+          tokens=$(make init-gitlab | tail -n1)
+          USER_TOKEN=$(echo "$tokens" | grep -oP "(?<=USER_TOKEN )\S+")
+          echo "GITLAB_TOKEN=$USER_TOKEN" >> $GITHUB_ENV
       - name: Build Docker Image
         uses: docker/build-push-action@v4
         with:

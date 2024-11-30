@@ -40,9 +40,10 @@ Also configure you organization (Github), workspace (Bitbucket) or group (Gitlab
 
 #### Git Token Permissions
 
-The token should have access for creating webhooks and read repositories content.
-For GitHub, configure `admin:org` and `write:org` permissions in Classic Token.
-For Bitbucket, configure `Repositories:read`, `Webhooks:read and write` and `Pull requests:read` permissions (for multiple repos use workspace token).
+The token should have access for creating webhooks and read repositories content.</br>
+<b>For GitHub</b>, configure `admin:org` and `write:org` permissions in Classic Token. </br>
+<b>For Bitbucket</b>, configure `Repositories:read`, `Webhooks:read and write` and `Pull requests:read` permissions (for multiple repos use workspace token). </br>
+<b>For Gitlab</b>, configure `read_api`, `write_repository` and `api` (for multiple repos use group token with owner role). </br>
 
 #### Token
 

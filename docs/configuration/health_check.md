@@ -1,5 +1,7 @@
 ## Health Check
 
+currently not supported for gitlab / bitbucket
+
 The following examples shows a health check being executed every 1 minute as configured in the helm chart under `livenessProbe`, and triggered by `/healthz` endpoint:
 
 ```yaml

@@ -3,13 +3,13 @@ name: E2E tests
 on:
   push:
     branches:
-      - "main"
+      - "add-gitlab-provider"
     paths:
       - "**"
       - "!docs/**"
   pull_request:
     branches:
-      - "main"
+      - "add-gitlab-provider"
 
 concurrency:
   group: ${{ github.workflow }} # Bottleneck in ngrok tunnel, only one tunnel can exist for specific token -${{ github.ref }}

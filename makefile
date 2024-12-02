@@ -41,9 +41,6 @@ init-gitlab: init-kind
 .PHONY: deploy
 deploy: init-kind init-nginx init-argo-workflows local-build local-push init-piper
 
-.PHONY: deploy-gitlab
-deploy-gitlab: init-kind init-nginx init-argo-workflows local-build local-push init-piper init-gitlab
-
 .PHONY: restart
 restart: local-build
 	docker push localhost:5001/piper:latest

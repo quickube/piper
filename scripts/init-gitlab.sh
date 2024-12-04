@@ -19,9 +19,16 @@ if [ -z "$(helm list -n gitlab | grep gitlab)" ]; then
   helm repo add gitlab https://charts.gitlab.io/
   helm upgrade --install gitlab -n gitlab gitlab/gitlab -f gitlab.values.yaml
 
-  kubectl wait --namespace gitlab --for=condition=ready pod -l app=toolbox --timeout=360s
+  echo "waiting for gitlab toolbox pod to ready"
+  kubectl wait --namespace gitlab --for=condition=ready pod -l app=toolbox --timeout=600s
+  echo "waiting for gitlab webservice pod to ready"
+  kubectl wait --namespace gitlab --for=condition=ready pod -l app=webservice --timeout=600s
 
+  echo "setup gitlab configs"
+  sleep 10
+  echo "starting"
   GITLAB_TOOLBOX_POD=$(kubectl get pods --namespace gitlab -l app=toolbox -o name)
+
   TOKENS_OUTPUT=$(kubectl exec -it -c toolbox ${GITLAB_TOOLBOX_POD} -n gitlab -- gitlab-rails runner /tmp/scripts/piper-setup.rb)
   echo $TOKENS_OUTPUT
 else

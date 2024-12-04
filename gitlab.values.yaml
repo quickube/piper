@@ -8,7 +8,7 @@ gitlab:
     extraVolumeMounts: |-
       - mountPath: /tmp/scripts/piper-setup.rb
         name: piper-config
-        subPath: gitlab_setup.rb
+        subPath: piper-setup.rb
         readOnly: true
   gitlab-shell:
     enabled: true

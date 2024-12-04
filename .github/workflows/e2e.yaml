@@ -88,7 +88,7 @@ jobs:
           --set piper.gitProvider.token="${{ env.GITLAB_TOKEN }}" \
           --set piper.gitProvider.url="http://gitlab-webservice-default.gitlab:8080" \
           --set piper.gitProvider.webhook.url="http://piper.default/webhook" \
-          --set piper.gitProvider.webhook.repoList={piper-e2e-test} \
+          --set piper.gitProvider.webhook.repoList=["piper-e2e-test"] \
           --set piper.gitProvider.organization.name="pied-pipers" \
           --set image.repository=localhost:5001 \
           --set piper.argoWorkflows.server.address="${{ env.NGROK_URL }}/argo" \

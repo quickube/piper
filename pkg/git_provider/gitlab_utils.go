@@ -97,7 +97,7 @@ func GetProjectId(ctx *context.Context, c *GitlabClientImpl, repo *string) (*int
 	projectFullName := fmt.Sprintf("%s/%s", c.cfg.GitProviderConfig.OrgName, *repo)
 	IProject, _, err := c.client.Projects.GetProject(projectFullName, nil, gitlab.WithContext(*ctx))
 	if err != nil {
-		log.Printf("Failed to get project: %v", err)
+		log.Printf("Failed to get project (%s): %v", *repo, err)
 		return nil, err
 	}
 	return &IProject.ID, nil

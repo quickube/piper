@@ -66,8 +66,8 @@ jobs:
       - name: install gitlab
         run: |
           tokens=$(make init-gitlab | tail -n1)
-          USER_TOKEN=$(echo "$tokens" | grep -oP "(?<=USER_TOKEN )\S+")
-          echo "GITLAB_TOKEN=$USER_TOKEN" >> $GITHUB_ENV
+          $TOKEN=$(echo "$tokens" | grep -oP "(?<=GROUP_TOKEN )\S+")
+          echo "GITLAB_TOKEN=$TOKEN" >> $GITHUB_ENV
       - name: Build Docker Image
         uses: docker/build-push-action@v4
         with:

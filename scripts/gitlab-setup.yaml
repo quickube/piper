@@ -25,15 +25,13 @@ data:
     token.save!
     
     #add user to group
-    g.add_member(u, :maintainer)
+    g.add_member(u, :owner)
     g.save!
     
     #create new project
     project = g.projects.create(name: "piper-e2e-test", path: "piper-e2e-test", creator:u, organization:g.organization)
     project.save!
-    g.save!
-    
-    
+    g.save!  
     
     #GROUP ACCESS TOKEN:
     # Create the group bot user. For further group access tokens, the username should be `group_{group_id}_bot_{random_string}` and email address `group_{group_id}_bot_{random_string}@noreply.{Gitlab.config.gitlab.host}`.

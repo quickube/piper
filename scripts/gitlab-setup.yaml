@@ -27,9 +27,12 @@ data:
     #add user to group
     g.add_member(u, :owner)
     g.save!
+    u.save!
     
     #create new project
-    project = g.projects.create(name: "piper-e2e-test", path: "piper-e2e-test", creator:u, organization:g.organization)
+    project = g.projects.create(name: "piper-e2e-test", path: "piper-e2e-test", creator:u, organization:g.organization, namespace: n, visibility_level: 20)
+    project.create_repository
+    project.add_member(u, :owner)
     project.save!
     g.save!  
     
@@ -43,7 +46,7 @@ data:
     bot.confirm
     
     # Add the bot to the group with the required role.
-    g.add_member(bot, :maintainer)
+    g.add_member(bot, :owner)
     token = bot.personal_access_tokens.create(scopes:[:read_api, :write_repository, :api], name: 'g-token', expires_at: 365.days.from_now)
     
     # Get the token value.

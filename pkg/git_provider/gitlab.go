@@ -230,7 +230,6 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 			gitlabHookId = &gitlabHook.ID
 			log.Printf("edited webhook: %d for %s: %s\n", *gitlabHookId, *repo, gitlabHook.URL)
 		}
-
 	}
 
 	hookID := int64(*gitlabHookId)

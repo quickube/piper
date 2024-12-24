@@ -148,7 +148,6 @@ jobs:
           [ ! "$RESULT" == "Failed"  ] && echo "CRD created $MESSAGE" || { echo "Workflow Failed $MESSAGE, existing..."; exit 1; }
   github-e2e-env:
     name: Github E2E Tests (on development)
-    needs: gitlab-e2e-env
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

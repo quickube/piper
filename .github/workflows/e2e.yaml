@@ -20,6 +20,8 @@ permissions:
 
 jobs:
   gitlab-e2e-env:
+    env:
+      GITLAB_LICENSE: ${{ secrets.GITLAB_LICENSE }}
     name: Gitlab E2E Tests (on development)
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -53,7 +55,7 @@ jobs:
           make init-argo-workflows
       - name: install gitlab
         run: |
-          tokens=$(make init-gitlab ${{ secrets.GITLAB_LICENSE }} | tail -n1)
+          tokens=$(make init-gitlab | tail -n1)
           GROUP_TOKEN=$(echo "$tokens" | grep -oP "(?<=GROUP_TOKEN )\S+")
           echo "GITLAB_TOKEN=$GROUP_TOKEN" >> $GITHUB_ENV
       - name: Build Docker Image

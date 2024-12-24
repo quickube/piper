@@ -40,8 +40,7 @@ data:
     # Create the group bot user. For further group access tokens, the username should be `group_{group_id}_bot_{random_string}` and email address `group_{group_id}_bot_{random_string}@noreply.{Gitlab.config.gitlab.host}`.
     admin = User.find(1)
     random_string = SecureRandom.hex(16)
-    service_response = Users::CreateService.new(admin, {name: 'g_token', username: "group_#{g.id}_bot_#{random_string}", email: "group_#{g.id}_bot_#{random_string}@noreply.gitlab.local", user_type: :project_bot }).execute
-    bot = service_response.payload[:user] if service_response.success?
+    bot = Users::CreateService.new(admin, {name: 'g_token', username: "group_#{g.id}_bot_#{random_string}", email: "group_#{g.id}_bot_#{random_string}@noreply.gitlab.local", user_type: :project_bot }).execute
     bot.confirm
     
     # Add the bot to the group with the required role.

@@ -17,7 +17,7 @@ if [ -z "$(helm list -n gitlab | grep gitlab)" ]; then
   kubectl apply -f ./scripts/gitlab-setup.yaml -n gitlab
   # 8. Install gitlab
   helm repo add gitlab https://charts.gitlab.io/
-  helm upgrade --install gitlab -n gitlab gitlab/gitlab -f gitlab.values.yaml
+  helm upgrade --install gitlab -n gitlab gitlab/gitlab --version 8.6.1 -f gitlab.values.yaml
 
   echo "waiting for gitlab toolbox pod to ready"
   kubectl wait --namespace gitlab --for=condition=ready pod -l app=toolbox --timeout=600s

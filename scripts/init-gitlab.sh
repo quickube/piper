@@ -27,6 +27,7 @@ if [ -z "$(helm list -n gitlab | grep gitlab)" ]; then
   echo "setup gitlab configs"
   GITLAB_TOOLBOX_POD=$(kubectl get pods --namespace gitlab -l app=toolbox -o name)
 
+  sleep 10
   TOKENS_OUTPUT=$(kubectl exec -it -c toolbox ${GITLAB_TOOLBOX_POD} -n gitlab -- gitlab-rails runner /tmp/scripts/piper-setup.rb)
   echo $TOKENS_OUTPUT
 else

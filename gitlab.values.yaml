@@ -1,8 +1,17 @@
 gitlab:
   toolbox:
-    enabled: false
+    enabled: true
+    extraVolumes: |-
+      - name: piper-config
+        configMap:
+          name: piper-setup
+    extraVolumeMounts: |-
+      - mountPath: /tmp/scripts/piper-setup.rb
+        name: piper-config
+        subPath: piper-setup.rb
+        readOnly: true
   gitlab-shell:
-    enabled: false
+    enabled: true
   gitlab-pages:
     enabled: false
   gitlab-exporter:
@@ -10,10 +19,15 @@ gitlab:
   kas:
     minReplicas: 1
   webservice:
+    enabled: true
     minReplicas: 1
     ingress:
       requireBasePath: false
 global:
+  gitlab:
+    license:
+      key: license_key
+      secret: gitlab-license
   hosts:
     domain: localhost
     https: false
@@ -38,7 +52,6 @@ prometheus:
 certmanager:
   installCRDs: false
   install: false
-
 nginx-ingress:
   controller:
     ingressClassResource:

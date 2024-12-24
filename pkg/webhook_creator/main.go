@@ -31,6 +31,10 @@ func NewWebhookCreator(cfg *conf.GlobalConfig, clients *clients.Clients) *Webhoo
 	return wr
 }
 
+func (wc *WebhookCreatorImpl) GetHooks() *map[int64]*git_provider.HookWithStatus {
+	return &wc.hooks
+}
+
 func (wc *WebhookCreatorImpl) Start() {
 
 	err := wc.initWebhooks()
@@ -86,6 +90,8 @@ func (wc *WebhookCreatorImpl) initWebhooks() error {
 	ctx := context.Background()
 	if wc.cfg.GitProviderConfig.OrgLevelWebhook && len(wc.cfg.GitProviderConfig.RepoList) != 0 {
 		return fmt.Errorf("org level webhook wanted but provided repositories list")
+	} else if !wc.cfg.GitProviderConfig.OrgLevelWebhook && len(wc.cfg.GitProviderConfig.RepoList) == 0 {
+		return fmt.Errorf("either org level webhook or repos list must be provided")
 	}
 	for _, repo := range strings.Split(wc.cfg.GitProviderConfig.RepoList, ",") {
 		if wc.cfg.GitProviderConfig.Provider == "bitbucket" {
@@ -111,7 +117,6 @@ func (wc *WebhookCreatorImpl) Stop(ctx *context.Context) {
 }
 
 func (wc *WebhookCreatorImpl) deleteWebhooks(ctx *context.Context) error {
-
 	for hookID, hook := range wc.hooks {
 		err := wc.clients.GitProvider.UnsetWebhook(ctx, hook)
 		if err != nil {

@@ -1,6 +1,6 @@
 piper:
   gitProvider:
-    name: github
+    name: ""  # github/bitbucket/gitlab | env: GIT_PROVIDER
     token: "GIT_TOKEN"
     organization:
       name: "ORG_NAME"

@@ -5,13 +5,16 @@ The helm chart populates them using [values.yaml](https://github.com/quickube/pi
 
 ### Git
 
-* GIT_PROVIDER
-  The git provider that Piper will use, possible variables: GitHub . We plan to support Bitbucket and GitLab, as well.
+- GIT_PROVIDER
+  The git provider that Piper will use, possible variables: GitHub | Gitlab | Bitbucket
 
 * GIT_TOKEN
   The git token that will be used to connect to the git provider.
 
-* GIT_ORG_NAME
+- GIT_URL
+  the git url that will be used, only relevant when running gitlab self hosted
+
+- GIT_ORG_NAME
   The organization name.
 
 * GIT_ORG_LEVEL_WEBHOOK

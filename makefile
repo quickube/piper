@@ -36,7 +36,7 @@ init-piper: init-kind local-build
 
 .PHONY: init-gitlab
 init-gitlab: init-kind
-	sh ./scripts/init-gitlab.sh
+	@sh ./scripts/init-gitlab.sh $(GITLAB_LICENSE)
 
 .PHONY: deploy
 deploy: init-kind init-nginx init-argo-workflows local-build local-push init-piper

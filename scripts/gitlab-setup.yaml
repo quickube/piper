@@ -41,8 +41,6 @@ data:
     admin = User.find(1)
     random_string = SecureRandom.hex(16)
     bot = Users::CreateService.new(admin, {name: 'g_token', username: "group_#{g.id}_bot_#{random_string}", email: "group_#{g.id}_bot_#{random_string}@noreply.gitlab.local", user_type: :project_bot }).execute
-    
-    # Confirm the group bot.
     bot.confirm
     
     # Add the bot to the group with the required role.

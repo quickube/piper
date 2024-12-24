@@ -33,15 +33,6 @@ jobs:
         with:
           go-version: "1.20"
           cache: true
-      - name: Install Ngrok Tunnel
-        run: |
-          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null && \
-          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list && \
-          sudo apt update && \
-          sudo apt install ngrok
-          touch ~/ngrok.log
-          (timeout 30m ngrok http 80 --authtoken ${{ secrets.NGROK_AUTHTOKEN }} --log ~/ngrok.log) &
-          echo $?
       - name: Install kind
         run: |
           curl -sSLo kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.19.0/kind-linux-amd64"
@@ -60,12 +51,9 @@ jobs:
       - name: install workflows
         run: |
           make init-argo-workflows
-      - name: adding license env var
-        run: |
-          echo "GITLAB_LICENSE=${{ secrets.GITLAB_LICENSE }}" >> $GITHUB_ENV
       - name: install gitlab
         run: |
-          tokens=$(make init-gitlab | tail -n1)
+          tokens=$(make init-gitlab ${{ secrets.GITLAB_LICENSE }} | tail -n1)
           GROUP_TOKEN=$(echo "$tokens" | grep -oP "(?<=GROUP_TOKEN )\S+")
           echo "GITLAB_TOKEN=$GROUP_TOKEN" >> $GITHUB_ENV
       - name: Build Docker Image

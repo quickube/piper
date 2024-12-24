@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/quickube/piper/compare/v1.6.0...v1.7.0) (2024-12-24)
+
+
+### Features
+
+* Gitlab provider ([#27](https://github.com/quickube/piper/issues/27)) ([8974887](https://github.com/quickube/piper/commit/8974887966ef429ab7d5ecb92db97bd6060e4d46))
+
 ## [1.6.0](https://github.com/quickube/piper/compare/v1.5.1...v1.6.0) (2024-04-06)
 
 

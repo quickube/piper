@@ -1,12 +1,12 @@
 ## .workflows Folder
 
-Piper will look in each of the target branches for a `.workflows` folder. [example](https://github.com/quickube/piper/tree/main/examples/.workflows).
-We will explain each of the files that should be included in the `.workflows` folder.
+Piper will look in each of the target branches for a `.workflows` folder. [Example](https://github.com/quickube/piper/tree/main/examples/.workflows).
+We will explain each of the files that should be included in the `.workflows` folder:
 
 ### triggers.yaml (convention name)
 
 This file holds a list of triggers that will be executed `onStart` by `events` from specific `branches`.
-Piper will execute each of matching triggers, so configure it wisely.
+Piper will execute each of the matching triggers, so configure it wisely.
 
 ```yaml
 - events:
@@ -21,54 +21,54 @@ Piper will execute each of matching triggers, so configure it wisely.
 
 This example can be found [here](https://github.com/quickube/piper/tree/main/examples/.workflows/triggers.yaml).
 
-In this example `main.yaml` will be executed as DAG when `push` or `pull_request.synchronize` events will be applied in `main` branch.
-`onExit` will be executed `exit.yaml` when finished the workflow as exit handler.
+In this example, `main.yaml` will be executed as a DAG when `push` or `pull_request.synchronize` events are applied in the `main` branch.
+`onExit` will execute `exit.yaml` when the workflow finishes as an exit handler.
 
-`onExit` can overwrite the default `onExit` configuration from by reference existing DAG tasks as in the [example](https://github.com/quickube/piper/tree/main/examples/.workflows/exit.yaml).
+`onExit` can overwrite the default `onExit` configuration by referencing existing DAG tasks as in the [example](https://github.com/quickube/piper/tree/main/examples/.workflows/exit.yaml).
 
-`config` field used for workflow configuration selection. the default value is `default` configuration.
+The `config` field is used for workflow configuration selection. The default value is the `default` configuration.
 
 #### events
 
-Events field used to terminate when the trigger will be executed. name of the event depends on the git provider.
+The `events` field is used to determine when the trigger will be executed. The name of the event depends on the git provider.
 
-For instance, GitHub pull_request event have few action, one of them is synchronize.
+For instance, the GitHub `pull_request` event has a few actions, one of which is `synchronize`.
 
 #### branches
 
-For which branch that trigger will be executed.
+The branch for which the trigger will be executed.
 
 #### onStart
 
-This [file](https://github.com/quickube/piper/tree/main/examples/.workflows/main.yaml) can be named as you wish and will be referenced in `triggers.yaml` file. It will define an entrypoint DAG that the Workflow will execute.
+This [file](https://github.com/quickube/piper/tree/main/examples/.workflows/main.yaml) can be named as you wish and will be referenced in the `triggers.yaml` file. It will define an entrypoint DAG that the Workflow will execute.
 
-As a best practice, this file should contain the dependencies logic and parametrization of each of referenced templates. It should not implement new templates, for this, use template.yaml file.
+As a best practice, this file should contain the dependency logic and parameterization of each referenced template. It should not implement new templates; for this, use the `template.yaml` file.
 
 #### onExit
 
-This field used to pass verbose exitHandler to the triggered workflow.
-It will override the default onExit from the provided `config` or the default `config`.
+This field is used to pass a verbose exit handler to the triggered workflow.
+It will override the default `onExit` from the provided `config` or the default `config`.
 
-In the provided `exit.yaml` describes a DAG that will overwrite the default `onExit` configuration.
+The provided `exit.yaml` describes a DAG that will overwrite the default `onExit` configuration.
 [Example](https://github.com/quickube/piper/tree/main/examples/.workflows/exit.yaml)
 
 #### templates
 
-This field will have additional templates that will be injected to the workflows.
-The purpose of this field is to create repository scope templates that can be referenced from the DAGs templates at `onStart` or `onExit`.
+This field will have additional templates that will be injected into the workflows.
+The purpose of this field is to create repository-scope templates that can be referenced from the DAG templates at `onStart` or `onExit`.
 [Example](https://github.com/quickube/piper/tree/main/examples/.workflows/templates.yaml)
 
-As a best practice, use this field for template implementation and reference them from executed.
+As a best practice, use this field for template implementation and reference them from the executed DAGs.
 [Example](https://github.com/quickube/piper/tree/main/examples/.workflows/main.yaml).
 
 ### config
 
-configured by `piper-workflows-config` [configMap](workflows_config.md).
-Can be passed explicitly, or will use `deafault` configuration.
+Configured by the `piper-workflows-config` [ConfigMap](workflows_config.md).
+It can be passed explicitly, or it will use the `default` configuration.
 
-###  parameters.yaml (convention name)
+### parameters.yaml (convention name)
 
-Will hold a list of global parameters of the Workflow.
-Can be referenced from any template with `{{ workflow.parameters.___ }}.`
+It will hold a list of global parameters for the Workflow.
+These can be referenced from any template with `{{ workflow.parameters.___ }}`.
 
 [Example](https://github.com/quickube/piper/tree/main/examples/.workflows/parameters.yaml)

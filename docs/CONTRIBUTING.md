@@ -16,7 +16,7 @@ git checkout -b my-feature
 ```bash
 git commit -s -m "fix: Add new feature"
 ```
-* please make sure you commit as described in [conventional commit](https://www.conventionalcommits.org/en/v1.0.0/)
+* Please make sure you commit as described in [conventional commit](https://www.conventionalcommits.org/en/v1.0.0/)
 6. Push your changes to your forked repository:
 ```bash
 git push origin my-feature
@@ -28,16 +28,16 @@ git push origin my-feature
 We welcome and appreciate contributions from the community. If you have developed a new feature, improvement, or bug fix for Piper, follow these steps to submit a pull request:
 
 1. Make sure you have forked the Piper repository and created a new branch for your changes. Checkout [How To Contribute](#How-to-contribute).
-2. commit your changes and push them to your forked repository.
+2. Commit your changes and push them to your forked repository.
 3. Go to the Piper repository on GitHub.
 4. Click on the "New Pull Request" button.
-5. Select your branch and provide a [descriptive title](#pull-request-nameing) and detailed description of your changes.
+5. Select your branch and provide a [descriptive title](#pull-request-naming) and a detailed description of your changes.
 6. If your pull request relates to an open issue, reference the issue in the description using the GitHub issue syntax (e.g., Fixes #123).
 7. Submit the pull request, and our team will review your changes. We appreciate your patience during the review process and may provide feedback or request further modifications.
 
 ### Pull Request Naming
 
-The name should follow conventional commit naming. 
+The name should follow Conventional Commits naming.
 
 ## Coding Guidelines
 
@@ -49,8 +49,8 @@ To maintain a consistent codebase and ensure readability, we follow a set of cod
 * Use meaningful variable and function names.
 * Make sure your code is properly formatted and free of syntax errors.
 * Run tests locally.
-* Check that the feature documented.
-* Add new packages only if necessary and already existing one, can't be used.
+* Check that the feature is documented.
+* Add new packages only if necessary and if an already existing one can't be used.
 * Add tests for new features or modification.
 
 ## Helm Chart Development
@@ -76,28 +76,28 @@ brew install helm
 ```bash
 brew install kubectl
 ```
-3. isntall docker
+3. install docker
 
 4. install ngrok
 ```bash
 brew install ngrok
 ```
-6. install 5
+5. install kind
 ```bash
 brew install kind
 ```
 
 Deployment:
-1. make sure docker are running. 
-2. create tunnel with ngrok using `make ngrok`, save the `Forwarding` address.
-3. create `values.dev.yaml` file that contains subset of chart's `value.yaml` file. check [example of values file](https://github.com/quickube/piper/tree/main/examples/template.values.dev.yaml) rename it to `values.dev.yaml` and put in root directory.
-4. use `make deploy`. it will do the following:
-     * deploy a local registry as container
-     * deploy a kind cluster as container with configuration
-     * deploy nginx reverse proxy in the kind cluster
-     * deploy Piper with the local helm chart
-5. validate using `curl localhost/piper/healthz`.
+1. Make sure Docker is running.
+2. Create a tunnel with ngrok using `make ngrok`, and save the `Forwarding` address.
+3. Create a `values.dev.yaml` file that contains a subset of the chart's `values.yaml` file. Check the [example of values file](https://github.com/quickube/piper/tree/main/examples/template.values.dev.yaml), rename it to `values.dev.yaml`, and put it in the root directory.
+4. Use `make deploy`. It will do the following:
+   * Deploy a local registry as a container
+   * Deploy a kind cluster as a container with configuration
+   * Deploy nginx reverse proxy in the kind cluster
+   * Deploy Piper with the local helm chart
+5. Validate using `curl localhost/piper/healthz`.
 
 ## Debugging
 
-For debugging the best practice is to use Rookout. To enable this function pass a Rookout token in the chart `rookout.token` or as existing secret `rookout.existingSecret`
+For debugging, the best practice is to use Rookout. To enable this function, pass a Rookout token in the chart `rookout.token` or as an existing secret `rookout.existingSecret`.

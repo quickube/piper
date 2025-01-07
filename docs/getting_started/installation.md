@@ -1,7 +1,7 @@
 ## Installation
 
 You must deploy Piper to a cluster with a pre-existing Argo Workflows deployment.
-Piper will create a CRD that Argo Workflows will pick, so install or configure Piper to create those CRDs in the right namespace.
+Piper will create a CRD that Argo Workflows will pick up, so install or configure Piper to create those CRDs in the right namespace.
 
 Please check out [values.yaml](https://github.com/quickube/piper/tree/main/helm-chart/values.yaml) file of the helm chart configurations.
 
@@ -36,11 +36,11 @@ Piper will use git to fetch the `.workflows` folder and receive events using web
 
 To pick which git provider you are using provide `gitProvider.name` configuration in helm chart (Currently we only support GitHub and Bitbucket).
 
-Also configure you organization (Github), workspace (Bitbucket) or group (Gitlab) name using `gitProvider.organization.name` in helm chart.
+Also configure your organization (GitHub), workspace (Bitbucket) or group (GitLab) name using `gitProvider.organization.name` in helm chart.
 
 #### Git Token Permissions
 
-The token should have access for creating webhooks and read repositories content.</br>
+The token should have access to create webhooks and read repository content.</br>
 <b>For GitHub</b>, configure `admin:org` and `write:org` permissions in Classic Token. </br>
 <b>For Bitbucket</b>, configure `Repositories:read`, `Webhooks:read and write` and `Pull requests:read` permissions (for multiple repos use workspace token). </br>
 <b>For Gitlab</b>, configure `read_api`, `write_repository` and `api` (for multiple repos use group token with owner role). </br>
@@ -50,8 +50,8 @@ The token should have access for creating webhooks and read repositories content
 The git token should be passed as secret in the helm chart at `gitProvider.token`.
 The token can be passed as parameter via helm install command using `--set piper.gitProvider.token=YOUR_GIT_TOKEN`
 
-Alternatively, you can consume an already existing secret by configuring `piper.gipProvider.existingSecret`.
-The key should have the name `token`. You can be create a Secret using this command:
+Alternatively, you can use an already existing secret by configuring `piper.gipProvider.existingSecret`.
+The key should be named token `token`. You can create a Secret using this command:
 
 ```bash
 kubectl create secret generic piper-git-token --from-literal=token=YOUR_GIT_OKEN
@@ -59,7 +59,7 @@ kubectl create secret generic piper-git-token --from-literal=token=YOUR_GIT_OKEN
 
 #### Webhook creation
 
-Piper will create a webhook configuration for you, for the whole organization or for each repo you configure.
+Piper will create a webhook configuration for you, either for the whole organization or for each repo you configure.
 
 Configure `piper.webhook.url` with the address of Piper that you exposed using an Ingress or Service with `/webhook` postfix.
 
@@ -67,21 +67,21 @@ For organization level configuration: `gitProvider.webhook.orgLevel` to `true`.
 
 For granular repo webhook provide list of repos at: `gitProvider.webhook.repoList`.
 
-Piper implements graceful shutdown, it will delete all the webhooks when terminated.
+Piper implements a graceful shutdown; it will delete all the webhooks when terminated.
 
 #### Status check
 
-Piper will handle status checks for you.
-It will notify the GitProvider for the status of Workflow for specific commit that triggered Piper.
+Piper will handle status checks for you. 
+It will notify the GitProvider of the status of the Workflow for the specific commit that triggered Piper.
 For linking provide valid URL of your Argo Workflows server address at: `argoWorkflows.server.address`
 
 ---
 
 ### Argo Workflow Server (On development)
 
-Piper will use REST API to communicate with Argo Workflows server for linting or for creation of workflows (ARGO_WORKFLOWS_CREATE_CRD). Please follow this [configuration](https://argoproj.github.io/argo-workflows/rest-api/).
+Piper will use the REST API to communicate with the Argo Workflows server for linting or creating workflows.
 
-To lint the workflow before submitting it, please configure the internal address of Argo Workflows server (for example, `argo-server.workflows.svc.cluster.local`) in the field: `argoWorkflows.server.address`. Argo will need a [token](https://argoproj.github.io/argo-workflows/access-token/) to authenticate. please provide the secret in `argoWorkflows.server.token`, Better to pass as a references to a secret in the field `argoWorkflows.server.token`.
+To lint the workflow before submitting it, please configure the internal address of Argo Workflows server (for example, `argo-server.workflows.svc.cluster.local`) in the field: `argoWorkflows.server.address`. Argo will need a [token](https://argoproj.github.io/argo-workflows/access-token/) to authenticate. Please provide the secret in `argoWorkflows.server.token`. It is better to pass it as a reference to a secret in the field `argoWorkflows.server.token`.
 
 #### Skip CRD Creation (On development)
 

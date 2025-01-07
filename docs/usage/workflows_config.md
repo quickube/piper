@@ -2,21 +2,21 @@
 
 Piper can inject configuration for Workflows that Piper creates.
 
-`default` config used as a convention for all Workflows that piper will create, even if not explicitly mentioned in triggers.yaml file.
+`default` config is used as a convention for all Workflows that Piper will create, even if not explicitly mentioned in the `triggers.yaml` file.
 
 ### ConfigMap
 
-Piper will mount a configMap when helm used.
-`piper.workflowsConfig` variable in helm chart, will create a configMap that hold set of configuration for Piper.
-Here is an [examples](https://github.com/quickube/piper/tree/main/examples/config.yaml) of such configuration.
+Piper will mount a ConfigMap when Helm is used.
+The `piper.workflowsConfig` variable in the Helm chart will create a ConfigMap that holds a set of configurations for Piper.
+Here is an [example](https://github.com/quickube/piper/tree/main/examples/config.yaml) of such a configuration.
 
 ### Spec
 
-This will be injected to Workflow spec field. can hold all configuration of the Workflow.
-> :warning: Please notice that the fields `entrypoint` and `onExit` should not exist in spec. both of them are managed fields.
+This will be injected into the Workflow spec field and can hold all configurations of the Workflow.
+> :warning: Please note that the fields `entrypoint` and `onExit` should not exist in the spec; both of them are managed fields.
 
 ### onExit
 
-This is the exit handler for each of the Workflows create by piper.
+This is the exit handler for each of the Workflows created by Piper.
 It configures a DAG that will be executed when the workflow ends.
-You can provide the templates to it us in the following [Examples](https://github.com/quickube/piper/tree/main/examples/config.yaml).
+You can provide the templates to it as shown in the following [Examples](https://github.com/quickube/piper/tree/main/examples/config.yaml).

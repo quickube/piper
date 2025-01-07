@@ -1,8 +1,8 @@
 ## Health Check
 
-currently not supported for gitlab / bitbucket
+Currently not supported for GitLab / Bitbucket
 
-The following examples shows a health check being executed every 1 minute as configured in the helm chart under `livenessProbe`, and triggered by `/healthz` endpoint:
+The following example shows a health check being executed every 1 minute as configured in the helm chart under `livenessProbe`, and triggered by the `/healthz` endpoint:
 
 ```yaml
 livenessProbe:
@@ -19,15 +19,15 @@ livenessProbe:
 
 The mechanism for checking the health of Piper is:
 
-1. Piper set health status of all webhooks to not-healthy.
+1. Piper sets the health status of all webhooks to not healthy
 
-2. Piper requests ping from all the webhooks configured.
+2. Piper requests a ping from all the configured webhooks.
 
-3. Git Provider send ping to `/webhook` endpoint, this will set the health status to `healthy` with timeout of 5 seconds.
+3. The Git provider sends a ping to the `/webhook` endpoint, which will set the health status to `healthy` with a timeout of 5 seconds.
 
-4. Piper check the status of all webhooks configured.
+4. Piper checks the status of all configured webhooks.
 
 Therefore, the criteria for health checking are:
 
 1. The registered webhook exists.
-2. The webhook send a ping in 5 seconds.
+2. The webhook sends a ping within 5 seconds.

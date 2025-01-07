@@ -562,37 +562,37 @@
 
 <div><h2 id="global-variables">Global Variables</h2>
 <p>Piper will automatically add Workflow scope parameters that can be referenced from any template.
-The parameters taken from webhook metadata, and will be populated respectively to GitProvider and event that triggered the workflow.</p>
+The parameters are taken from webhook metadata and will be populated according to the GitProvider and the event that triggered the workflow.</p>
 <ol>
 <li>
-<p><code>{{ workflow.parameters.event }}</code> the event that triggered the workflow.</p>
+<p><code>{{ workflow.parameters.event }}</code> The event that triggered the workflow.</p>
 </li>
 <li>
-<p><code>{{ workflow.parameters.action }}</code> the action that triggered the workflow.</p>
+<p><code>{{ workflow.parameters.action }}</code> The action that triggered the workflow.</p>
 </li>
 <li>
-<p><code>{{ workflow.parameters.dest_branch }}</code> the destination branch for pull request.</p>
+<p><code>{{ workflow.parameters.dest_branch }}</code> The destination branch for the pull request.</p>
 </li>
 <li>
-<p><code>{{ workflow.parameters.commit }}</code> the commit that triggered the workflow.</p>
+<p><code>{{ workflow.parameters.commit }}</code> The commit that triggered the workflow.</p>
 </li>
 <li>
-<p><code>{{ workflow.parameters.repo }}</code> repository name that triggered the workflow.</p>
+<p><code>{{ workflow.parameters.repo }}</code> The repository name that triggered the workflow.</p>
 </li>
 <li>
-<p><code>{{ workflow.parameters.user }}</code> the username that triggered the workflow.</p>
+<p><code>{{ workflow.parameters.user }}</code> The username that triggered the workflow.</p>
 </li>
 <li>
-<p><code>{{ workflow.parameters.user_email }}</code> the user's email that triggered the workflow.</p>
+<p><code>{{ workflow.parameters.user_email }}</code> The user's email that triggered the workflow.</p>
 </li>
 <li>
-<p><code>{{ workflow.parameters.pull_request_url }}</code> the url of the pull request that triggered the workflow.</p>
+<p><code>{{ workflow.parameters.pull_request_url }}</code> The URL of the pull request that triggered the workflow.</p>
 </li>
 <li>
-<p><code>{{workflow.parameters.pull_request_title }}</code> the tile of the pull request that triggered the workflow.</p>
+<p><code>{{ workflow.parameters.pull_request_title }}</code> The title of the pull request that triggered the workflow.</p>
 </li>
 <li>
-<p><code>{{workflow.parameters.pull_request_labels }}</code> comma seperated labels of the pull request that triggered the workflow.</p>
+<p><code>{{ workflow.parameters.pull_request_labels }}</code> Comma-separated labels of the pull request that triggered the workflow.</p>
 </li>
 </ol></div>
 

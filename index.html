@@ -561,18 +561,18 @@
 
 
 <div><h1 id="introduction">Introduction</h1>
-<p align="center">
-  <img src="https://www.quickube.com/wp-content/uploads/2022/10/ArgoPipeline_1.0_Hero.png.webp?raw=true">
+<p>
+  <img src="https://www.rookout.com/wp-content/uploads/2022/10/ArgoPipeline_1.0_Hero.png.webp?raw=true" alt="ArgoPipeline">
 </p>
 
 <p>Welcome to Piper!</p>
-<p>Piper is an open source project that aimed at providing multibranch pipeline functionality to Argo Workflows. This allows users to create distinct Workflows based on Git branches. We supports GitHub and Bitbucket.</p>
+<p>Piper is an open-source project aimed at providing multibranch pipeline functionality to Argo Workflows. This allows users to create distinct Workflows based on Git branches. We support GitHub and Bitbucket.</p>
 <h2 id="general-explanation">General Explanation</h2>
-<p align="center">
-  <img src="https://raw.githubusercontent.com/quickube/piper/main/docs/img/flow.svg">
+<p>
+  <img src="https://raw.githubusercontent.com/quickube/piper/main/docs/img/flow.svg" alt="flow">
 </p>
 
-<p>Piper handles the hard work of configuring multibranch pipelines for us! At initialization, it will load all configuration and create a webhook in repository or organization scope. Then, for each branch that has a <code>.workflows</code> folder, Piper will create a Workflow CRD out of the files in this folder. Finally, when Piper detects changes in the repository via the webhook, it triggers the workflows that match the branch and event.</p>
+<p>Piper handles the hard work of configuring multibranch pipelines for us! At initialization, it will load all configuration and create a webhook in the repository or organization scope. Then, for each branch that has a <code>.workflows</code> folder, Piper will create a Workflow CRD out of the files in this folder. Finally, when Piper detects changes in the repository via the webhook, it triggers the workflows that match the branch and event.</p>
 <p><div class="video-container"><video style="position:relative;width:100%;height:22.172vw" loop muted controls autoplay alt="type:video"><source src="img/piper-demo-1080.mp4" type="video/mp4"></source></video></div></p></div>
 
 

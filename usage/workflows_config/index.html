@@ -628,20 +628,20 @@
 
 <div><h2 id="workflow-configuration">Workflow Configuration</h2>
 <p>Piper can inject configuration for Workflows that Piper creates.</p>
-<p><code>default</code> config used as a convention for all Workflows that piper will create, even if not explicitly mentioned in triggers.yaml file.</p>
+<p><code>default</code> config is used as a convention for all Workflows that Piper will create, even if not explicitly mentioned in the <code>triggers.yaml</code> file.</p>
 <h3 id="configmap">ConfigMap</h3>
-<p>Piper will mount a configMap when helm used.
-<code>piper.workflowsConfig</code> variable in helm chart, will create a configMap that hold set of configuration for Piper.
-Here is an <a href="https://github.com/quickube/piper/tree/main/examples/config.yaml">examples</a> of such configuration.</p>
+<p>Piper will mount a ConfigMap when Helm is used.
+The <code>piper.workflowsConfig</code> variable in the Helm chart will create a ConfigMap that holds a set of configurations for Piper.
+Here is an <a href="https://github.com/quickube/piper/tree/main/examples/config.yaml">example</a> of such a configuration.</p>
 <h3 id="spec">Spec</h3>
-<p>This will be injected to Workflow spec field. can hold all configuration of the Workflow.</p>
+<p>This will be injected into the Workflow spec field and can hold all configurations of the Workflow.</p>
 <blockquote>
-<p>:warning: Please notice that the fields <code>entrypoint</code> and <code>onExit</code> should not exist in spec. both of them are managed fields.</p>
+<p>:warning: Please note that the fields <code>entrypoint</code> and <code>onExit</code> should not exist in the spec; both of them are managed fields.</p>
 </blockquote>
 <h3 id="onexit">onExit</h3>
-<p>This is the exit handler for each of the Workflows create by piper.
+<p>This is the exit handler for each of the Workflows created by Piper.
 It configures a DAG that will be executed when the workflow ends.
-You can provide the templates to it us in the following <a href="https://github.com/quickube/piper/tree/main/examples/config.yaml">Examples</a>.</p></div>
+You can provide the templates to it as shown in the following <a href="https://github.com/quickube/piper/tree/main/examples/config.yaml">Examples</a>.</p></div>
 
 
 

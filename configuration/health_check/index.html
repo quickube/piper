@@ -561,8 +561,8 @@
   <h1>Health check</h1>
 
 <div><h2 id="health-check">Health Check</h2>
-<p>currently not supported for gitlab / bitbucket</p>
-<p>The following examples shows a health check being executed every 1 minute as configured in the helm chart under <code>livenessProbe</code>, and triggered by <code>/healthz</code> endpoint:</p>
+<p>Currently not supported for GitLab / Bitbucket</p>
+<p>The following example shows a health check being executed every 1 minute as configured in the helm chart under <code>livenessProbe</code>, and triggered by the <code>/healthz</code> endpoint:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">livenessProbe</span><span class="p">:</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">httpGet</span><span class="p">:</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/healthz</span>
@@ -577,22 +577,22 @@
 <p>The mechanism for checking the health of Piper is:</p>
 <ol>
 <li>
-<p>Piper set health status of all webhooks to not-healthy.</p>
+<p>Piper sets the health status of all webhooks to not healthy</p>
 </li>
 <li>
-<p>Piper requests ping from all the webhooks configured.</p>
+<p>Piper requests a ping from all the configured webhooks.</p>
 </li>
 <li>
-<p>Git Provider send ping to <code>/webhook</code> endpoint, this will set the health status to <code>healthy</code> with timeout of 5 seconds.</p>
+<p>The Git provider sends a ping to the <code>/webhook</code> endpoint, which will set the health status to <code>healthy</code> with a timeout of 5 seconds.</p>
 </li>
 <li>
-<p>Piper check the status of all webhooks configured.</p>
+<p>Piper checks the status of all configured webhooks.</p>
 </li>
 </ol>
 <p>Therefore, the criteria for health checking are:</p>
 <ol>
 <li>The registered webhook exists.</li>
-<li>The webhook send a ping in 5 seconds.</li>
+<li>The webhook sends a ping within 5 seconds.</li>
 </ol></div>
 
 

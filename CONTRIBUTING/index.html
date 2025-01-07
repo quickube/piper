@@ -690,7 +690,7 @@
 <li>Commit your changes with clear and descriptive commit messages and sign it:
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>git<span class="w"> </span>commit<span class="w"> </span>-s<span class="w"> </span>-m<span class="w"> </span><span class="s2">"fix: Add new feature"</span>
 </code></pre></div></li>
-<li>please make sure you commit as described in <a href="https://www.conventionalcommits.org/en/v1.0.0/">conventional commit</a></li>
+<li>Please make sure you commit as described in <a href="https://www.conventionalcommits.org/en/v1.0.0/">conventional commit</a></li>
 <li>Push your changes to your forked repository:
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>my-feature
 </code></pre></div></li>
@@ -700,15 +700,15 @@
 <p>We welcome and appreciate contributions from the community. If you have developed a new feature, improvement, or bug fix for Piper, follow these steps to submit a pull request:</p>
 <ol>
 <li>Make sure you have forked the Piper repository and created a new branch for your changes. Checkout <a href="#How-to-contribute">How To Contribute</a>.</li>
-<li>commit your changes and push them to your forked repository.</li>
+<li>Commit your changes and push them to your forked repository.</li>
 <li>Go to the Piper repository on GitHub.</li>
 <li>Click on the "New Pull Request" button.</li>
-<li>Select your branch and provide a <a href="#pull-request-nameing">descriptive title</a> and detailed description of your changes.</li>
+<li>Select your branch and provide a <a href="#pull-request-naming">descriptive title</a> and a detailed description of your changes.</li>
 <li>If your pull request relates to an open issue, reference the issue in the description using the GitHub issue syntax (e.g., Fixes #123).</li>
 <li>Submit the pull request, and our team will review your changes. We appreciate your patience during the review process and may provide feedback or request further modifications.</li>
 </ol>
 <h3 id="pull-request-naming">Pull Request Naming</h3>
-<p>The name should follow conventional commit naming. </p>
+<p>The name should follow Conventional Commits naming.</p>
 <h2 id="coding-guidelines">Coding Guidelines</h2>
 <p>To maintain a consistent codebase and ensure readability, we follow a set of coding guidelines in Piper. Please adhere to the following guidelines when making changes:</p>
 <ul>
@@ -718,8 +718,8 @@
 <li>Use meaningful variable and function names.</li>
 <li>Make sure your code is properly formatted and free of syntax errors.</li>
 <li>Run tests locally.</li>
-<li>Check that the feature documented.</li>
-<li>Add new packages only if necessary and already existing one, can't be used.</li>
+<li>Check that the feature is documented.</li>
+<li>Add new packages only if necessary and if an already existing one can't be used.</li>
 <li>Add tests for new features or modification.</li>
 </ul>
 <h2 id="helm-chart-development">Helm Chart Development</h2>
@@ -736,27 +736,27 @@
 2. install kubectl
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>brew<span class="w"> </span>install<span class="w"> </span>kubectl
 </code></pre></div>
-3. isntall docker
+3. install docker
 <ol>
 <li>install ngrok
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>brew<span class="w"> </span>install<span class="w"> </span>ngrok
 </code></pre></div></li>
-<li>install 5
+<li>install kind
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>brew<span class="w"> </span>install<span class="w"> </span>kind
 </code></pre></div></li>
 </ol>
 <p>Deployment:
-1. make sure docker are running. 
-2. create tunnel with ngrok using <code>make ngrok</code>, save the <code>Forwarding</code> address.
-3. create <code>values.dev.yaml</code> file that contains subset of chart's <code>value.yaml</code> file. check <a href="https://github.com/quickube/piper/tree/main/examples/template.values.dev.yaml">example of values file</a> rename it to <code>values.dev.yaml</code> and put in root directory.
-4. use <code>make deploy</code>. it will do the following:
-     * deploy a local registry as container
-     * deploy a kind cluster as container with configuration
-     * deploy nginx reverse proxy in the kind cluster
-     * deploy Piper with the local helm chart
-5. validate using <code>curl localhost/piper/healthz</code>.</p>
+1. Make sure Docker is running.
+2. Create a tunnel with ngrok using <code>make ngrok</code>, and save the <code>Forwarding</code> address.
+3. Create a <code>values.dev.yaml</code> file that contains a subset of the chart's <code>values.yaml</code> file. Check the <a href="https://github.com/quickube/piper/tree/main/examples/template.values.dev.yaml">example of values file</a>, rename it to <code>values.dev.yaml</code>, and put it in the root directory.
+4. Use <code>make deploy</code>. It will do the following:
+   * Deploy a local registry as a container
+   * Deploy a kind cluster as a container with configuration
+   * Deploy nginx reverse proxy in the kind cluster
+   * Deploy Piper with the local helm chart
+5. Validate using <code>curl localhost/piper/healthz</code>.</p>
 <h2 id="debugging">Debugging</h2>
-<p>For debugging the best practice is to use Rookout. To enable this function pass a Rookout token in the chart <code>rookout.token</code> or as existing secret <code>rookout.existingSecret</code></p></div>
+<p>For debugging, the best practice is to use Rookout. To enable this function, pass a Rookout token in the chart <code>rookout.token</code> or as an existing secret <code>rookout.existingSecret</code>.</p></div>
 
 
 

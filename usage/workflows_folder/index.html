@@ -729,11 +729,11 @@
   <h1>Workflows folder</h1>
 
 <div><h2 id="workflows-folder">.workflows Folder</h2>
-<p>Piper will look in each of the target branches for a <code>.workflows</code> folder. <a href="https://github.com/quickube/piper/tree/main/examples/.workflows">example</a>.
-We will explain each of the files that should be included in the <code>.workflows</code> folder.</p>
+<p>Piper will look in each of the target branches for a <code>.workflows</code> folder. <a href="https://github.com/quickube/piper/tree/main/examples/.workflows">Example</a>.
+We will explain each of the files that should be included in the <code>.workflows</code> folder:</p>
 <h3 id="triggersyaml-convention-name">triggers.yaml (convention name)</h3>
 <p>This file holds a list of triggers that will be executed <code>onStart</code> by <code>events</code> from specific <code>branches</code>.
-Piper will execute each of matching triggers, so configure it wisely.</p>
+Piper will execute each of the matching triggers, so configure it wisely.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">events</span><span class="p">:</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">push</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pull_request.synchronize</span>
@@ -744,35 +744,35 @@ Piper will execute each of matching triggers, so configure it wisely.</p>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="nt">config</span><span class="p">:</span><span class="w"> </span><span class="s">"default"</span>
 </code></pre></div>
 <p>This example can be found <a href="https://github.com/quickube/piper/tree/main/examples/.workflows/triggers.yaml">here</a>.</p>
-<p>In this example <code>main.yaml</code> will be executed as DAG when <code>push</code> or <code>pull_request.synchronize</code> events will be applied in <code>main</code> branch.
-<code>onExit</code> will be executed <code>exit.yaml</code> when finished the workflow as exit handler.</p>
-<p><code>onExit</code> can overwrite the default <code>onExit</code> configuration from by reference existing DAG tasks as in the <a href="https://github.com/quickube/piper/tree/main/examples/.workflows/exit.yaml">example</a>.</p>
-<p><code>config</code> field used for workflow configuration selection. the default value is <code>default</code> configuration.</p>
+<p>In this example, <code>main.yaml</code> will be executed as a DAG when <code>push</code> or <code>pull_request.synchronize</code> events are applied in the <code>main</code> branch.
+<code>onExit</code> will execute <code>exit.yaml</code> when the workflow finishes as an exit handler.</p>
+<p><code>onExit</code> can overwrite the default <code>onExit</code> configuration by referencing existing DAG tasks as in the <a href="https://github.com/quickube/piper/tree/main/examples/.workflows/exit.yaml">example</a>.</p>
+<p>The <code>config</code> field is used for workflow configuration selection. The default value is the <code>default</code> configuration.</p>
 <h4 id="events">events</h4>
-<p>Events field used to terminate when the trigger will be executed. name of the event depends on the git provider.</p>
-<p>For instance, GitHub pull_request event have few action, one of them is synchronize.</p>
+<p>The <code>events</code> field is used to determine when the trigger will be executed. The name of the event depends on the git provider.</p>
+<p>For instance, the GitHub <code>pull_request</code> event has a few actions, one of which is <code>synchronize</code>.</p>
 <h4 id="branches">branches</h4>
-<p>For which branch that trigger will be executed.</p>
+<p>The branch for which the trigger will be executed.</p>
 <h4 id="onstart">onStart</h4>
-<p>This <a href="https://github.com/quickube/piper/tree/main/examples/.workflows/main.yaml">file</a> can be named as you wish and will be referenced in <code>triggers.yaml</code> file. It will define an entrypoint DAG that the Workflow will execute.</p>
-<p>As a best practice, this file should contain the dependencies logic and parametrization of each of referenced templates. It should not implement new templates, for this, use template.yaml file.</p>
+<p>This <a href="https://github.com/quickube/piper/tree/main/examples/.workflows/main.yaml">file</a> can be named as you wish and will be referenced in the <code>triggers.yaml</code> file. It will define an entrypoint DAG that the Workflow will execute.</p>
+<p>As a best practice, this file should contain the dependency logic and parameterization of each referenced template. It should not implement new templates; for this, use the <code>template.yaml</code> file.</p>
 <h4 id="onexit">onExit</h4>
-<p>This field used to pass verbose exitHandler to the triggered workflow.
-It will override the default onExit from the provided <code>config</code> or the default <code>config</code>.</p>
-<p>In the provided <code>exit.yaml</code> describes a DAG that will overwrite the default <code>onExit</code> configuration.
+<p>This field is used to pass a verbose exit handler to the triggered workflow.
+It will override the default <code>onExit</code> from the provided <code>config</code> or the default <code>config</code>.</p>
+<p>The provided <code>exit.yaml</code> describes a DAG that will overwrite the default <code>onExit</code> configuration.
 <a href="https://github.com/quickube/piper/tree/main/examples/.workflows/exit.yaml">Example</a></p>
 <h4 id="templates">templates</h4>
-<p>This field will have additional templates that will be injected to the workflows.
-The purpose of this field is to create repository scope templates that can be referenced from the DAGs templates at <code>onStart</code> or <code>onExit</code>.
+<p>This field will have additional templates that will be injected into the workflows.
+The purpose of this field is to create repository-scope templates that can be referenced from the DAG templates at <code>onStart</code> or <code>onExit</code>.
 <a href="https://github.com/quickube/piper/tree/main/examples/.workflows/templates.yaml">Example</a></p>
-<p>As a best practice, use this field for template implementation and reference them from executed.
+<p>As a best practice, use this field for template implementation and reference them from the executed DAGs.
 <a href="https://github.com/quickube/piper/tree/main/examples/.workflows/main.yaml">Example</a>.</p>
 <h3 id="config">config</h3>
-<p>configured by <code>piper-workflows-config</code> <a href="../workflows_config/">configMap</a>.
-Can be passed explicitly, or will use <code>deafault</code> configuration.</p>
+<p>Configured by the <code>piper-workflows-config</code> <a href="../workflows_config/">ConfigMap</a>.
+It can be passed explicitly, or it will use the <code>default</code> configuration.</p>
 <h3 id="parametersyaml-convention-name">parameters.yaml (convention name)</h3>
-<p>Will hold a list of global parameters of the Workflow.
-Can be referenced from any template with <code>{{ workflow.parameters.___ }}.</code></p>
+<p>It will hold a list of global parameters for the Workflow.
+These can be referenced from any template with <code>{{ workflow.parameters.___ }}</code>.</p>
 <p><a href="https://github.com/quickube/piper/tree/main/examples/.workflows/parameters.yaml">Example</a></p></div>
 
 

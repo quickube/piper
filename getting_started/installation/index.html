@@ -758,7 +758,7 @@
 
 <div><h2 id="installation">Installation</h2>
 <p>You must deploy Piper to a cluster with a pre-existing Argo Workflows deployment.
-Piper will create a CRD that Argo Workflows will pick, so install or configure Piper to create those CRDs in the right namespace.</p>
+Piper will create a CRD that Argo Workflows will pick up, so install or configure Piper to create those CRDs in the right namespace.</p>
 <p>Please check out <a href="https://github.com/quickube/piper/tree/main/helm-chart/values.yaml">values.yaml</a> file of the helm chart configurations.</p>
 <p>To add piper helm repo run:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>piper<span class="w"> </span>https://piper.quickube.com
@@ -777,33 +777,33 @@ Expose Piper using an ingress or service, then provide the address to <code>pipe
 <h3 id="git">Git</h3>
 <p>Piper will use git to fetch the <code>.workflows</code> folder and receive events using webhooks.</p>
 <p>To pick which git provider you are using provide <code>gitProvider.name</code> configuration in helm chart (Currently we only support GitHub and Bitbucket).</p>
-<p>Also configure you organization (Github), workspace (Bitbucket) or group (Gitlab) name using <code>gitProvider.organization.name</code> in helm chart.</p>
+<p>Also configure your organization (GitHub), workspace (Bitbucket) or group (GitLab) name using <code>gitProvider.organization.name</code> in helm chart.</p>
 <h4 id="git-token-permissions">Git Token Permissions</h4>
-<p>The token should have access for creating webhooks and read repositories content.
+<p>The token should have access to create webhooks and read repository content.
 <b>For GitHub</b>, configure <code>admin:org</code> and <code>write:org</code> permissions in Classic Token. 
 <b>For Bitbucket</b>, configure <code>Repositories:read</code>, <code>Webhooks:read and write</code> and <code>Pull requests:read</code> permissions (for multiple repos use workspace token). 
 <b>For Gitlab</b>, configure <code>read_api</code>, <code>write_repository</code> and <code>api</code> (for multiple repos use group token with owner role). </p>
 <h4 id="token">Token</h4>
 <p>The git token should be passed as secret in the helm chart at <code>gitProvider.token</code>.
 The token can be passed as parameter via helm install command using <code>--set piper.gitProvider.token=YOUR_GIT_TOKEN</code></p>
-<p>Alternatively, you can consume an already existing secret by configuring <code>piper.gipProvider.existingSecret</code>.
-The key should have the name <code>token</code>. You can be create a Secret using this command:</p>
+<p>Alternatively, you can use an already existing secret by configuring <code>piper.gipProvider.existingSecret</code>.
+The key should be named token <code>token</code>. You can create a Secret using this command:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>kubectl<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>generic<span class="w"> </span>piper-git-token<span class="w"> </span>--from-literal<span class="o">=</span><span class="nv">token</span><span class="o">=</span>YOUR_GIT_OKEN
 </code></pre></div>
 <h4 id="webhook-creation">Webhook creation</h4>
-<p>Piper will create a webhook configuration for you, for the whole organization or for each repo you configure.</p>
+<p>Piper will create a webhook configuration for you, either for the whole organization or for each repo you configure.</p>
 <p>Configure <code>piper.webhook.url</code> with the address of Piper that you exposed using an Ingress or Service with <code>/webhook</code> postfix.</p>
 <p>For organization level configuration: <code>gitProvider.webhook.orgLevel</code> to <code>true</code>.</p>
 <p>For granular repo webhook provide list of repos at: <code>gitProvider.webhook.repoList</code>.</p>
-<p>Piper implements graceful shutdown, it will delete all the webhooks when terminated.</p>
+<p>Piper implements a graceful shutdown; it will delete all the webhooks when terminated.</p>
 <h4 id="status-check">Status check</h4>
-<p>Piper will handle status checks for you.
-It will notify the GitProvider for the status of Workflow for specific commit that triggered Piper.
+<p>Piper will handle status checks for you. 
+It will notify the GitProvider of the status of the Workflow for the specific commit that triggered Piper.
 For linking provide valid URL of your Argo Workflows server address at: <code>argoWorkflows.server.address</code></p>
 <hr>
 <h3 id="argo-workflow-server-on-development">Argo Workflow Server (On development)</h3>
-<p>Piper will use REST API to communicate with Argo Workflows server for linting or for creation of workflows (ARGO_WORKFLOWS_CREATE_CRD). Please follow this <a href="https://argoproj.github.io/argo-workflows/rest-api/">configuration</a>.</p>
-<p>To lint the workflow before submitting it, please configure the internal address of Argo Workflows server (for example, <code>argo-server.workflows.svc.cluster.local</code>) in the field: <code>argoWorkflows.server.address</code>. Argo will need a <a href="https://argoproj.github.io/argo-workflows/access-token/">token</a> to authenticate. please provide the secret in <code>argoWorkflows.server.token</code>, Better to pass as a references to a secret in the field <code>argoWorkflows.server.token</code>.</p>
+<p>Piper will use the REST API to communicate with the Argo Workflows server for linting or creating workflows.</p>
+<p>To lint the workflow before submitting it, please configure the internal address of Argo Workflows server (for example, <code>argo-server.workflows.svc.cluster.local</code>) in the field: <code>argoWorkflows.server.address</code>. Argo will need a <a href="https://argoproj.github.io/argo-workflows/access-token/">token</a> to authenticate. Please provide the secret in <code>argoWorkflows.server.token</code>. It is better to pass it as a reference to a secret in the field <code>argoWorkflows.server.token</code>.</p>
 <h4 id="skip-crd-creation-on-development">Skip CRD Creation (On development)</h4>
 <p>Piper can communicate directly to Argo Workflow using ARGO_WORKFLOWS_CREATE_CRD environment variable, if you want to skip the creation of CRD change <code>argoWorkflows.crdCreation</code> to <code>false</code>.</p></div>
 

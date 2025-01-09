@@ -55,7 +55,7 @@ func NewGitlabClient(cfg *conf.GlobalConfig) (Client, error) {
 	}, err
 }
 
-func (c *GitlabClientImpl) ListFiles(ctx *context.Context, repo string, branch string, path string) ([]string, error) {
+func (c *GitlabClientImpl) ListFiles(ctx context.Context, repo string, branch string, path string) ([]string, error) {
 	log.Printf("Listing files for repo: %s", repo)
 	var files []string
 	opt := &gitlab.ListTreeOptions{
@@ -66,7 +66,7 @@ func (c *GitlabClientImpl) ListFiles(ctx *context.Context, repo string, branch s
 	if err != nil {
 		return nil, err
 	}
-	dirFiles, resp, err := c.client.Repositories.ListTree(*projectId, opt, gitlab.WithContext(*ctx))
+	dirFiles, resp, err := c.client.Repositories.ListTree(*projectId, opt, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (c *GitlabClientImpl) ListFiles(ctx *context.Context, repo string, branch s
 	return files, nil
 }
 
-func (c *GitlabClientImpl) GetFile(ctx *context.Context, repo string, branch string, path string) (*CommitFile, error) {
+func (c *GitlabClientImpl) GetFile(ctx context.Context, repo string, branch string, path string) (*CommitFile, error) {
 	log.Printf("Getting file: %s", path)
 	commitFile := &CommitFile{}
 	projectId, err := GetProjectId(ctx, c, &repo)
@@ -87,7 +87,7 @@ func (c *GitlabClientImpl) GetFile(ctx *context.Context, repo string, branch str
 		return nil, err
 	}
 	fmt.Println("got project id: ", *projectId)
-	fileContent, resp, err := c.client.RepositoryFiles.GetFile(*projectId, path, &gitlab.GetFileOptions{Ref: &branch}, gitlab.WithContext(*ctx))
+	fileContent, resp, err := c.client.RepositoryFiles.GetFile(*projectId, path, &gitlab.GetFileOptions{Ref: &branch}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (c *GitlabClientImpl) GetFile(ctx *context.Context, repo string, branch str
 	return commitFile, nil
 }
 
-func (c *GitlabClientImpl) GetFiles(ctx *context.Context, repo string, branch string, paths []string) ([]*CommitFile, error) {
+func (c *GitlabClientImpl) GetFiles(ctx context.Context, repo string, branch string, paths []string) ([]*CommitFile, error) {
 	log.Println("Getting multiple files")
 	var commitFiles []*CommitFile
 	for _, path := range paths {
@@ -124,7 +124,7 @@ func (c *GitlabClientImpl) GetFiles(ctx *context.Context, repo string, branch st
 	return commitFiles, nil
 }
 
-func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*HookWithStatus, error) {
+func (c *GitlabClientImpl) SetWebhook(ctx context.Context, repo *string) (*HookWithStatus, error) {
 	var gitlabHookId *int
 	if *repo == "" {
 		log.Println("starting with group level hooks")
@@ -138,7 +138,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 				ReleasesEvents:      gitlab.Ptr(true),
 			}
 
-			gitlabHook, resp, err := c.client.Groups.AddGroupHook(c.cfg.GitProviderConfig.OrgName, &groupHookOptions, gitlab.WithContext(*ctx))
+			gitlabHook, resp, err := c.client.Groups.AddGroupHook(c.cfg.GitProviderConfig.OrgName, &groupHookOptions, gitlab.WithContext(ctx))
 			if resp != nil {
 				if resp.StatusCode == http.StatusForbidden {
 					return nil, fmt.Errorf("for org level webhook, group token must be Owner level")
@@ -159,7 +159,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 				PushEvents:          gitlab.Ptr(true),
 				ReleasesEvents:      gitlab.Ptr(true),
 			}
-			gitlabHook, resp, err := c.client.Groups.EditGroupHook(c.cfg.GitProviderConfig.OrgName, respHook.ID, &editedGroupHookOpt, gitlab.WithContext(*ctx))
+			gitlabHook, resp, err := c.client.Groups.EditGroupHook(c.cfg.GitProviderConfig.OrgName, respHook.ID, &editedGroupHookOpt, gitlab.WithContext(ctx))
 			if resp != nil {
 				if resp.StatusCode == http.StatusForbidden {
 					return nil, fmt.Errorf("for org level webhook, group token must be Owner level")
@@ -194,7 +194,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 				PushEvents:          gitlab.Ptr(true),
 				ReleasesEvents:      gitlab.Ptr(true),
 			}
-			gitlabHook, resp, err := c.client.Projects.AddProjectHook(*projectId, &addProjectHookOpts, gitlab.WithContext(*ctx))
+			gitlabHook, resp, err := c.client.Projects.AddProjectHook(*projectId, &addProjectHookOpts, gitlab.WithContext(ctx))
 			if resp != nil {
 				if resp.StatusCode == http.StatusForbidden {
 					return nil, fmt.Errorf("for projects specific webhook, group token must be Maintainer level or above")
@@ -216,7 +216,7 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 				PushEvents:          gitlab.Ptr(true),
 				ReleasesEvents:      gitlab.Ptr(true),
 			}
-			gitlabHook, resp, err := c.client.Projects.EditProjectHook(*projectId, respHook.ID, &editProjectHookOpts, gitlab.WithContext(*ctx))
+			gitlabHook, resp, err := c.client.Projects.EditProjectHook(*projectId, respHook.ID, &editProjectHookOpts, gitlab.WithContext(ctx))
 			if resp != nil {
 				if resp.StatusCode == http.StatusForbidden {
 					return nil, fmt.Errorf("for projects specific webhook, group token must be Maintainer level or above")
@@ -236,10 +236,10 @@ func (c *GitlabClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Hook
 	return &HookWithStatus{HookID: hookID, HealthStatus: true, RepoName: repo}, nil
 }
 
-func (c *GitlabClientImpl) UnsetWebhook(ctx *context.Context, hook *HookWithStatus) error {
+func (c *GitlabClientImpl) UnsetWebhook(ctx context.Context, hook *HookWithStatus) error {
 	log.Println("unsetting webhook", *hook.RepoName)
 	if *hook.RepoName == "" {
-		resp, err := c.client.Groups.DeleteGroupHook(c.cfg.GitProviderConfig.OrgName, int(hook.HookID), gitlab.WithContext(*ctx))
+		resp, err := c.client.Groups.DeleteGroupHook(c.cfg.GitProviderConfig.OrgName, int(hook.HookID), gitlab.WithContext(ctx))
 		if resp != nil {
 			if resp.StatusCode != http.StatusNoContent {
 				return fmt.Errorf("failed to delete group level webhhok, API call returned %d", resp.StatusCode)
@@ -254,7 +254,7 @@ func (c *GitlabClientImpl) UnsetWebhook(ctx *context.Context, hook *HookWithStat
 		if err != nil {
 			return err
 		}
-		resp, err := c.client.Projects.DeleteProjectHook(*projectId, int(hook.HookID), gitlab.WithContext(*ctx))
+		resp, err := c.client.Projects.DeleteProjectHook(*projectId, int(hook.HookID), gitlab.WithContext(ctx))
 		if resp != nil {
 			if resp.StatusCode != http.StatusNoContent {
 				log.Printf("failed to delete project level webhhok for %s, API call returned %d", *hook.RepoName, resp.StatusCode)
@@ -271,7 +271,7 @@ func (c *GitlabClientImpl) UnsetWebhook(ctx *context.Context, hook *HookWithStat
 	return nil
 }
 
-func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Request, secret []byte) (*WebhookPayload, error) {
+func (c *GitlabClientImpl) HandlePayload(ctx context.Context, request *http.Request, secret []byte) (*WebhookPayload, error) {
 	log.Printf("starting with payload")
 	var webhookPayload WebhookPayload
 	payload, err := io.ReadAll(request.Body)
@@ -323,7 +323,7 @@ func (c *GitlabClientImpl) HandlePayload(ctx *context.Context, request *http.Req
 	return &webhookPayload, nil
 }
 
-func (c *GitlabClientImpl) SetStatus(ctx *context.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error {
+func (c *GitlabClientImpl) SetStatus(ctx context.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error {
 	if !utils.ValidateHTTPFormat(*linkURL) {
 		log.Println("invalid link URL", *linkURL)
 		return fmt.Errorf("invalid linkURL")
@@ -333,7 +333,7 @@ func (c *GitlabClientImpl) SetStatus(ctx *context.Context, repo *string, commit 
 		return err
 	}
 
-	currCommit, resp, err := c.client.Commits.GetCommitStatuses(*projectId, *commit, nil, gitlab.WithContext(*ctx))
+	currCommit, resp, err := c.client.Commits.GetCommitStatuses(*projectId, *commit, nil, gitlab.WithContext(ctx))
 	if err != nil {
 		return err
 	}
@@ -355,7 +355,7 @@ func (c *GitlabClientImpl) SetStatus(ctx *context.Context, repo *string, commit 
 		Description: gitlab.Ptr(fmt.Sprintf("Workflow %s %s", *status, *message)),
 		Context:     gitlab.Ptr("Piper/ArgoWorkflows"),
 	}
-	_, resp, err = c.client.Commits.SetCommitStatus(*projectId, *commit, &repoStatus, gitlab.WithContext(*ctx))
+	_, resp, err = c.client.Commits.SetCommitStatus(*projectId, *commit, &repoStatus, gitlab.WithContext(ctx))
 	if err != nil {
 		return err
 	}
@@ -368,7 +368,7 @@ func (c *GitlabClientImpl) SetStatus(ctx *context.Context, repo *string, commit 
 	return nil
 }
 
-func (c *GitlabClientImpl) PingHook(ctx *context.Context, hook *HookWithStatus) error {
+func (c *GitlabClientImpl) PingHook(ctx context.Context, hook *HookWithStatus) error {
 	//TODO implement me
 	panic("implement me")
 }

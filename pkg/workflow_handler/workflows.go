@@ -99,10 +99,10 @@ func (wfc *WorkflowsClientImpl) CreateWorkflow(spec *v1alpha1.WorkflowSpec, work
 			Namespace:    wfc.cfg.Namespace,
 			Labels: map[string]string{
 				"piper.quickube.com/notified": "false",
-				"repo":                       ConvertToValidString(workflowsBatch.Payload.Repo),
-				"branch":                     ConvertToValidString(workflowsBatch.Payload.Branch),
-				"user":                       ConvertToValidString(workflowsBatch.Payload.User),
-				"commit":                     ConvertToValidString(workflowsBatch.Payload.Commit),
+				"repo":                        ConvertToValidString(workflowsBatch.Payload.Repo),
+				"branch":                      ConvertToValidString(workflowsBatch.Payload.Branch),
+				"user":                        ConvertToValidString(workflowsBatch.Payload.User),
+				"commit":                      ConvertToValidString(workflowsBatch.Payload.Commit),
 			},
 		},
 		Spec: *spec,
@@ -144,9 +144,9 @@ func (wfc *WorkflowsClientImpl) Lint(wf *v1alpha1.Workflow) error {
 	panic("implement me")
 }
 
-func (wfc *WorkflowsClientImpl) Submit(ctx *context.Context, wf *v1alpha1.Workflow) error {
+func (wfc *WorkflowsClientImpl) Submit(ctx context.Context, wf *v1alpha1.Workflow) error {
 	workflowsClient := wfc.clientSet.ArgoprojV1alpha1().Workflows(wfc.cfg.Namespace)
-	_, err := workflowsClient.Create(*ctx, wf, metav1.CreateOptions{})
+	_, err := workflowsClient.Create(ctx, wf, metav1.CreateOptions{})
 	if err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func (wfc *WorkflowsClientImpl) Submit(ctx *context.Context, wf *v1alpha1.Workfl
 	return nil
 }
 
-func (wfc *WorkflowsClientImpl) HandleWorkflowBatch(ctx *context.Context, workflowsBatch *common.WorkflowsBatch) error {
+func (wfc *WorkflowsClientImpl) HandleWorkflowBatch(ctx context.Context, workflowsBatch *common.WorkflowsBatch) error {
 	var params []v1alpha1.Parameter
 
 	configName, err := wfc.SelectConfig(workflowsBatch)
@@ -209,13 +209,13 @@ func (wfc *WorkflowsClientImpl) HandleWorkflowBatch(ctx *context.Context, workfl
 	return nil
 }
 
-func (wfc *WorkflowsClientImpl) Watch(ctx *context.Context, labelSelector *metav1.LabelSelector) (watch.Interface, error) {
+func (wfc *WorkflowsClientImpl) Watch(ctx context.Context, labelSelector *metav1.LabelSelector) (watch.Interface, error) {
 	workflowsClient := wfc.clientSet.ArgoprojV1alpha1().Workflows(wfc.cfg.Namespace)
 	opts := v1.ListOptions{
 		Watch:         true,
 		LabelSelector: metav1.FormatLabelSelector(labelSelector),
 	}
-	watcher, err := workflowsClient.Watch(*ctx, opts)
+	watcher, err := workflowsClient.Watch(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -223,7 +223,7 @@ func (wfc *WorkflowsClientImpl) Watch(ctx *context.Context, labelSelector *metav
 	return watcher, nil
 }
 
-func (wfc *WorkflowsClientImpl) UpdatePiperWorkflowLabel(ctx *context.Context, workflowName string, label string, value string) error {
+func (wfc *WorkflowsClientImpl) UpdatePiperWorkflowLabel(ctx context.Context, workflowName string, label string, value string) error {
 	workflowsClient := wfc.clientSet.ArgoprojV1alpha1().Workflows(wfc.cfg.Namespace)
 
 	patch, err := json.Marshal(map[string]interface{}{"metadata": metav1.ObjectMeta{
@@ -234,7 +234,7 @@ func (wfc *WorkflowsClientImpl) UpdatePiperWorkflowLabel(ctx *context.Context, w
 	if err != nil {
 		return err
 	}
-	_, err = workflowsClient.Patch(*ctx, workflowName, types.MergePatchType, patch, v1.PatchOptions{})
+	_, err = workflowsClient.Patch(ctx, workflowName, types.MergePatchType, patch, v1.PatchOptions{})
 	if err != nil {
 		return err
 	}

@@ -18,7 +18,7 @@ func NewGracefulShutdown(ctx context.Context, stop context.CancelFunc) *Graceful
 	}
 }
 
-func (s *GracefulShutdown) StopServices(ctx *context.Context, server *Server) {
+func (s *GracefulShutdown) StopServices(ctx context.Context, server *Server) {
 	server.webhookCreator.Stop(ctx)
 }
 
@@ -35,7 +35,7 @@ func (s *GracefulShutdown) Shutdown(server *Server) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	s.StopServices(&ctx, server)
+	s.StopServices(ctx, server)
 
 	err := server.httpServer.Shutdown(ctx)
 	if err != nil {

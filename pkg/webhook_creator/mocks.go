@@ -1,6 +1,7 @@
 package webhook_creator
 
 import (
+	context2 "context"
 	"errors"
 	"github.com/quickube/piper/pkg/git_provider"
 	"golang.org/x/net/context"
@@ -18,58 +19,58 @@ type MockGitProviderClient struct {
 	PingHookFunc      func(ctx context.Context, hook *git_provider.HookWithStatus) error
 }
 
-func (m *MockGitProviderClient) ListFiles(ctx *context.Context, repo string, branch string, path string) ([]string, error) {
+func (m *MockGitProviderClient) ListFiles(ctx context2.Context, repo string, branch string, path string) ([]string, error) {
 	if m.ListFilesFunc != nil {
-		return m.ListFilesFunc(*ctx, repo, branch, path)
+		return m.ListFilesFunc(ctx, repo, branch, path)
 	}
 	return nil, errors.New("unimplemented")
 }
 
-func (m *MockGitProviderClient) GetFile(ctx *context.Context, repo string, branch string, path string) (*git_provider.CommitFile, error) {
+func (m *MockGitProviderClient) GetFile(ctx context2.Context, repo string, branch string, path string) (*git_provider.CommitFile, error) {
 	if m.GetFileFunc != nil {
-		return m.GetFileFunc(*ctx, repo, branch, path)
+		return m.GetFileFunc(ctx, repo, branch, path)
 	}
 	return nil, errors.New("unimplemented")
 }
 
-func (m *MockGitProviderClient) GetFiles(ctx *context.Context, repo string, branch string, paths []string) ([]*git_provider.CommitFile, error) {
+func (m *MockGitProviderClient) GetFiles(ctx context2.Context, repo string, branch string, paths []string) ([]*git_provider.CommitFile, error) {
 	if m.GetFilesFunc != nil {
-		return m.GetFilesFunc(*ctx, repo, branch, paths)
+		return m.GetFilesFunc(ctx, repo, branch, paths)
 	}
 	return nil, errors.New("unimplemented")
 }
 
-func (m *MockGitProviderClient) SetWebhook(ctx *context.Context, repo *string) (*git_provider.HookWithStatus, error) {
+func (m *MockGitProviderClient) SetWebhook(ctx context2.Context, repo *string) (*git_provider.HookWithStatus, error) {
 	if m.SetWebhookFunc != nil {
-		return m.SetWebhookFunc(*ctx, repo)
+		return m.SetWebhookFunc(ctx, repo)
 	}
 	return nil, errors.New("unimplemented")
 }
 
-func (m *MockGitProviderClient) UnsetWebhook(ctx *context.Context, hook *git_provider.HookWithStatus) error {
+func (m *MockGitProviderClient) UnsetWebhook(ctx context2.Context, hook *git_provider.HookWithStatus) error {
 	if m.UnsetWebhookFunc != nil {
-		return m.UnsetWebhookFunc(*ctx, hook)
+		return m.UnsetWebhookFunc(ctx, hook)
 	}
 	return errors.New("unimplemented")
 }
 
-func (m *MockGitProviderClient) HandlePayload(ctx *context.Context, request *http.Request, secret []byte) (*git_provider.WebhookPayload, error) {
+func (m *MockGitProviderClient) HandlePayload(ctx context2.Context, request *http.Request, secret []byte) (*git_provider.WebhookPayload, error) {
 	if m.HandlePayloadFunc != nil {
 		return m.HandlePayloadFunc(request, secret)
 	}
 	return nil, errors.New("unimplemented")
 }
 
-func (m *MockGitProviderClient) SetStatus(ctx *context.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error {
+func (m *MockGitProviderClient) SetStatus(ctx context2.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error {
 	if m.SetStatusFunc != nil {
-		return m.SetStatusFunc(*ctx, repo, commit, linkURL, status, message)
+		return m.SetStatusFunc(ctx, repo, commit, linkURL, status, message)
 	}
 	return errors.New("unimplemented")
 }
 
-func (m *MockGitProviderClient) PingHook(ctx *context.Context, hook *git_provider.HookWithStatus) error {
+func (m *MockGitProviderClient) PingHook(ctx context2.Context, hook *git_provider.HookWithStatus) error {
 	if m.PingHookFunc != nil {
-		return m.PingHookFunc(*ctx, hook)
+		return m.PingHookFunc(ctx, hook)
 	}
 	return errors.New("unimplemented")
 }

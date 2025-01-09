@@ -34,12 +34,12 @@ type WebhookPayload struct {
 }
 
 type Client interface {
-	ListFiles(ctx *context.Context, repo string, branch string, path string) ([]string, error)
-	GetFile(ctx *context.Context, repo string, branch string, path string) (*CommitFile, error)
-	GetFiles(ctx *context.Context, repo string, branch string, paths []string) ([]*CommitFile, error)
-	SetWebhook(ctx *context.Context, repo *string) (*HookWithStatus, error)
-	UnsetWebhook(ctx *context.Context, hook *HookWithStatus) error
-	HandlePayload(ctx *context.Context, request *http.Request, secret []byte) (*WebhookPayload, error)
-	SetStatus(ctx *context.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error
-	PingHook(ctx *context.Context, hook *HookWithStatus) error
+	ListFiles(ctx context.Context, repo string, branch string, path string) ([]string, error)
+	GetFile(ctx context.Context, repo string, branch string, path string) (*CommitFile, error)
+	GetFiles(ctx context.Context, repo string, branch string, paths []string) ([]*CommitFile, error)
+	SetWebhook(ctx context.Context, repo *string) (*HookWithStatus, error)
+	UnsetWebhook(ctx context.Context, hook *HookWithStatus) error
+	HandlePayload(ctx context.Context, request *http.Request, secret []byte) (*WebhookPayload, error)
+	SetStatus(ctx context.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error
+	PingHook(ctx context.Context, hook *HookWithStatus) error
 }

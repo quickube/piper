@@ -16,35 +16,35 @@ import (
 
 type mockGitProvider struct{}
 
-func (m *mockGitProvider) GetFile(ctx *context.Context, repo string, branch string, path string) (*git_provider.CommitFile, error) {
+func (m *mockGitProvider) GetFile(ctx context.Context, repo string, branch string, path string) (*git_provider.CommitFile, error) {
 	return nil, nil
 }
 
-func (m *mockGitProvider) GetFiles(ctx *context.Context, repo string, branch string, paths []string) ([]*git_provider.CommitFile, error) {
+func (m *mockGitProvider) GetFiles(ctx context.Context, repo string, branch string, paths []string) ([]*git_provider.CommitFile, error) {
 	return nil, nil
 }
 
-func (m *mockGitProvider) ListFiles(ctx *context.Context, repo string, branch string, path string) ([]string, error) {
+func (m *mockGitProvider) ListFiles(ctx context.Context, repo string, branch string, path string) ([]string, error) {
 	return nil, nil
 }
 
-func (m *mockGitProvider) SetWebhook(ctx *context.Context, repo *string) (*git_provider.HookWithStatus, error) {
+func (m *mockGitProvider) SetWebhook(ctx context.Context, repo *string) (*git_provider.HookWithStatus, error) {
 	return nil, nil
 }
 
-func (m *mockGitProvider) UnsetWebhook(ctx *context.Context, hook *git_provider.HookWithStatus) error {
+func (m *mockGitProvider) UnsetWebhook(ctx context.Context, hook *git_provider.HookWithStatus) error {
 	return nil
 }
 
-func (m *mockGitProvider) HandlePayload(ctx *context.Context, request *http.Request, secret []byte) (*git_provider.WebhookPayload, error) {
+func (m *mockGitProvider) HandlePayload(ctx context.Context, request *http.Request, secret []byte) (*git_provider.WebhookPayload, error) {
 	return nil, nil
 }
 
-func (m *mockGitProvider) SetStatus(ctx *context.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error {
+func (m *mockGitProvider) SetStatus(ctx context.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error {
 	return nil
 }
 
-func (m *mockGitProvider) PingHook(ctx *context.Context, hook *git_provider.HookWithStatus) error {
+func (m *mockGitProvider) PingHook(ctx context.Context, hook *git_provider.HookWithStatus) error {
 	return nil
 }
 
@@ -202,7 +202,7 @@ func TestNotify(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// Call the function being tested
-			err := gn.Notify(&ctx, test.workflow)
+			err := gn.Notify(ctx, test.workflow)
 
 			// Use assert to check the equality of the error
 			if test.wantedError != nil {

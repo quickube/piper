@@ -42,9 +42,9 @@ func ValidateGitlabPermissions(ctx context.Context, client *gitlab.Client, cfg *
 	return fmt.Errorf("permissions error: %v is not a valid scope for the project level permissions", scopes)
 }
 
-func IsGroupWebhookEnabled(ctx *context.Context, c *GitlabClientImpl) (*gitlab.GroupHook, bool) {
+func IsGroupWebhookEnabled(ctx context.Context, c *GitlabClientImpl) (*gitlab.GroupHook, bool) {
 	emptyHook := gitlab.GroupHook{}
-	hooks, resp, err := c.client.Groups.ListGroupHooks(c.cfg.GitProviderConfig.OrgName, nil, gitlab.WithContext(*ctx))
+	hooks, resp, err := c.client.Groups.ListGroupHooks(c.cfg.GitProviderConfig.OrgName, nil, gitlab.WithContext(ctx))
 
 	if err != nil {
 		return &emptyHook, false
@@ -62,10 +62,10 @@ func IsGroupWebhookEnabled(ctx *context.Context, c *GitlabClientImpl) (*gitlab.G
 	return &emptyHook, false
 }
 
-func IsProjectWebhookEnabled(ctx *context.Context, c *GitlabClientImpl, projectId int) (*gitlab.ProjectHook, bool) {
+func IsProjectWebhookEnabled(ctx context.Context, c *GitlabClientImpl, projectId int) (*gitlab.ProjectHook, bool) {
 	emptyHook := gitlab.ProjectHook{}
 
-	hooks, resp, err := c.client.Projects.ListProjectHooks(projectId, nil, gitlab.WithContext(*ctx))
+	hooks, resp, err := c.client.Projects.ListProjectHooks(projectId, nil, gitlab.WithContext(ctx))
 	if err != nil {
 		return &emptyHook, false
 	}
@@ -93,9 +93,9 @@ func ExtractLabelsId(labels []*gitlab.EventLabel) []string {
 	return returnLabelsList
 }
 
-func GetProjectId(ctx *context.Context, c *GitlabClientImpl, repo *string) (*int, error) {
+func GetProjectId(ctx context.Context, c *GitlabClientImpl, repo *string) (*int, error) {
 	projectFullName := fmt.Sprintf("%s/%s", c.cfg.GitProviderConfig.OrgName, *repo)
-	IProject, _, err := c.client.Projects.GetProject(projectFullName, nil, gitlab.WithContext(*ctx))
+	IProject, _, err := c.client.Projects.GetProject(projectFullName, nil, gitlab.WithContext(ctx))
 	if err != nil {
 		log.Printf("Failed to get project (%s): %v", *repo, err)
 		return nil, err

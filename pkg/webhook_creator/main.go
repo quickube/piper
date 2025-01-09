@@ -97,7 +97,7 @@ func (wc *WebhookCreatorImpl) initWebhooks() error {
 		if wc.cfg.GitProviderConfig.Provider == "bitbucket" {
 			repo = utils.SanitizeString(repo)
 		}
-		hook, err := wc.clients.GitProvider.SetWebhook(&ctx, &repo)
+		hook, err := wc.clients.GitProvider.SetWebhook(ctx, &repo)
 		if err != nil {
 			return err
 		}
@@ -107,7 +107,7 @@ func (wc *WebhookCreatorImpl) initWebhooks() error {
 	return nil
 }
 
-func (wc *WebhookCreatorImpl) Stop(ctx *context.Context) {
+func (wc *WebhookCreatorImpl) Stop(ctx context.Context) {
 	if wc.cfg.GitProviderConfig.WebhookAutoCleanup {
 		err := wc.deleteWebhooks(ctx)
 		if err != nil {
@@ -116,7 +116,7 @@ func (wc *WebhookCreatorImpl) Stop(ctx *context.Context) {
 	}
 }
 
-func (wc *WebhookCreatorImpl) deleteWebhooks(ctx *context.Context) error {
+func (wc *WebhookCreatorImpl) deleteWebhooks(ctx context.Context) error {
 	for hookID, hook := range wc.hooks {
 		err := wc.clients.GitProvider.UnsetWebhook(ctx, hook)
 		if err != nil {
@@ -154,7 +154,7 @@ func (wc *WebhookCreatorImpl) checkHooksHealth(timeoutSeconds time.Duration) boo
 	return false
 }
 
-func (wc *WebhookCreatorImpl) recoverHook(ctx *context.Context, hookID int64) error {
+func (wc *WebhookCreatorImpl) recoverHook(ctx context.Context, hookID int64) error {
 
 	log.Printf("started recover of hook %d", hookID)
 	hook := wc.getWebhook(hookID)
@@ -172,7 +172,7 @@ func (wc *WebhookCreatorImpl) recoverHook(ctx *context.Context, hookID int64) er
 
 }
 
-func (wc *WebhookCreatorImpl) pingHooks(ctx *context.Context) error {
+func (wc *WebhookCreatorImpl) pingHooks(ctx context.Context) error {
 	for _, hook := range wc.hooks {
 		err := wc.clients.GitProvider.PingHook(ctx, hook)
 		if err != nil {
@@ -182,7 +182,7 @@ func (wc *WebhookCreatorImpl) pingHooks(ctx *context.Context) error {
 	return nil
 }
 
-func (wc *WebhookCreatorImpl) RunDiagnosis(ctx *context.Context) error {
+func (wc *WebhookCreatorImpl) RunDiagnosis(ctx context.Context) error {
 	log.Printf("Starting webhook diagnostics")
 	wc.setAllHooksHealth(false)
 	err := wc.pingHooks(ctx)

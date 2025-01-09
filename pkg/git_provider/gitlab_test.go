@@ -65,7 +65,7 @@ func TestGitlabListFiles(t *testing.T) {
 	ctx := context.Background()
 
 	// Execute
-	actualContent, err := c.ListFiles(&ctx, project, expectedRef, ".workflows")
+	actualContent, err := c.ListFiles(ctx, project, expectedRef, ".workflows")
 
 	var expectedFilesNames []string
 	for _, file := range treeNodes {
@@ -122,7 +122,7 @@ func TestGitlabGetFile(t *testing.T) {
 	ctx := context.Background()
 
 	// Execute
-	actualFile, err := c.GetFile(&ctx, project, branch, filePath)
+	actualFile, err := c.GetFile(ctx, project, branch, filePath)
 	// Assert
 	assert := assertion.New(t)
 	assert.NotNil(t, err)
@@ -247,7 +247,7 @@ func TestGitlabSetStatus(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 
 			// Call the function being tested
-			err := c.SetStatus(&ctx, test.repo, test.commit, test.linkURL, test.status, test.message)
+			err := c.SetStatus(ctx, test.repo, test.commit, test.linkURL, test.status, test.message)
 
 			if test.wantedError != nil {
 				assert.NotNil(err)
@@ -365,7 +365,7 @@ func TestGitlabSetWebhook(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			c.cfg.GitProviderConfig = test.config
-			_, err := c.SetWebhook(&ctx, &c.cfg.GitProviderConfig.RepoList)
+			_, err := c.SetWebhook(ctx, &c.cfg.GitProviderConfig.RepoList)
 
 			// Use assert to check the equality of the error
 			assert.Nil(err)

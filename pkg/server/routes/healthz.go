@@ -19,7 +19,7 @@ func AddHealthRoutes(rg *gin.RouterGroup, wc *webhook_creator.WebhookCreatorImpl
 			ctx := c.Copy().Request.Context()
 			ctx2, cancel := context.WithTimeout(ctx, 5*time.Second)
 			defer cancel()
-			err := wc.RunDiagnosis(&ctx2)
+			err := wc.RunDiagnosis(ctx2)
 			if err != nil {
 				log.Printf("error from healthz endpoint:%s\n", err)
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

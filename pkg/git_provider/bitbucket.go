@@ -2,13 +2,13 @@ package git_provider
 
 import (
 	"bytes"
+	context2 "context"
 	"encoding/json"
 	"fmt"
 	"github.com/ktrysmt/go-bitbucket"
 	"github.com/quickube/piper/pkg/conf"
 	"github.com/quickube/piper/pkg/utils"
 	"github.com/tidwall/gjson"
-	"golang.org/x/net/context"
 	"io"
 	"log"
 	"net/http"
@@ -36,7 +36,7 @@ func NewBitbucketServerClient(cfg *conf.GlobalConfig) (Client, error) {
 	}, err
 }
 
-func (b BitbucketClientImpl) ListFiles(ctx *context.Context, repo string, branch string, path string) ([]string, error) {
+func (b BitbucketClientImpl) ListFiles(ctx context2.Context, repo string, branch string, path string) ([]string, error) {
 	var filesList []string
 	fileOptions := bitbucket.RepositoryFilesOptions{
 		Owner:    b.cfg.GitProviderConfig.OrgName,
@@ -58,7 +58,7 @@ func (b BitbucketClientImpl) ListFiles(ctx *context.Context, repo string, branch
 	return filesList, nil
 }
 
-func (b BitbucketClientImpl) GetFile(ctx *context.Context, repo string, branch string, path string) (*CommitFile, error) {
+func (b BitbucketClientImpl) GetFile(ctx context2.Context, repo string, branch string, path string) (*CommitFile, error) {
 	fileOptions := bitbucket.RepositoryFilesOptions{
 		Owner:    b.cfg.GitProviderConfig.OrgName,
 		RepoSlug: repo,
@@ -78,7 +78,7 @@ func (b BitbucketClientImpl) GetFile(ctx *context.Context, repo string, branch s
 	}, nil
 }
 
-func (b BitbucketClientImpl) GetFiles(ctx *context.Context, repo string, branch string, paths []string) ([]*CommitFile, error) {
+func (b BitbucketClientImpl) GetFiles(ctx context2.Context, repo string, branch string, paths []string) ([]*CommitFile, error) {
 	var commitFiles []*CommitFile
 	for _, path := range paths {
 		file, err := b.GetFile(ctx, repo, branch, path)
@@ -94,7 +94,7 @@ func (b BitbucketClientImpl) GetFiles(ctx *context.Context, repo string, branch 
 	return commitFiles, nil
 }
 
-func (b BitbucketClientImpl) SetWebhook(ctx *context.Context, repo *string) (*HookWithStatus, error) {
+func (b BitbucketClientImpl) SetWebhook(ctx context2.Context, repo *string) (*HookWithStatus, error) {
 	webhookOptions := &bitbucket.WebhooksOptions{
 		Owner:       b.cfg.GitProviderConfig.OrgName,
 		RepoSlug:    *repo,
@@ -139,12 +139,12 @@ func (b BitbucketClientImpl) SetWebhook(ctx *context.Context, repo *string) (*Ho
 	}, nil
 }
 
-func (b BitbucketClientImpl) UnsetWebhook(ctx *context.Context, hook *HookWithStatus) error {
+func (b BitbucketClientImpl) UnsetWebhook(ctx context2.Context, hook *HookWithStatus) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (b BitbucketClientImpl) HandlePayload(ctx *context.Context, request *http.Request, secret []byte) (*WebhookPayload, error) {
+func (b BitbucketClientImpl) HandlePayload(ctx context2.Context, request *http.Request, secret []byte) (*WebhookPayload, error) {
 	var webhookPayload *WebhookPayload
 	var buf bytes.Buffer
 
@@ -205,7 +205,7 @@ func (b BitbucketClientImpl) HandlePayload(ctx *context.Context, request *http.R
 	return webhookPayload, nil
 }
 
-func (b BitbucketClientImpl) SetStatus(ctx *context.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error {
+func (b BitbucketClientImpl) SetStatus(ctx context2.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error {
 	commitOptions := bitbucket.CommitsOptions{
 		Owner:    b.cfg.GitProviderConfig.OrgName,
 		RepoSlug: *repo,
@@ -225,7 +225,7 @@ func (b BitbucketClientImpl) SetStatus(ctx *context.Context, repo *string, commi
 	return nil
 }
 
-func (b BitbucketClientImpl) PingHook(ctx *context.Context, hook *HookWithStatus) error {
+func (b BitbucketClientImpl) PingHook(ctx context2.Context, hook *HookWithStatus) error {
 	//TODO implement me
 	panic("implement me")
 }

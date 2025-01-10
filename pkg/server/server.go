@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/quickube/piper/pkg/clients"
 	"github.com/quickube/piper/pkg/conf"
@@ -28,6 +29,7 @@ func (s *Server) startServer() *http.Server {
 	}
 
 	go func() {
+		log.Printf("Server is listening on %s", s.httpServer.Addr)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}
@@ -53,11 +55,11 @@ func (s *Server) getRoutes() {
 	routes.AddWebhookRoutes(s.config, s.clients, v1, s.webhookCreator)
 }
 
-func (s *Server) startServices() {
-	s.webhookCreator.Start()
+func (s *Server) startServices(ctx context.Context) {
+	s.webhookCreator.Start(ctx)
 }
 
-func (s *Server) Start() {
+func (s *Server) Start(ctx context.Context) {
 
 	s.registerMiddlewares()
 
@@ -65,6 +67,6 @@ func (s *Server) Start() {
 
 	s.httpServer = s.startServer()
 
-	s.startServices()
+	s.startServices(ctx)
 
 }

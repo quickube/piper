@@ -35,9 +35,9 @@ func (wc *WebhookCreatorImpl) GetHooks() *map[int64]*git_provider.HookWithStatus
 	return &wc.hooks
 }
 
-func (wc *WebhookCreatorImpl) Start() {
+func (wc *WebhookCreatorImpl) Start(ctx context.Context) {
 
-	err := wc.initWebhooks()
+	err := wc.initWebhooks(ctx)
 	if err != nil {
 		log.Print(err)
 		panic("failed in initializing webhooks")
@@ -85,9 +85,8 @@ func (wc *WebhookCreatorImpl) setAllHooksHealth(status bool) {
 	log.Printf("set all hooks health status for to %s", strconv.FormatBool(status))
 }
 
-func (wc *WebhookCreatorImpl) initWebhooks() error {
+func (wc *WebhookCreatorImpl) initWebhooks(ctx context.Context) error {
 
-	ctx := context.Background()
 	if wc.cfg.GitProviderConfig.OrgLevelWebhook && len(wc.cfg.GitProviderConfig.RepoList) != 0 {
 		return fmt.Errorf("org level webhook wanted but provided repositories list")
 	} else if !wc.cfg.GitProviderConfig.OrgLevelWebhook && len(wc.cfg.GitProviderConfig.RepoList) == 0 {

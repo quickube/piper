@@ -11,7 +11,7 @@ func Start(ctx context.Context, stop context.CancelFunc, cfg *conf.GlobalConfig,
 
 	srv := NewServer(cfg, clients)
 	gracefulShutdownHandler := NewGracefulShutdown(ctx, stop)
-	srv.Start()
+	srv.Start(ctx)
 
 	gracefulShutdownHandler.Shutdown(srv)
 

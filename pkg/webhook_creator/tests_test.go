@@ -126,6 +126,7 @@ func TestWebhookCreatorImpl_SetAllHooksHealth(t *testing.T) {
 
 func TestWebhookCreatorImpl_InitWebhooks(t *testing.T) {
 	assertion := assert.New(t)
+	ctx := context.Background()
 	// Mock the necessary methods of the GitProvider client
 	mockClient := &MockGitProviderClient{
 		SetWebhookFunc: func(ctx context.Context, repoName *string) (*git_provider.HookWithStatus, error) {
@@ -149,7 +150,7 @@ func TestWebhookCreatorImpl_InitWebhooks(t *testing.T) {
 	})
 
 	// Initialize the webhooks
-	err := wc.initWebhooks()
+	err := wc.initWebhooks(ctx)
 
 	// Run tests
 	assertion.NoError(err)

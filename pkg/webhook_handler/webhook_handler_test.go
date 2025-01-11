@@ -3,6 +3,7 @@ package webhook_handler
 import (
 	"context"
 	"fmt"
+	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
 	"github.com/quickube/piper/pkg/clients"
 	"github.com/quickube/piper/pkg/common"
 	"github.com/quickube/piper/pkg/git_provider"
@@ -95,7 +96,9 @@ func (m *mockGitProvider) HandlePayload(ctx context.Context, request *http.Reque
 func (m *mockGitProvider) SetStatus(ctx context.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error {
 	return nil
 }
-
+func (m *mockGitProvider) GetCorrelatingEvent(ctx context.Context, workflowEvent *v1alpha1.WorkflowPhase) (string, error) {
+	return "", nil
+}
 func (m *mockGitProvider) PingHook(ctx context.Context, hook *git_provider.HookWithStatus) error {
 	return nil
 }

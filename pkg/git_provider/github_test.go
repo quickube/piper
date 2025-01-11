@@ -63,7 +63,7 @@ func TestListFiles(t *testing.T) {
 	ctx := context.Background()
 
 	// Execute
-	actualContent, err := c.ListFiles(&ctx, "test-repo1", "branch1", ".workflows")
+	actualContent, err := c.ListFiles(ctx, "test-repo1", "branch1", ".workflows")
 	expectedContent := []string{"exit.yaml", "main.yaml"}
 
 	// Assert
@@ -179,7 +179,7 @@ func TestSetStatus(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 
 			// Call the function being tested
-			err := c.SetStatus(&ctx, test.repo, test.commit, test.linkURL, test.status, test.message)
+			err := c.SetStatus(ctx, test.repo, test.commit, test.linkURL, test.status, test.message)
 
 			// Use assert to check the equality of the error
 			if test.wantedError != nil {
@@ -397,7 +397,7 @@ func TestSetWebhook(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			c.cfg.GitProviderConfig = *test.config
 			// Call the function being tested
-			_, err := c.SetWebhook(&ctx, test.repo)
+			_, err := c.SetWebhook(ctx, test.repo)
 
 			// Use assert to check the equality of the error
 			if test.wantedError != nil {
@@ -482,7 +482,7 @@ func TestPingHook(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			c.cfg.GitProviderConfig = *test.config
 			// Call the function being tested
-			err := c.PingHook(&ctx, test.hook)
+			err := c.PingHook(ctx, test.hook)
 
 			// Use assert to check the equality of the error
 			if test.wantedError != nil {

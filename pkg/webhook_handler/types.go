@@ -15,6 +15,6 @@ type Trigger struct {
 }
 
 type WebhookHandler interface {
-	RegisterTriggers(ctx *context.Context) error
-	PrepareBatchForMatchingTriggers(ctx *context.Context) ([]*common.WorkflowsBatch, error)
+	RegisterTriggers(ctx context.Context) error
+	PrepareBatchForMatchingTriggers(ctx context.Context) ([]*common.WorkflowsBatch, error)
 }

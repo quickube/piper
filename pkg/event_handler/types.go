@@ -11,5 +11,5 @@ type EventHandler interface {
 }
 
 type EventNotifier interface {
-	Notify(ctx *context.Context, workflow *v1alpha1.Workflow) error
+	Notify(ctx context.Context, workflow *v1alpha1.Workflow) error
 }

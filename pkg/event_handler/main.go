@@ -15,7 +15,7 @@ func Start(ctx context.Context, stop context.CancelFunc, cfg *conf.GlobalConfig,
 				Operator: metav1.LabelSelectorOpExists},
 		},
 	}
-	watcher, err := clients.Workflows.Watch(&ctx, labelSelector)
+	watcher, err := clients.Workflows.Watch(ctx, labelSelector)
 	if err != nil {
 		log.Printf("[event handler] Failed to watch workflow error:%s", err)
 		return

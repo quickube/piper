@@ -185,7 +185,7 @@ func TestWebhookCreatorImpl_Stop(t *testing.T) {
 
 	// Stop the webhook creator
 	ctx := context.Background()
-	wc.Stop(&ctx)
+	wc.Stop(ctx)
 
 	// Verify that the webhook was deleted
 	hook := wc.getWebhook(hookID)
@@ -217,7 +217,7 @@ func TestWebhookCreatorImpl_DeleteWebhooks(t *testing.T) {
 
 	// Delete the webhooks
 	ctx := context.Background()
-	err := wc.deleteWebhooks(&ctx)
+	err := wc.deleteWebhooks(ctx)
 	assertion.NoError(err)
 
 	// Verify that all webhooks were deleted
@@ -280,7 +280,7 @@ func TestWebhookCreatorImpl_RecoverHook(t *testing.T) {
 
 	// Recover the webhook
 	ctx := context.Background()
-	err := wc.recoverHook(&ctx, hookID)
+	err := wc.recoverHook(ctx, hookID)
 	assertion.Nil(err)
 
 	// Verify that the webhook was recovered
@@ -329,7 +329,7 @@ func TestWebhookCreatorImpl_PingHooks(t *testing.T) {
 
 	// Ping the webhooks
 	ctx := context.Background()
-	err := wc.pingHooks(&ctx)
+	err := wc.pingHooks(ctx)
 	assertion.NotNil(err)
 }
 
@@ -365,7 +365,7 @@ func TestWebhookCreatorImpl_RunDiagnosis(t *testing.T) {
 
 	// Run the webhook diagnosis
 	ctx := context.Background()
-	err := wc.RunDiagnosis(&ctx)
+	err := wc.RunDiagnosis(ctx)
 	assertion.NotNil(err)
 
 }

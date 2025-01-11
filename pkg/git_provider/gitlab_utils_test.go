@@ -96,7 +96,7 @@ func TestIsGroupWebhookEnabled(t *testing.T) {
 		mockHTTPResponse(t, w, hook)
 	})
 	// Execute
-	groupHook, isEnabled := IsGroupWebhookEnabled(&ctx, &c)
+	groupHook, isEnabled := IsGroupWebhookEnabled(ctx, &c)
 	// Assert
 	assert := assertion.New(t)
 	assert.Equal(isEnabled, true)
@@ -136,7 +136,7 @@ func TestIsProjectWebhookEnabled(t *testing.T) {
 	//
 	// Execute
 	//
-	projectHook, isEnabled := IsProjectWebhookEnabled(&ctx, &c, projectId)
+	projectHook, isEnabled := IsProjectWebhookEnabled(ctx, &c, projectId)
 	//
 	// Assert
 	//

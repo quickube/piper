@@ -16,7 +16,7 @@ func AddWebhookRoutes(cfg *conf.GlobalConfig, clients *clients.Clients, rg *gin.
 
 	webhook.POST("", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		webhookPayload, err := clients.GitProvider.HandlePayload(&ctx, c.Request, []byte(cfg.GitProviderConfig.WebhookSecret))
+		webhookPayload, err := clients.GitProvider.HandlePayload(ctx, c.Request, []byte(cfg.GitProviderConfig.WebhookSecret))
 		if err != nil {
 			log.Println(err)
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -41,7 +41,7 @@ func AddWebhookRoutes(cfg *conf.GlobalConfig, clients *clients.Clients, rg *gin.
 			return
 		}
 
-		workflowsBatches, err := webhookHandler.HandleWebhook(&ctx, wh)
+		workflowsBatches, err := webhookHandler.HandleWebhook(ctx, wh)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			log.Printf("failed to handle webhook, error: %v", err)
@@ -49,7 +49,7 @@ func AddWebhookRoutes(cfg *conf.GlobalConfig, clients *clients.Clients, rg *gin.
 		}
 
 		for _, wf := range workflowsBatches {
-			err = clients.Workflows.HandleWorkflowBatch(&ctx, wf)
+			err = clients.Workflows.HandleWorkflowBatch(ctx, wf)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				log.Printf("failed to handle workflow, error: %v", err)

@@ -30,7 +30,7 @@ func NewWebhookHandler(cfg *conf.GlobalConfig, clients *clients.Clients, payload
 	}, err
 }
 
-func (wh *WebhookHandlerImpl) RegisterTriggers(ctx *context.Context) error {
+func (wh *WebhookHandlerImpl) RegisterTriggers(ctx context.Context) error {
 	if !IsFileExists(ctx, wh, "", ".workflows") {
 		return fmt.Errorf(".workflows folder does not exist in %s/%s", wh.Payload.Repo, wh.Payload.Branch)
 	}
@@ -53,7 +53,7 @@ func (wh *WebhookHandlerImpl) RegisterTriggers(ctx *context.Context) error {
 	return nil
 }
 
-func (wh *WebhookHandlerImpl) PrepareBatchForMatchingTriggers(ctx *context.Context) ([]*common.WorkflowsBatch, error) {
+func (wh *WebhookHandlerImpl) PrepareBatchForMatchingTriggers(ctx context.Context) ([]*common.WorkflowsBatch, error) {
 	triggered := false
 	var workflowBatches []*common.WorkflowsBatch
 	for _, trigger := range *wh.Triggers {
@@ -155,7 +155,7 @@ func (wh *WebhookHandlerImpl) PrepareBatchForMatchingTriggers(ctx *context.Conte
 	return workflowBatches, nil
 }
 
-func IsFileExists(ctx *context.Context, wh *WebhookHandlerImpl, path string, file string) bool {
+func IsFileExists(ctx context.Context, wh *WebhookHandlerImpl, path string, file string) bool {
 	files, err := wh.clients.GitProvider.ListFiles(ctx, wh.Payload.Repo, wh.Payload.Branch, path)
 	if err != nil {
 		log.Printf("Error listing files in repo: %s branch: %s. %v", wh.Payload.Repo, wh.Payload.Branch, err)
@@ -173,7 +173,7 @@ func IsFileExists(ctx *context.Context, wh *WebhookHandlerImpl, path string, fil
 	return false
 }
 
-func HandleWebhook(ctx *context.Context, wh *WebhookHandlerImpl) ([]*common.WorkflowsBatch, error) {
+func HandleWebhook(ctx context.Context, wh *WebhookHandlerImpl) ([]*common.WorkflowsBatch, error) {
 	err := wh.RegisterTriggers(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to register triggers, error: %v", err)

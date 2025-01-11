@@ -43,7 +43,9 @@ func (m *mockGitProvider) HandlePayload(ctx context.Context, request *http.Reque
 func (m *mockGitProvider) SetStatus(ctx context.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error {
 	return nil
 }
-
+func (m *mockGitProvider) GetCorrelatingEvent(ctx context.Context, workflowEvent *v1alpha1.WorkflowPhase) (string, error) {
+	return "", nil
+}
 func (m *mockGitProvider) PingHook(ctx context.Context, hook *git_provider.HookWithStatus) error {
 	return nil
 }
@@ -193,8 +195,8 @@ func TestNotify(t *testing.T) {
 		GitProvider: &mockGitProvider{},
 	}
 
-	// Create a new githubNotifier instance
-	gn := NewGithubEventNotifier(cfg, globalClients)
+	// Create a new eventNotifier instance
+	gn := NewEventNotifier(cfg, globalClients)
 
 	// Call the Notify method
 

@@ -27,24 +27,25 @@ func Start(ctx context.Context, stop context.CancelFunc, cfg *conf.GlobalConfig,
 		Notifier: notifier,
 	}
 	go func() {
+		defer func() {
+			log.Print("[event handler] shutting down, stopping watcher")
+			watcher.Stop()
+		}()
+
 		for {
 			select {
 			case <-ctx.Done():
-				log.Print("[event handler] context canceled, stopping watcher")
-				watcher.Stop()
+				log.Print("[event handler] context canceled, exiting")
 				return
 			case event, ok := <-watcher.ResultChan():
 				if !ok {
 					log.Print("[event handler] result channel closed")
-					watcher.Stop()
-					stop()
 					return
 				}
 				if err2 := handler.Handle(ctx, &event); err2 != nil {
-					log.Printf("[event handler] failed to Handle workflow event: %v", err2)
+					log.Printf("[event handler] failed to handle workflow event: %v", err2)
 				}
 			}
 		}
-
 	}()
 }

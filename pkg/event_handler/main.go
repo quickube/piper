@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func Start(ctx context.Context, cfg *conf.GlobalConfig, clients *clients.Clients) {
+func Start(ctx context.Context, stop context.CancelFunc, cfg *conf.GlobalConfig, clients *clients.Clients) {
 	labelSelector := &metav1.LabelSelector{
 		MatchExpressions: []metav1.LabelSelectorRequirement{
 			{Key: "piper.quickube.com/notified",
@@ -37,6 +37,7 @@ func Start(ctx context.Context, cfg *conf.GlobalConfig, clients *clients.Clients
 				if !ok {
 					log.Print("[event handler] result channel closed")
 					watcher.Stop()
+					stop()
 					return
 				}
 				if err2 := handler.Handle(ctx, &event); err2 != nil {

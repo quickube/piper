@@ -3,6 +3,7 @@ package git_provider
 import (
 	"context"
 	"fmt"
+	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
 	"github.com/quickube/piper/pkg/utils"
 	"log"
 	"net/http"
@@ -330,6 +331,30 @@ func (c *GithubClientImpl) SetStatus(ctx context.Context, repo *string, commit *
 
 	log.Printf("successfully set status on repo:%s commit: %s to status: %s\n", *repo, *commit, *status)
 	return nil
+}
+
+func (c *GithubClientImpl) GetCorrelatingEvent(ctx context.Context, workflowEvent *v1alpha1.WorkflowPhase) (string, error) {
+	var event string
+	switch *workflowEvent {
+	case v1alpha1.WorkflowUnknown:
+		event = "pending"
+	case v1alpha1.WorkflowPending:
+
+		event = "pending"
+	case v1alpha1.WorkflowRunning:
+
+		event = "pending"
+	case v1alpha1.WorkflowSucceeded:
+		event = "success"
+	case v1alpha1.WorkflowFailed:
+		event = "failure"
+	case v1alpha1.WorkflowError:
+		event = "error"
+	default:
+		return "", fmt.Errorf("unimplemented workflow event")
+	}
+
+	return event, nil
 }
 
 func (c *GithubClientImpl) PingHook(ctx context.Context, hook *HookWithStatus) error {

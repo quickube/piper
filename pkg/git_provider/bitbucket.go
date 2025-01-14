@@ -5,6 +5,7 @@ import (
 	context2 "context"
 	"encoding/json"
 	"fmt"
+	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
 	"github.com/ktrysmt/go-bitbucket"
 	"github.com/quickube/piper/pkg/conf"
 	"github.com/quickube/piper/pkg/utils"
@@ -223,6 +224,28 @@ func (b BitbucketClientImpl) SetStatus(ctx context2.Context, repo *string, commi
 	}
 	log.Printf("set status of commit %s in repo %s to %s", *commit, *repo, *status)
 	return nil
+}
+
+func (b BitbucketClientImpl) GetCorrelatingEvent(ctx context2.Context, workflowEvent *v1alpha1.WorkflowPhase) (string, error) {
+	var event string
+	switch *workflowEvent {
+	case v1alpha1.WorkflowUnknown:
+		event = "INPROGRESS"
+	case v1alpha1.WorkflowPending:
+		event = "INPROGRESS"
+	case v1alpha1.WorkflowRunning:
+
+		event = "INPROGRESS"
+	case v1alpha1.WorkflowSucceeded:
+		event = "SUCCESSFUL"
+	case v1alpha1.WorkflowFailed:
+		event = "FAILED"
+	case v1alpha1.WorkflowError:
+		event = "STOPPED"
+	default:
+		return "", fmt.Errorf("unimplemented workflow event")
+	}
+	return event, nil
 }
 
 func (b BitbucketClientImpl) PingHook(ctx context2.Context, hook *HookWithStatus) error {

@@ -21,7 +21,7 @@ func Start(ctx context.Context, stop context.CancelFunc, cfg *conf.GlobalConfig,
 		return
 	}
 
-	notifier := NewGithubEventNotifier(cfg, clients)
+	notifier := NewEventNotifier(cfg, clients)
 	handler := &workflowEventHandler{
 		Clients:  clients,
 		Notifier: notifier,

@@ -2,6 +2,7 @@ package git_provider
 
 import (
 	"context"
+	"github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1"
 	"net/http"
 )
 
@@ -42,4 +43,5 @@ type Client interface {
 	HandlePayload(ctx context.Context, request *http.Request, secret []byte) (*WebhookPayload, error)
 	SetStatus(ctx context.Context, repo *string, commit *string, linkURL *string, status *string, message *string) error
 	PingHook(ctx context.Context, hook *HookWithStatus) error
+	GetCorrelatingEvent(ctx context.Context, workflowEvent *v1alpha1.WorkflowPhase) (string, error)
 }

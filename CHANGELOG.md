@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.8.0](https://github.com/quickube/piper/compare/v1.7.0...v1.8.0) (2025-01-16)
+
+
+### Features
+
+* added provider struct method: GetCorrelatingEvent ([#41](https://github.com/quickube/piper/issues/41)) ([f1e817f](https://github.com/quickube/piper/commit/f1e817fba0f36eb1145e6fb9f8c5eda049194a67))
+
+
+### Bug Fixes
+
+* add context to webhook creator ([#39](https://github.com/quickube/piper/issues/39)) ([e7d9578](https://github.com/quickube/piper/commit/e7d95781f36ea4137ed2fe8a9ddfc9e01b6f7d94))
+* event handler listen to ctx.Done ([#38](https://github.com/quickube/piper/issues/38)) ([9a36417](https://github.com/quickube/piper/commit/9a364170caca808f29ef4a6300222dfb93d82024))
+* remove context propogation as pointer ([#37](https://github.com/quickube/piper/issues/37)) ([075cbf2](https://github.com/quickube/piper/commit/075cbf2ae24755b7ce681da3e35e19ad530ce5e4))
+
 ## [1.7.0](https://github.com/quickube/piper/compare/v1.6.0...v1.7.0) (2024-12-24)
 
 

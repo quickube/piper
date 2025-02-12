@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   piper:
   - apiVersion: v2
+    appVersion: v1.8.0
+    created: "2025-02-12T06:02:10.291512876Z"
+    description: A Helm chart for Piper
+    digest: 44bb8751c75c3445ae57bcac0fbebc1767f36c3714d59c978badd059f9fb6edb
+    name: piper
+    type: application
+    urls:
+    - https://quickube.github.io/piper/piper-v1.8.0.tgz
+    version: v1.8.0
+  - apiVersion: v2
     appVersion: v1.7.0
     created: "2024-12-24T13:43:39.131281658Z"
     description: A Helm chart for Piper
@@ -111,4 +121,4 @@ entries:
     urls:
     - https://Rookout.github.io/piper/piper-v1.1.0.tgz
     version: v1.1.0
-generated: "2024-12-24T13:43:39.130502231Z"
+generated: "2025-02-12T06:02:10.290611349Z"

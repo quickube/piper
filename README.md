@@ -12,7 +12,7 @@ Welcome to Piper! Piper is an open-source project aimed at providing multibranch
   - [How to Contribute](#how-to-contribute)
   - [License](#license)
 
-## Getting Started
+## Getting Started 
 
 Piper configures a webhook in the git provider and listens to the webhooks sent. It will create a Workflow CRD out of branches that contain a `.workflows` folder.
 This folder should contain declarations of the templates and the main DAG that will be running.
